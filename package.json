@@ -7,7 +7,9 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "biome check",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "prepare": "lefthook install",
+    "release": "semantic-release"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
@@ -22,12 +24,21 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.2",
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^9.0.7",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.1",
     "@tailwindcss/postcss": "^4.1.13",
     "@types/node": "^20.19.17",
     "@types/react": "^19.1.14",
     "@types/react-dom": "^19.1.9",
     "lefthook": "^1.13.4",
     "lint-staged": "^16.2.1",
+    "semantic-release": "^24.2.9",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.13",
     "tw-animate-css": "^1.4.0",

@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+# Portfolio
 
-First, run the development server:
+沉浸式交互式作品集，采用 Next.js App Router 与 Framer Motion 打造整页动态滚动体验。
+
+</div>
+
+## ✨ 功能亮点
+
+- **分屏滚动动画**：自定义 `usePageScroll` 钩子结合 Motion Values，实现滚轮/键盘驱动的整页翻动与平滑弹簧动画。
+- **滚动阈值指示器**：`ScrollThresholdIndicator` 根据方向与滚动比例实时反馈，桌面与移动端拥有差异化动效。
+- **全局滚动上下文**：`ScrollProvider` 向导航栏、页面组件提供当前分段、方向、进度等状态，保持 UI 一致响应。
+- **交互细节**：自定义光标、渐变背景、按钮悬停动画等增强沉浸感。
+- **自动化流程**：Biome 代码质量检查、lefthook 本地钩子、semantic-release 持续发布。
+
+## 🧱 技术栈
+
+- [Next.js 15](https://nextjs.org/)（App Router）
+- [React 19](https://react.dev/)
+- [Framer Motion (motion/react)](https://motion.dev/)
+- [Tailwind CSS 4](https://tailwindcss.com/) & 自定义工具库
+- [Biome](https://biomejs.dev/) 用于 Lint & Format
+
+## 🚀 快速开始
+
+### 环境要求
+
+- Node.js ≥ 20
+- [pnpm](https://pnpm.io/) ≥ 8（项目使用 `packageManager` 锁定版本）
+
+### 安装依赖
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 开发模式
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+默认访问地址：<http://localhost:3000>
 
-## Learn More
+### 构建与启动
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm build
+pnpm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 代码质量
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm lint   # Biome 检查
+pnpm format # Biome 自动格式化
+```
 
-## Deploy on Vercel
+### Git 钩子
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+项目集成了 [lefthook](https://github.com/evilmartians/lefthook)：
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `pre-commit`：执行 `pnpm lint-staged`（针对暂存区文件运行 Biome 修复）
+- `commit-msg`：使用 `@commitlint/config-conventional` 校验提交信息
+- `pre-push`：推送前运行 `pnpm lint`
+
+首次克隆后运行一次：
+
+```bash
+pnpm dlx lefthook install
+```
+
+### 语义化发布
+
+项目通过 [semantic-release](https://semantic-release.gitbook.io/) 自动生成版本与变更记录：
+
+1. 使用 Conventional Commits 规则书写提交信息
+2. 在 CI 中执行 `pnpm semantic-release`
+3. 自动更新版本号、发布标签并写入 `CHANGELOG.md`
+
+## 🗂️ 项目结构
+
+```
+src/
+├─ app/
+│  ├─ layout.tsx        # Root layout，挂载 ScrollProvider
+│  └─ page.tsx          # 主页面，消费滚动上下文
+├─ components/
+│  ├─ cursor.tsx        # 自定义光标
+│  ├─ navbar.tsx        # 顶部导航，监听滚动状态
+│  ├─ scroll-view.tsx   # Banner 与按钮交互区
+│  └─ scroll-threshold-indicator.tsx
+├─ hooks/
+│  └─ usePageScroll.ts  # 分段滚动核心逻辑
+└─ contexts/
+	└─ scroll-context.tsx
+```
+
+## 🧪 开发建议
+
+- 修改滚动逻辑后，请同步更新关联组件的依赖状态（如 `ScrollProvider`）。
+- 新增组件时遵守 Biome 规则，避免触发复杂度限制与嵌套三元运算符警告。
+- 若需要扩展滚动段落，只需在 `ClientLayout` 中扩充 `sections` 数组，并在 `page.tsx` 中补充对应内容。
+
+## 📄 协议
+
+MIT License © Loopwic
