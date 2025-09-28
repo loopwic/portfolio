@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue } from "motion/react";
+import { animate, motion, useMotionValue } from "motion/react";
 import Image from "next/image";
 import {
   type RefObject,
@@ -30,8 +30,8 @@ const IMAGE_TEXTS = [
   { title: "Connect", subtitle: "Join our community" },
 ];
 
-const SCROLL_IDLE_TIMEOUT = 2000;
-const ANIMATION_DELAY_MS = 500;
+const SCROLL_IDLE_TIMEOUT = 1800;
+const INDICATOR_FADE_DURATION = 0.22;
 
 export const ScrollView = ({
   handleHoverStart,
@@ -41,89 +41,16 @@ export const ScrollView = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const progress = useMotionValue(0);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const isScrollingRef = useRef(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 创建图片ref数组
-  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  // 处理图片切换
-  const handleImageSwitch = useCallback((completedImages: number) => {
-    isScrollingRef.current = true;
-
-    const nextIndex = completedImages % IMAGES.length;
-    setCurrentIndex(nextIndex);
-
-    // 如果滚动到了最后，循环回到第一张
-    if (completedImages >= IMAGES.length) {
-      const targetElement = imageRefs.current[0];
-      if (targetElement) {
-        targetElement.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
-      setTimeout(() => {
-        setCurrentIndex(0);
-        isScrollingRef.current = false;
-      }, ANIMATION_DELAY_MS);
-    } else {
-      setTimeout(() => {
-        isScrollingRef.current = false;
-      }, ANIMATION_DELAY_MS);
-    }
-  }, []);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) {
-      return;
-    }
-
-    const handleScroll = () => {
-      const scrollTop = container.scrollTop;
-      const containerHeight = container.clientHeight;
-
-      // 设置滚动状态
-      setIsScrolling(true);
-
-      // 清除之前的定时器
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-
-      // 设置新的定时器，滚动停止后隐藏进度条
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsScrolling(false);
-      }, SCROLL_IDLE_TIMEOUT);
-
-      // 计算图片高度和全局滚动进度
-      const imageHeight = containerHeight;
-      // 实际可滚动的最大高度 = (图片数量 - 1) * 图片高度
-      const maxScrollHeight = imageHeight * (IMAGES.length - 1);
-      const globalProgress =
-        maxScrollHeight > 0 ? Math.min(scrollTop / maxScrollHeight, 1) : 0;
-
-      // 更新全局进度条
-      progress.set(globalProgress); // 检查是否完成了一个完整图片高度的滚动
-      const completedImages = Math.floor(scrollTop / imageHeight);
-
-      // 当滚动距离达到完整图片高度时切换图片
-      if (completedImages !== currentIndex && !isScrollingRef.current) {
-        handleImageSwitch(completedImages);
-      }
-    };
-
-    container.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      container.removeEventListener("scroll", handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, [currentIndex, progress, handleImageSwitch]);
+  const hideIndicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+  const pendingScrollRef = useRef({ scrollTop: 0, containerHeight: 0 });
+  const currentIndexRef = useRef(0);
+  const indicatorOpacity = useMotionValue(0);
+  const indicatorOffsetY = useMotionValue(10);
+  const activeIndicatorAnimationRef = useRef<ReturnType<typeof animate> | null>(
+    null
+  );
 
   const handleMouseEnter = useCallback(() => {
     handleHoverStart();
@@ -132,6 +59,111 @@ export const ScrollView = ({
   const handleMouseLeave = useCallback(() => {
     handleHoverEnd();
   }, [handleHoverEnd]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const showIndicator = () => {
+      hideIndicatorTimeoutRef.current &&
+        clearTimeout(hideIndicatorTimeoutRef.current);
+
+      activeIndicatorAnimationRef.current?.stop();
+      activeIndicatorAnimationRef.current = animate(indicatorOpacity, 1, {
+        duration: INDICATOR_FADE_DURATION,
+        ease: "easeOut",
+      });
+
+      animate(indicatorOffsetY, 0, {
+        duration: INDICATOR_FADE_DURATION,
+        ease: "easeOut",
+      });
+    };
+
+    const scheduleIndicatorHide = () => {
+      hideIndicatorTimeoutRef.current &&
+        clearTimeout(hideIndicatorTimeoutRef.current);
+
+      hideIndicatorTimeoutRef.current = setTimeout(() => {
+        activeIndicatorAnimationRef.current?.stop();
+        activeIndicatorAnimationRef.current = animate(indicatorOpacity, 0, {
+          duration: INDICATOR_FADE_DURATION,
+          ease: "anticipate",
+        });
+
+        animate(indicatorOffsetY, 10, {
+          duration: INDICATOR_FADE_DURATION,
+          ease: "anticipate",
+        });
+      }, SCROLL_IDLE_TIMEOUT);
+    };
+
+    const processScrollFrame = () => {
+      rafIdRef.current = null;
+      const { scrollTop, containerHeight } = pendingScrollRef.current;
+
+      if (containerHeight <= 0) {
+        return;
+      }
+
+      const imageHeight = containerHeight;
+      const maxScroll = imageHeight * (IMAGES.length - 1);
+      const progressValue =
+        maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 0;
+
+      progress.set(progressValue);
+
+      const nextIndex = Math.min(
+        IMAGES.length - 1,
+        Math.max(0, Math.round(scrollTop / imageHeight))
+      );
+
+      if (currentIndexRef.current !== nextIndex) {
+        currentIndexRef.current = nextIndex;
+        setCurrentIndex(nextIndex);
+      }
+    };
+
+    const handleScroll = () => {
+      pendingScrollRef.current = {
+        scrollTop: container.scrollTop,
+        containerHeight: container.clientHeight,
+      };
+
+      showIndicator();
+      scheduleIndicatorHide();
+
+      if (rafIdRef.current !== null) {
+        return;
+      }
+
+      rafIdRef.current = requestAnimationFrame(processScrollFrame);
+    };
+
+    pendingScrollRef.current = {
+      scrollTop: container.scrollTop,
+      containerHeight: container.clientHeight,
+    };
+    processScrollFrame();
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+
+      if (hideIndicatorTimeoutRef.current) {
+        clearTimeout(hideIndicatorTimeoutRef.current);
+      }
+
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+
+      activeIndicatorAnimationRef.current?.stop();
+    };
+  }, [indicatorOffsetY, indicatorOpacity, progress]);
 
   return (
     <motion.div
@@ -160,17 +192,15 @@ export const ScrollView = ({
           <div
             className="flex h-full w-full snap-start items-center justify-center"
             key={imageSrc}
-            ref={(el) => {
-              imageRefs.current[index] = el;
-            }}
           >
             <div className="relative h-full w-full">
               <Image
                 alt={`Image ${index + 1}`}
                 className="pointer-events-none select-none object-cover"
                 fill
+                loading={index === 0 ? "eager" : "lazy"}
                 priority={index === 0}
-                quality={90}
+                quality={80}
                 sizes="(max-width: 768px) 100vw, 80vw"
                 src={imageSrc}
               />
@@ -179,7 +209,6 @@ export const ScrollView = ({
         ))}
       </div>
 
-      {/* Hover覆盖层 */}
       <motion.div
         className="pointer-events-none absolute inset-0 z-20 flex select-none flex-col items-center justify-center bg-black/30"
         id="cover"
@@ -192,7 +221,7 @@ export const ScrollView = ({
           key={`title-${currentIndex}`}
           transition={{ duration: 0.3 }}
         >
-          {IMAGE_TEXTS[currentIndex].title}
+          {IMAGE_TEXTS[currentIndex]?.title}
         </motion.p>
         <motion.p
           animate={{ y: 0, opacity: 1 }}
@@ -201,18 +230,13 @@ export const ScrollView = ({
           key={`subtitle-${currentIndex}`}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          {IMAGE_TEXTS[currentIndex].subtitle}
+          {IMAGE_TEXTS[currentIndex]?.subtitle}
         </motion.p>
       </motion.div>
 
-      {/* 滚动进度指示器 - 只在滚动时显示 */}
       <motion.div
-        animate={{
-          opacity: isScrolling ? 1 : 0,
-          y: isScrolling ? 0 : 10,
-        }}
         className="-translate-x-1/2 absolute bottom-4 left-1/2 z-30 h-1 w-24 rounded-full bg-white/30"
-        transition={{ duration: 0.3 }}
+        style={{ opacity: indicatorOpacity, y: indicatorOffsetY }}
       >
         <motion.div
           className="h-full rounded-full bg-white"
