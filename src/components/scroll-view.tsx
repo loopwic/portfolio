@@ -1,7 +1,6 @@
 "use client";
 
 import { animate, motion, useMotionValue } from "motion/react";
-import Image from "next/image";
 import {
   type RefObject,
   useCallback,
@@ -36,12 +35,35 @@ const IMAGE_TEXTS = [
   { title: "Connect", subtitle: "Join our community" },
 ];
 
+const computeScrollInfo = (scrollTop: number, containerHeight: number) => {
+  if (containerHeight <= 0) {
+    return {
+      baseIndex: 0,
+      nextIndex: 0,
+      blend: 0,
+      rawIndex: 0,
+    };
+  }
+
+  const rawIndex = scrollTop / containerHeight;
+  const baseIndex = Math.floor(rawIndex);
+  const blend = rawIndex - baseIndex;
+
+  return {
+    baseIndex,
+    nextIndex: baseIndex + 1,
+    blend,
+    rawIndex,
+  };
+};
+
 export const ScrollView = ({
   handleHoverStart,
   handleHoverEnd,
   buttonScope,
 }: ScrollViewProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const progress = useMotionValue(0);
   const scrollProgress = useMotionValue(0);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -50,38 +72,185 @@ export const ScrollView = ({
   const hideIndicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const rafIdRef = useRef<number | null>(null);
   const currentIndexRef = useRef(0);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
   const indicatorOpacity = useMotionValue(0);
   const indicatorOffsetY = useMotionValue(10);
   const activeIndicatorAnimationRef = useRef<ReturnType<typeof animate> | null>(
     null
   );
 
-  const updateScrollProgress = useCallback(
-    (scrollTop: number, containerHeight: number) => {
-      if (containerHeight <= 0) {
+  const drawImageCover = useCallback(
+    (
+      context: CanvasRenderingContext2D,
+      image: HTMLImageElement | undefined,
+      width: number,
+      height: number
+    ) => {
+      if (!image) {
         return;
       }
 
-      const imageHeight = containerHeight;
-      const maxScroll = imageHeight * (IMAGES.length - 1);
-      const progressValue =
-        maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 0;
-
-      progress.set(progressValue);
-      scrollProgress.set(progressValue);
-
-      const nextIndex = Math.min(
-        IMAGES.length - 1,
-        Math.max(0, Math.round(scrollTop / imageHeight))
-      );
-
-      if (currentIndexRef.current !== nextIndex) {
-        currentIndexRef.current = nextIndex;
-        setCurrentIndex(nextIndex);
+      if (!image.complete) {
+        return;
       }
+
+      if (!image.naturalWidth) {
+        return;
+      }
+
+      if (!image.naturalHeight) {
+        return;
+      }
+
+      const imageAspect = image.naturalWidth / image.naturalHeight;
+      const canvasAspect = width / height;
+
+      let renderWidth = width;
+      let renderHeight = height;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      if (imageAspect > canvasAspect) {
+        renderHeight = height;
+        renderWidth = height * imageAspect;
+        offsetX = (width - renderWidth) / 2;
+      } else {
+        renderWidth = width;
+        renderHeight = width / imageAspect;
+        offsetY = (height - renderHeight) / 2;
+      }
+
+      context.drawImage(image, offsetX, offsetY, renderWidth, renderHeight);
+    },
+    []
+  );
+
+  const updateProgressValues = useCallback(
+    (scrollTop: number, containerHeight: number) => {
+      const maxScroll = containerHeight * (IMAGES.length - 1);
+      const normalizedProgress = maxScroll > 0 ? scrollTop / maxScroll : 0;
+      const clampedProgress = Math.min(Math.max(normalizedProgress, 0), 1);
+
+      progress.set(clampedProgress);
+      scrollProgress.set(clampedProgress);
+
+      return clampedProgress;
     },
     [progress, scrollProgress]
   );
+
+  const updateActiveIndex = useCallback((rawIndex: number) => {
+    const displayIndex = Math.min(
+      IMAGES.length - 1,
+      Math.max(0, Math.round(rawIndex))
+    );
+
+    if (currentIndexRef.current !== displayIndex) {
+      currentIndexRef.current = displayIndex;
+      setCurrentIndex(displayIndex);
+    }
+
+    return displayIndex;
+  }, []);
+
+  const paintImages = useCallback(
+    (
+      context: CanvasRenderingContext2D,
+      dimensions: { width: number; height: number },
+      indices: { baseIndex: number; nextIndex: number; blend: number }
+    ) => {
+      const { width, height } = dimensions;
+      const { baseIndex, nextIndex, blend } = indices;
+      const clampedBaseIndex = Math.min(
+        IMAGES.length - 1,
+        Math.max(0, baseIndex)
+      );
+      const clampedNextIndex = Math.min(
+        IMAGES.length - 1,
+        Math.max(0, nextIndex)
+      );
+
+      const baseImage = imagesRef.current[clampedBaseIndex];
+      const nextImage =
+        blend > 0 ? imagesRef.current[clampedNextIndex] : undefined;
+
+      if (baseImage) {
+        context.globalAlpha = 1;
+        drawImageCover(context, baseImage, width, height);
+      }
+
+      if (nextImage && clampedNextIndex !== clampedBaseIndex) {
+        context.globalAlpha = blend;
+        drawImageCover(context, nextImage, width, height);
+      }
+    },
+    [drawImageCover]
+  );
+
+  const renderCanvas = useCallback(() => {
+    const container = containerRef.current;
+    const canvas = canvasRef.current;
+    if (!container) {
+      return;
+    }
+
+    if (!canvas) {
+      return;
+    }
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return;
+    }
+
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    if (containerWidth === 0 || containerHeight === 0) {
+      return;
+    }
+
+    const devicePixelRatio = window.devicePixelRatio ?? 1;
+    const renderWidth = Math.floor(containerWidth * devicePixelRatio);
+    const renderHeight = Math.floor(containerHeight * devicePixelRatio);
+
+    if (canvas.width !== renderWidth || canvas.height !== renderHeight) {
+      canvas.width = renderWidth;
+      canvas.height = renderHeight;
+      canvas.style.width = `${containerWidth}px`;
+      canvas.style.height = `${containerHeight}px`;
+    }
+
+    context.save();
+    context.scale(devicePixelRatio, devicePixelRatio);
+    context.clearRect(0, 0, containerWidth, containerHeight);
+
+    const scrollTop = container.scrollTop;
+    const { baseIndex, nextIndex, blend, rawIndex } = computeScrollInfo(
+      scrollTop,
+      containerHeight
+    );
+
+    updateProgressValues(scrollTop, containerHeight);
+    updateActiveIndex(rawIndex);
+    paintImages(
+      context,
+      { width: containerWidth, height: containerHeight },
+      { baseIndex, nextIndex, blend }
+    );
+
+    context.restore();
+  }, [paintImages, updateActiveIndex, updateProgressValues]);
+
+  const scheduleRender = useCallback(() => {
+    if (rafIdRef.current !== null) {
+      return;
+    }
+
+    rafIdRef.current = requestAnimationFrame(() => {
+      rafIdRef.current = null;
+      renderCanvas();
+    });
+  }, [renderCanvas]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -133,27 +302,14 @@ export const ScrollView = ({
       }, SCROLL_VIEW_ANIMATIONS.scrollIdleTimeout);
     };
 
-    const processScrollFrame = () => {
-      rafIdRef.current = null;
-      const scrollTop = container.scrollTop;
-      const containerHeight = container.clientHeight;
-
-      updateScrollProgress(scrollTop, containerHeight);
-    };
-
     const handleScroll = () => {
       showIndicator();
       scheduleIndicatorHide();
-
-      if (rafIdRef.current !== null) {
-        return;
-      }
-
-      rafIdRef.current = requestAnimationFrame(processScrollFrame);
+      scheduleRender();
     };
 
     // 初始化
-    processScrollFrame();
+    renderCanvas();
     container.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
@@ -165,11 +321,76 @@ export const ScrollView = ({
 
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
       }
 
       activeIndicatorAnimationRef.current?.stop();
     };
-  }, [updateScrollProgress, indicatorOffsetY, indicatorOpacity]);
+  }, [indicatorOffsetY, indicatorOpacity, renderCanvas, scheduleRender]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const imageElements = IMAGES.map((src) => {
+      const image = new window.Image();
+      image.src = src;
+      return image;
+    });
+
+    imagesRef.current = imageElements;
+
+    if (imageElements.every((image) => image.complete)) {
+      scheduleRender();
+      return;
+    }
+
+    let loaded = 0;
+    let cancelled = false;
+
+    const listeners = imageElements.map((image) => {
+      const handleLoad = () => {
+        loaded += 1;
+        if (!cancelled && loaded >= imageElements.length) {
+          scheduleRender();
+        }
+      };
+
+      image.addEventListener("load", handleLoad, { once: true });
+      image.addEventListener("error", handleLoad, { once: true });
+
+      return handleLoad;
+    });
+
+    return () => {
+      cancelled = true;
+      imageElements.forEach((image, index) => {
+        const listener = listeners[index];
+        if (listener) {
+          image.removeEventListener("load", listener);
+          image.removeEventListener("error", listener);
+        }
+      });
+    };
+  }, [scheduleRender]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      scheduleRender();
+    });
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [scheduleRender]);
 
   const containerClassName = cn(
     "relative",
@@ -212,27 +433,12 @@ export const ScrollView = ({
           ))}
         </div>
 
-        {/* 图片层 */}
-        <div className="pointer-events-none absolute inset-0 z-10">
-          {IMAGES.map((imageSrc, index) => (
-            <motion.div
-              animate={{ opacity: index === currentIndex ? 1 : 0 }}
-              className="absolute inset-0"
-              initial={{ opacity: index === 0 ? 1 : 0 }}
-              key={imageSrc}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <Image
-                alt={`Slide ${index + 1}`}
-                className="object-cover"
-                fill
-                priority={index === 0}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 60vw"
-                src={imageSrc}
-              />
-            </motion.div>
-          ))}
-        </div>
+        {/* Canvas 渲染层 */}
+        <canvas
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-10 h-full w-full"
+          ref={canvasRef}
+        />
       </div>
 
       <motion.div
