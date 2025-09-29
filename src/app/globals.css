@@ -78,6 +78,32 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+  --hero-width-rest: min(20vw, calc(70vh * 1 / 1));
+  --hero-width-hover: min(58vw, calc(80vh * 1 / 1));
+  --hero-aspect-rest: 1 / 1;
+  --hero-aspect-hover: 16 / 9;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --hero-width-rest: min(40vw, calc(72vh * 1 / 1));
+    --hero-width-hover: min(68vw, calc(80vh * 1 / 1));
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --hero-width-rest: min(100vw, calc(86vh * 1 / 1));
+    --hero-width-hover: var(--hero-width-rest);
+    --hero-aspect-rest: 6 / 19;
+    --hero-aspect-hover: 16 / 9;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --hero-width-rest: min(100vw, calc(92vh * 6 / 19));
+  }
 }
 
 .dark {

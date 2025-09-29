@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 
 type CursorProps = {
   isExpanded?: boolean;
-  buttonRef?: React.RefObject<HTMLButtonElement>;
+  buttonRef?: React.RefObject<HTMLElement>;
 };
 
 const CURSOR_SIZE = 40; // size-10 = 40px

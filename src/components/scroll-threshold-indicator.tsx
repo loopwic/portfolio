@@ -41,7 +41,7 @@ export const ScrollThresholdIndicator = ({
       animate={{ opacity: 1, scale: 1 }}
       className={cn(
         "-translate-y-1/2 fixed z-99",
-        isMobile ? "inset-x-0 top-16" : "top-1/2 right-8"
+        isMobile ? "inset-x-0 top-18" : "top-1/2 right-8"
       )}
       exit={{ opacity: 0, scale: 0.8 }}
       initial={{ opacity: 0, scale: 0.8 }}

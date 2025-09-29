@@ -4,10 +4,14 @@ import { animate, useMotionValue, useMotionValueEvent } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const WHEEL_THRESHOLD = 200;
+const TOUCH_THRESHOLD = 100;
 const IDLE_RESET_DELAY = 800;
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
+
+const isWithinScrollableContainer = (element: Element | null) =>
+  Boolean(element?.closest(".scrollbar-none"));
 
 type Direction = "up" | "down" | null;
 
@@ -33,6 +37,9 @@ export const usePageScroll = (sections: string[]) => {
     typeof window !== "undefined" ? window.innerHeight : 0
   );
   const wheelThresholdRef = useRef(WHEEL_THRESHOLD);
+  const touchIdentifierRef = useRef<number | null>(null);
+  const touchLastYRef = useRef<number | null>(null);
+  const isTouchActiveRef = useRef(false);
 
   const clearIdleTimeout = useCallback(() => {
     if (idleTimeoutRef.current) {
@@ -267,7 +274,7 @@ export const usePageScroll = (sections: string[]) => {
     const handleWheel = (event: WheelEvent) => {
       const target = event.target as Element | null;
 
-      if (target?.closest(".scrollbar-none")) {
+      if (isWithinScrollableContainer(target)) {
         return;
       }
 
@@ -298,13 +305,164 @@ export const usePageScroll = (sections: string[]) => {
 
     window.addEventListener("wheel", handleWheel, { passive: false });
 
+    const resetTouchState = () => {
+      touchIdentifierRef.current = null;
+      touchLastYRef.current = null;
+      isTouchActiveRef.current = false;
+      accumulatedDeltaRef.current = 0;
+      wheelThresholdRef.current = WHEEL_THRESHOLD;
+    };
+
+    const getTrackedTouch = (event: TouchEvent) => {
+      const identifier = touchIdentifierRef.current;
+
+      if (identifier === null) {
+        return event.changedTouches[0] ?? null;
+      }
+
+      const currentTouches = Array.from(event.touches);
+      const updatedTouches = Array.from(event.changedTouches);
+
+      return (
+        currentTouches.find((touch) => touch.identifier === identifier) ??
+        updatedTouches.find((touch) => touch.identifier === identifier) ??
+        null
+      );
+    };
+
+    const shouldResetTouch = (event: TouchEvent) => {
+      if (event.touches.length > 1) {
+        return true;
+      }
+
+      const target = event.target as Element | null;
+      return isWithinScrollableContainer(target);
+    };
+
+    const processTouchDelta = (event: TouchEvent, delta: number) => {
+      if (delta === 0) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const { magnitude, threshold, ratio, nextDirection } =
+        computeWheelSnapshot(delta);
+
+      applyWheelProgress(nextDirection, ratio);
+
+      if (nextDirection && magnitude >= threshold) {
+        handleThresholdCross(nextDirection);
+        resetTouchState();
+        return;
+      }
+
+      scheduleIdleReset();
+    };
+
+    const handleTouchStart = (event: TouchEvent) => {
+      if (isAnimatingRef.current) {
+        return;
+      }
+
+      if (event.touches.length > 1) {
+        resetTouchState();
+        return;
+      }
+
+      const target = event.target as Element | null;
+      if (isWithinScrollableContainer(target)) {
+        return;
+      }
+
+      const touch = event.changedTouches[0];
+      if (!touch) {
+        return;
+      }
+
+      touchIdentifierRef.current = touch.identifier;
+      touchLastYRef.current = touch.clientY;
+      isTouchActiveRef.current = true;
+      accumulatedDeltaRef.current = 0;
+      wheelThresholdRef.current = TOUCH_THRESHOLD;
+      clearIdleTimeout();
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (!isTouchActiveRef.current) {
+        return;
+      }
+
+      if (shouldResetTouch(event)) {
+        resetTouchState();
+        return;
+      }
+
+      const touch = getTrackedTouch(event);
+
+      if (!touch) {
+        return;
+      }
+
+      const lastY = touchLastYRef.current ?? touch.clientY;
+      const delta = lastY - touch.clientY;
+
+      touchLastYRef.current = touch.clientY;
+
+      processTouchDelta(event, delta);
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      if (!isTouchActiveRef.current) {
+        return;
+      }
+
+      const identifier = touchIdentifierRef.current;
+      if (identifier === null) {
+        resetTouchState();
+        return;
+      }
+
+      const endedTouch = Array.from(event.changedTouches).some(
+        (touch) => touch.identifier === identifier
+      );
+
+      if (!endedTouch) {
+        return;
+      }
+
+      resetTouchState();
+      scheduleIdleReset();
+    };
+
+    const handleTouchCancel = () => {
+      if (!isTouchActiveRef.current) {
+        return;
+      }
+
+      resetTouchState();
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd);
+    window.addEventListener("touchcancel", handleTouchCancel);
+
     return () => {
       window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("touchcancel", handleTouchCancel);
+      resetTouchState();
     };
   }, [
     applyWheelProgress,
     computeWheelSnapshot,
     handleThresholdCross,
+    clearIdleTimeout,
     scheduleIdleReset,
   ]);
 

@@ -7,9 +7,8 @@ import { usePageScroll } from "@/hooks/use-page-scroll";
 
 export default function ClientLayout({ children }: { children: ReactNode }) {
   // 定义各个section的ID
-  const sections = ["home", "about", "projects"];
+  const sections = ["home", "about", "projects", "works"];
 
-  // 使用自定义hook管理页面滚动
   const {
     currentSectionIndex,
     scrollProgress,
@@ -31,7 +30,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   return (
     <ScrollProvider value={scrollContextValue}>
       <Navbar />
-      {children}
+      <main className="container mx-auto">{children}</main>
     </ScrollProvider>
   );
 }

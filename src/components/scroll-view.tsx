@@ -1,6 +1,7 @@
 "use client";
 
 import { animate, motion, useMotionValue } from "motion/react";
+import Image from "next/image";
 import {
   type RefObject,
   useCallback,
@@ -8,10 +9,16 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  SCROLL_VIEW_ANIMATIONS,
+  SCROLL_VIEW_CONTAINER_TRANSITION,
+  SCROLL_VIEW_CONTAINER_VARIANTS,
+} from "@/lib/animations";
+import { cn } from "@/lib/utils";
 
 type ScrollViewProps = {
-  handleHoverStart: () => void;
-  handleHoverEnd: () => void;
+  handleHoverStart?: () => void;
+  handleHoverEnd?: () => void;
   buttonScope: RefObject<HTMLDivElement>;
 };
 
@@ -29,351 +36,62 @@ const IMAGE_TEXTS = [
   { title: "Connect", subtitle: "Join our community" },
 ];
 
-const SCROLL_IDLE_TIMEOUT = 1800;
-const INDICATOR_FADE_DURATION = 0.22;
-
-const loadImage = (src: string, signal: AbortSignal) =>
-  new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image();
-    image.decoding = "async";
-
-    const handleAbort = () => {
-      image.src = "";
-      reject(new DOMException("Aborted", "AbortError"));
-    };
-
-    const cleanup = () => {
-      signal.removeEventListener("abort", handleAbort);
-      image.onload = null;
-      image.onerror = null;
-    };
-
-    if (signal.aborted) {
-      handleAbort();
-      return;
-    }
-
-    signal.addEventListener("abort", handleAbort, { once: true });
-
-    image.onload = () => {
-      const finalize = () => {
-        cleanup();
-        resolve(image);
-      };
-
-      if (typeof image.decode === "function") {
-        image.decode().then(finalize).catch(finalize);
-        return;
-      }
-
-      finalize();
-    };
-
-    image.onerror = (event) => {
-      cleanup();
-      reject(event instanceof Error ? event : new Error("Image load failed"));
-    };
-
-    image.src = src;
-  });
-
-const preloadImages = async (
-  signal: AbortSignal,
-  onProgress?: (images: HTMLImageElement[]) => void
-) => {
-  const loadedImages: HTMLImageElement[] = [];
-
-  for (const src of IMAGES) {
-    if (signal.aborted) {
-      break;
-    }
-
-    try {
-      const image = await loadImage(src, signal);
-
-      if (signal.aborted) {
-        break;
-      }
-
-      loadedImages.push(image);
-      onProgress?.([...loadedImages]);
-    } catch {
-      if (signal.aborted) {
-        break;
-      }
-    }
-  }
-
-  return loadedImages;
-};
-
 export const ScrollView = ({
   handleHoverStart,
   handleHoverEnd,
   buttonScope,
 }: ScrollViewProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
-  const canvasSizeRef = useRef({ width: 0, height: 0 });
-  const imageCacheRef = useRef<HTMLImageElement[]>([]);
   const progress = useMotionValue(0);
+  const scrollProgress = useMotionValue(0);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   const hideIndicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const rafIdRef = useRef<number | null>(null);
-  const pendingScrollRef = useRef({ scrollTop: 0, containerHeight: 0 });
   const currentIndexRef = useRef(0);
   const indicatorOpacity = useMotionValue(0);
   const indicatorOffsetY = useMotionValue(10);
   const activeIndicatorAnimationRef = useRef<ReturnType<typeof animate> | null>(
     null
   );
-  const resizeRafRef = useRef<number | null>(null);
 
-  const drawFrame = useCallback(
+  const updateScrollProgress = useCallback(
     (scrollTop: number, containerHeight: number) => {
-      const context = canvasCtxRef.current;
-      if (!context) {
+      if (containerHeight <= 0) {
         return;
       }
 
-      const { width, height } = canvasSizeRef.current;
+      const imageHeight = containerHeight;
+      const maxScroll = imageHeight * (IMAGES.length - 1);
+      const progressValue =
+        maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 0;
 
-      if (width === 0 || height === 0 || containerHeight === 0) {
-        return;
-      }
+      progress.set(progressValue);
+      scrollProgress.set(progressValue);
 
-      context.clearRect(0, 0, width, height);
-
-      const images = imageCacheRef.current;
-
-      if (images.length === 0) {
-        return;
-      }
-
-      const maxIndex = images.length - 1;
-      const normalizedHeight = Math.max(containerHeight, 1);
-      const baseIndex = Math.max(
-        0,
-        Math.min(maxIndex, Math.floor(scrollTop / normalizedHeight))
+      const nextIndex = Math.min(
+        IMAGES.length - 1,
+        Math.max(0, Math.round(scrollTop / imageHeight))
       );
-      const offsetWithin = scrollTop - baseIndex * normalizedHeight;
 
-      const currentImage = images[baseIndex];
-      const nextIndex = Math.min(maxIndex, baseIndex + 1);
-      const nextImage = images[nextIndex];
-
-      const drawCoverImage = (image: HTMLImageElement, translateY: number) => {
-        const intrinsicWidth = image.naturalWidth || image.width;
-        const intrinsicHeight = image.naturalHeight || image.height;
-
-        if (intrinsicWidth === 0 || intrinsicHeight === 0) {
-          return;
-        }
-
-        const scale = Math.max(
-          width / intrinsicWidth,
-          height / intrinsicHeight
-        );
-        const renderWidth = intrinsicWidth * scale;
-        const renderHeight = intrinsicHeight * scale;
-        const offsetX = (width - renderWidth) / 2;
-        const offsetY = (height - renderHeight) / 2;
-
-        context.drawImage(
-          image,
-          offsetX,
-          offsetY + translateY,
-          renderWidth,
-          renderHeight
-        );
-      };
-
-      if (currentImage) {
-        drawCoverImage(currentImage, -offsetWithin);
-      }
-
-      if (nextImage && nextIndex !== baseIndex) {
-        drawCoverImage(nextImage, normalizedHeight - offsetWithin);
+      if (currentIndexRef.current !== nextIndex) {
+        currentIndexRef.current = nextIndex;
+        setCurrentIndex(nextIndex);
       }
     },
-    []
+    [progress, scrollProgress]
   );
 
-  const applyCanvasResize = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return;
-    }
-
-    const container = containerRef.current;
-    if (!container) {
-      return;
-    }
-
-    const context = canvasCtxRef.current;
-    if (!context) {
-      return;
-    }
-
-    const rect = container.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-
-    if (typeof context.resetTransform === "function") {
-      context.resetTransform();
-    } else {
-      context.setTransform(1, 0, 0, 1, 0, 0);
-    }
-
-    context.scale(dpr, dpr);
-    canvasSizeRef.current = { width: rect.width, height: rect.height };
-
-    const scrollTop = container.scrollTop;
-    const containerHeight = container.clientHeight;
-
-    pendingScrollRef.current = {
-      scrollTop,
-      containerHeight,
-    };
-
-    drawFrame(scrollTop, containerHeight);
-  }, [drawFrame]);
-
-  const scheduleCanvasResize = useCallback(() => {
-    if (resizeRafRef.current !== null) {
-      return;
-    }
-
-    resizeRafRef.current = requestAnimationFrame(() => {
-      resizeRafRef.current = null;
-      applyCanvasResize();
-    });
-  }, [applyCanvasResize]);
-
   const handleMouseEnter = useCallback(() => {
-    handleHoverStart();
+    setIsHovered(true);
+    handleHoverStart?.();
   }, [handleHoverStart]);
 
   const handleMouseLeave = useCallback(() => {
-    handleHoverEnd();
+    setIsHovered(false);
+    handleHoverEnd?.();
   }, [handleHoverEnd]);
-
-  useEffect(() => {
-    let isActive = true;
-    const controller = new AbortController();
-
-    const hydrateImages = async () => {
-      const loadedImages = await preloadImages(controller.signal, (images) => {
-        if (!isActive || controller.signal.aborted || images.length === 0) {
-          return;
-        }
-
-        imageCacheRef.current = images;
-        const {
-          scrollTop: currentScrollTop,
-          containerHeight: currentContainerHeight,
-        } = pendingScrollRef.current;
-        drawFrame(currentScrollTop, currentContainerHeight);
-      });
-
-      if (!isActive || controller.signal.aborted || loadedImages.length === 0) {
-        return;
-      }
-
-      imageCacheRef.current = loadedImages;
-      const {
-        scrollTop: finalScrollTop,
-        containerHeight: finalContainerHeight,
-      } = pendingScrollRef.current;
-      drawFrame(finalScrollTop, finalContainerHeight);
-    };
-
-    hydrateImages().catch(() => {
-      /* swallow preload failures */
-    });
-
-    return () => {
-      isActive = false;
-      controller.abort();
-      imageCacheRef.current = [];
-    };
-  }, [drawFrame]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return;
-    }
-
-    const container = containerRef.current;
-    if (!container) {
-      return;
-    }
-
-    const context = canvas.getContext("2d");
-    if (!context) {
-      return;
-    }
-
-    canvasCtxRef.current = context;
-
-    scheduleCanvasResize();
-
-    const resizeObserver = new ResizeObserver(() => {
-      scheduleCanvasResize();
-    });
-    resizeObserver.observe(container);
-
-    const handleWindowResize = () => scheduleCanvasResize();
-
-    window.addEventListener("resize", handleWindowResize);
-
-    return () => {
-      window.removeEventListener("resize", handleWindowResize);
-      resizeObserver.disconnect();
-      if (resizeRafRef.current !== null) {
-        cancelAnimationFrame(resizeRafRef.current);
-        resizeRafRef.current = null;
-      }
-      canvasCtxRef.current = null;
-    };
-  }, [scheduleCanvasResize]);
-
-  useEffect(() => {
-    const target = buttonScope.current;
-
-    if (!target) {
-      return;
-    }
-
-    const observer = new MutationObserver((mutations) => {
-      const hasStyleMutation = mutations.some(
-        (mutation) =>
-          mutation.type === "attributes" && mutation.attributeName === "style"
-      );
-
-      if (!hasStyleMutation) {
-        return;
-      }
-
-      scheduleCanvasResize();
-    });
-
-    observer.observe(target, {
-      attributes: true,
-      attributeFilter: ["style"],
-    });
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [buttonScope, scheduleCanvasResize]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -387,12 +105,12 @@ export const ScrollView = ({
 
       activeIndicatorAnimationRef.current?.stop();
       activeIndicatorAnimationRef.current = animate(indicatorOpacity, 1, {
-        duration: INDICATOR_FADE_DURATION,
+        duration: SCROLL_VIEW_ANIMATIONS.indicatorFadeDuration,
         ease: "easeOut",
       });
 
       animate(indicatorOffsetY, 0, {
-        duration: INDICATOR_FADE_DURATION,
+        duration: SCROLL_VIEW_ANIMATIONS.indicatorFadeDuration,
         ease: "easeOut",
       });
     };
@@ -404,50 +122,26 @@ export const ScrollView = ({
       hideIndicatorTimeoutRef.current = setTimeout(() => {
         activeIndicatorAnimationRef.current?.stop();
         activeIndicatorAnimationRef.current = animate(indicatorOpacity, 0, {
-          duration: INDICATOR_FADE_DURATION,
+          duration: SCROLL_VIEW_ANIMATIONS.indicatorFadeDuration,
           ease: "anticipate",
         });
 
         animate(indicatorOffsetY, 10, {
-          duration: INDICATOR_FADE_DURATION,
+          duration: SCROLL_VIEW_ANIMATIONS.indicatorFadeDuration,
           ease: "anticipate",
         });
-      }, SCROLL_IDLE_TIMEOUT);
+      }, SCROLL_VIEW_ANIMATIONS.scrollIdleTimeout);
     };
 
     const processScrollFrame = () => {
       rafIdRef.current = null;
-      const { scrollTop, containerHeight } = pendingScrollRef.current;
+      const scrollTop = container.scrollTop;
+      const containerHeight = container.clientHeight;
 
-      if (containerHeight <= 0) {
-        return;
-      }
-
-      const imageHeight = containerHeight;
-      const maxScroll = imageHeight * (IMAGES.length - 1);
-      const progressValue =
-        maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 0;
-
-      progress.set(progressValue);
-      drawFrame(scrollTop, containerHeight);
-
-      const nextIndex = Math.min(
-        IMAGES.length - 1,
-        Math.max(0, Math.round(scrollTop / imageHeight))
-      );
-
-      if (currentIndexRef.current !== nextIndex) {
-        currentIndexRef.current = nextIndex;
-        setCurrentIndex(nextIndex);
-      }
+      updateScrollProgress(scrollTop, containerHeight);
     };
 
     const handleScroll = () => {
-      pendingScrollRef.current = {
-        scrollTop: container.scrollTop,
-        containerHeight: container.clientHeight,
-      };
-
       showIndicator();
       scheduleIndicatorHide();
 
@@ -458,12 +152,8 @@ export const ScrollView = ({
       rafIdRef.current = requestAnimationFrame(processScrollFrame);
     };
 
-    pendingScrollRef.current = {
-      scrollTop: container.scrollTop,
-      containerHeight: container.clientHeight,
-    };
+    // 初始化
     processScrollFrame();
-
     container.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
@@ -479,25 +169,39 @@ export const ScrollView = ({
 
       activeIndicatorAnimationRef.current?.stop();
     };
-  }, [drawFrame, indicatorOffsetY, indicatorOpacity, progress]);
+  }, [updateScrollProgress, indicatorOffsetY, indicatorOpacity]);
+
+  const containerClassName = cn(
+    "relative",
+    "max-h-[80vh]",
+    "overflow-hidden",
+    "rounded-lg",
+    "md:cursor-none"
+  );
 
   return (
     <motion.div
-      animate={{
-        scale: 1,
-        opacity: 1,
-      }}
-      className="relative size-80 cursor-none overflow-hidden rounded-lg"
+      animate={isHovered ? "hover" : "rest"}
+      className={containerClassName}
+      initial="rest"
+      layout
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       ref={buttonScope}
-      transition={{ duration: 0.4 }}
+      style={{ maxWidth: "100%" }}
+      transition={SCROLL_VIEW_CONTAINER_TRANSITION}
+      variants={SCROLL_VIEW_CONTAINER_VARIANTS}
     >
       <div className="relative h-full w-full">
+        {/* 滚动容器 */}
         <div
           className="scrollbar-none relative z-0 h-full w-full snap-y snap-mandatory overflow-y-auto"
           ref={containerRef}
-          style={{ willChange: "scroll-position" }}
+          style={{
+            willChange: "scroll-position",
+            touchAction: "pan-y",
+            overscrollBehavior: "contain",
+          }}
         >
           {IMAGES.map((imageSrc) => (
             <div
@@ -507,10 +211,28 @@ export const ScrollView = ({
             />
           ))}
         </div>
-        <canvas
-          className="pointer-events-none absolute inset-0 z-10 h-full w-full"
-          ref={canvasRef}
-        />
+
+        {/* 图片层 */}
+        <div className="pointer-events-none absolute inset-0 z-10">
+          {IMAGES.map((imageSrc, index) => (
+            <motion.div
+              animate={{ opacity: index === currentIndex ? 1 : 0 }}
+              className="absolute inset-0"
+              initial={{ opacity: index === 0 ? 1 : 0 }}
+              key={imageSrc}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <Image
+                alt={`Slide ${index + 1}`}
+                className="object-cover"
+                fill
+                priority={index === 0}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 60vw"
+                src={imageSrc}
+              />
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       <motion.div
@@ -524,7 +246,7 @@ export const ScrollView = ({
           className="hover-text font-semibold text-2xl text-white"
           initial={{ y: 20, opacity: 0 }}
           key={`title-${currentIndex}`}
-          transition={{ duration: 0.3 }}
+          transition={SCROLL_VIEW_ANIMATIONS.textTransition}
         >
           {IMAGE_TEXTS[currentIndex]?.title}
         </motion.p>
@@ -533,7 +255,7 @@ export const ScrollView = ({
           className="hover-text text-white"
           initial={{ y: 20, opacity: 0 }}
           key={`subtitle-${currentIndex}`}
-          transition={{ duration: 0.3, delay: 0.1 }}
+          transition={SCROLL_VIEW_ANIMATIONS.textTransitionDelayed}
         >
           {IMAGE_TEXTS[currentIndex]?.subtitle}
         </motion.p>

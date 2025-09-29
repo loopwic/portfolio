@@ -1,13 +1,44 @@
 "use client";
 
 import { motion, useAnimate } from "motion/react";
+import { useEffect, useState } from "react";
+import { About } from "@/components/about";
 import Cursor from "@/components/cursor";
 import { ScrollThresholdIndicator } from "@/components/scroll-threshold-indicator";
 import { ScrollView } from "@/components/scroll-view";
 import { useScrollContext } from "@/contexts/scroll-context";
+import { useIsMobile } from "@/hooks/use-is-mobile";
+import { HERO_ANIMATIONS } from "@/lib/animations";
 
 export default function HomePage() {
   const [buttonScope, animateButton] = useAnimate();
+  const isMobile = useIsMobile();
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+
+  useEffect(() => {
+    const scope = buttonScope.current;
+    if (!scope) {
+      return;
+    }
+
+    const state = isMobile || isHovered ? "animate" : "initial";
+
+    animateButton(
+      scope,
+      HERO_ANIMATIONS.button[state],
+      HERO_ANIMATIONS.button.transition
+    );
+    animateButton(
+      "#cover",
+      HERO_ANIMATIONS.cover[state],
+      HERO_ANIMATIONS.cover.transition
+    );
+    animateButton(
+      "p",
+      HERO_ANIMATIONS.text[state],
+      HERO_ANIMATIONS.text.transition
+    );
+  }, [isMobile, isHovered, animateButton, buttonScope]);
 
   // 从context获取滚动状态
   const { scrollProgress, isAnimating, direction, translateY } =
@@ -15,68 +46,8 @@ export default function HomePage() {
 
   // 使用context中的方向
   const scrollDirection = direction;
-
-  const handleHoverStart = () => {
-    // 按钮变宽，从正方形变为宽矩形
-    animateButton(
-      buttonScope.current,
-      {
-        width: "30rem", // 480px
-        height: "20rem", // 320px
-        borderRadius: 0,
-      },
-      { duration: 0.3 }
-    );
-
-    // 覆盖层淡入
-    animateButton(
-      "#cover",
-      {
-        opacity: 1,
-      },
-      { duration: 0.2 }
-    );
-
-    // 文字向上滑入
-    animateButton(
-      ".hover-text",
-      {
-        y: 0,
-      },
-      { duration: 0.3 }
-    );
-  };
-
-  const handleHoverEnd = () => {
-    // 按钮恢复正方形
-    animateButton(
-      buttonScope.current,
-      {
-        width: "20rem",
-        height: "20rem",
-        borderRadius: "var(--radius)",
-      },
-      { duration: 0.3 }
-    );
-
-    // 覆盖层淡出
-    animateButton(
-      "#cover",
-      {
-        opacity: 0,
-      },
-      { duration: 0.2 }
-    );
-
-    // 文字向下滑出
-    animateButton(
-      ".hover-text",
-      {
-        y: 20,
-      },
-      { duration: 0.3 }
-    );
-  };
+  const handleHoverStart = () => setIsHovered(true);
+  const handleHoverEnd = () => setIsHovered(false);
 
   return (
     <div className="relative">
@@ -89,19 +60,7 @@ export default function HomePage() {
           />
         </div>
 
-        {/* 添加更多内容来创建滚动 */}
-        <div
-          className="flex h-screen items-center justify-center bg-gradient-to-b from-background to-muted/20"
-          id="about"
-        >
-          <div className="text-center">
-            <h2 className="mb-4 font-bold text-4xl">About</h2>
-            <p className="max-w-2xl text-muted-foreground">
-              This is some additional content to create scrollable area for
-              navbar animation.
-            </p>
-          </div>
-        </div>
+        <About />
 
         <div
           className="flex h-screen items-center justify-center bg-gradient-to-b from-muted/20 to-muted/40"
@@ -117,9 +76,10 @@ export default function HomePage() {
         </div>
       </motion.div>
 
-      <p className="fixed bottom-4 left-4 text-4xl text-muted-foreground/30 uppercase">
-        hey there
-      </p>
+      <div
+        className="flex h-screen items-center justify-center bg-gradient-to-b from-muted/20 to-muted/40"
+        id="works"
+      />
 
       {/* 滚动阈值指示器 */}
       <ScrollThresholdIndicator
@@ -128,7 +88,7 @@ export default function HomePage() {
         progress={scrollProgress}
       />
 
-      <Cursor buttonRef={buttonScope} />
+      {!isMobile && <Cursor buttonRef={buttonScope} />}
     </div>
   );
 }
