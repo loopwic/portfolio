@@ -1,3 +1,11 @@
+# [1.1.0](https://github.com/loopwic/portfolio/compare/v1.0.0...v1.1.0) (2025-09-29)
+
+
+### Features
+
+* add work experience section to About component with animations ([3520f04](https://github.com/loopwic/portfolio/commit/3520f043d41f42a15f66ae3af3a4591a60670688))
+* 使用 Canvas 渲染图像，优化滚动视图性能和响应性 ([3e17a77](https://github.com/loopwic/portfolio/commit/3e17a77c7f86d700a1241233e911a951902dc9e5))
+
 # 1.0.0 (2025-09-29)
 
 
