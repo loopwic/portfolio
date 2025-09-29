@@ -55,6 +55,20 @@ const CONTSTANDS = {
       icon: "/svgs/docker.svg",
     },
   ],
+  works: [
+    {
+      name: "Chengdu kuaiqi Tech Co., Ltd.",
+      job: "Frontend Engineer",
+      date: "2024.10 - 2025.07",
+      icon: "/svgs/kq.svg",
+    },
+    {
+      name: "MOONDROP Tech Co. Ltd.",
+      date: "2025.08 - Now",
+      job: "Frontend Engineer",
+      icon: "/svgs/md.svg",
+    },
+  ],
 } as const;
 
 const BREAKPOINT = 1024;
@@ -104,8 +118,8 @@ export function About() {
           <motion.ul
             className="flex flex-wrap gap-4"
             initial="initial"
-            transition={ABOUT_ANIMATIONS.skillsList.transition}
-            variants={ABOUT_ANIMATIONS.skillsList}
+            transition={ABOUT_ANIMATIONS.List.transition}
+            variants={ABOUT_ANIMATIONS.List}
             viewport={{ amount: 0.1 }}
             whileInView="animate"
           >
@@ -129,6 +143,53 @@ export function About() {
               </motion.li>
             ))}
           </motion.ul>
+
+          <p className="mb-2 font-semibold">Where I Worked</p>
+          <div className="flex gap-2">
+            <motion.div
+              className="h-full w-1 rounded-full bg-muted"
+              initial="initial"
+              style={{ transformOrigin: "top" }}
+              transition={ABOUT_ANIMATIONS.workLine.transition}
+              variants={ABOUT_ANIMATIONS.workLine}
+              whileInView="animate"
+            />
+
+            <motion.ul
+              className="flex flex-col flex-wrap items-start gap-4"
+              initial="initial"
+              transition={ABOUT_ANIMATIONS.List.transition}
+              variants={ABOUT_ANIMATIONS.List}
+              viewport={{ amount: 0.1 }}
+              whileInView="animate"
+            >
+              {CONTSTANDS.works.map((work) => (
+                <motion.li
+                  className="items flex gap-2 rounded bg-muted px-3 py-1"
+                  key={work.name}
+                  transition={ABOUT_ANIMATIONS.skillItem.transition}
+                  variants={ABOUT_ANIMATIONS.skillItem}
+                >
+                  <div className="relative mt-2 size-4 shrink-0">
+                    <Image
+                      alt={work.name}
+                      className="object-contain"
+                      fill
+                      sizes="auto"
+                      src={work.icon}
+                    />
+                  </div>
+                  <div>
+                    <span className="text-sm">{work.name}</span>
+                    <span className="ml-2 text-muted-foreground text-xs">
+                      {work.date}
+                    </span>
+                    <p>{work.job}</p>
+                  </div>
+                </motion.li>
+              ))}
+            </motion.ul>
+          </div>
 
           <ul className="mt-auto flex items-center gap-4 lg:ml-auto">
             {CONTSTANDS.href.map((item) => (
