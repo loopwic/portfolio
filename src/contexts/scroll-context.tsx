@@ -10,6 +10,7 @@ type ScrollContextType = {
   direction: "up" | "down" | null;
   scrollYProgress: MotionValue<number>;
   translateY: MotionValue<number>;
+  scrollToSection: (targetIndex: number) => void;
 };
 
 const ScrollContext = createContext<ScrollContextType | null>(null);

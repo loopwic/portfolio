@@ -93,7 +93,6 @@ export const ABOUT_ANIMATIONS = {
     },
   },
 };
-
 export const SCROLL_VIEW_ANIMATIONS = {
   scrollIdleTimeout: 1800,
   indicatorFadeDuration: 0.22,

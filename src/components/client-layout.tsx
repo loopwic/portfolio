@@ -16,6 +16,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
     direction,
     scrollYProgress,
     translateY,
+    scrollToSection,
   } = usePageScroll(sections);
 
   const scrollContextValue = {
@@ -25,6 +26,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
     direction,
     scrollYProgress,
     translateY,
+    scrollToSection,
   };
 
   return (
