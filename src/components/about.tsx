@@ -165,7 +165,7 @@ export function About() {
             >
               {CONTSTANDS.works.map((work) => (
                 <motion.li
-                  className="items flex gap-2 rounded bg-muted px-3 py-1"
+                  className="items flex w-full gap-2 rounded bg-muted px-3 py-1 lg:w-auto"
                   key={work.name}
                   transition={ABOUT_ANIMATIONS.skillItem.transition}
                   variants={ABOUT_ANIMATIONS.skillItem}

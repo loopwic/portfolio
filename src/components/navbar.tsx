@@ -16,10 +16,6 @@ const CONSTANTS = [
     label: "Projects",
     href: "#projects",
   },
-  {
-    label: "Works",
-    href: "#works",
-  },
 ];
 
 const FULL_ROTATION_DEGREES = 360;

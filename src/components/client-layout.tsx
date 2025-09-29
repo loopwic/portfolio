@@ -7,7 +7,7 @@ import { usePageScroll } from "@/hooks/use-page-scroll";
 
 export default function ClientLayout({ children }: { children: ReactNode }) {
   // 定义各个section的ID
-  const sections = ["home", "about", "projects", "works"];
+  const sections = ["home", "about", "projects"];
 
   const {
     currentSectionIndex,

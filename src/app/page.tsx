@@ -4,6 +4,7 @@ import { motion, useAnimate } from "motion/react";
 import { useEffect, useState } from "react";
 import { About } from "@/components/about";
 import Cursor from "@/components/cursor";
+import { Project } from "@/components/project";
 import { ScrollThresholdIndicator } from "@/components/scroll-threshold-indicator";
 import { ScrollView } from "@/components/scroll-view";
 import { useScrollContext } from "@/contexts/scroll-context";
@@ -62,24 +63,8 @@ export default function HomePage() {
 
         <About />
 
-        <div
-          className="flex h-screen items-center justify-center bg-gradient-to-b from-muted/20 to-muted/40"
-          id="projects"
-        >
-          <div className="text-center">
-            <h2 className="mb-4 font-bold text-4xl">Projects</h2>
-            <p className="max-w-2xl text-muted-foreground">
-              More content to ensure we have enough scroll height for the navbar
-              animation.
-            </p>
-          </div>
-        </div>
+        <Project />
       </motion.div>
-
-      <div
-        className="flex h-screen items-center justify-center bg-gradient-to-b from-muted/20 to-muted/40"
-        id="works"
-      />
 
       {/* 滚动阈值指示器 */}
       <ScrollThresholdIndicator
