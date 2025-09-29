@@ -1,3 +1,10 @@
+# 1.0.0 (2025-09-29)
+
+
+### Features
+
+* enhance hero section responsiveness and animations ([5d0a55b](https://github.com/loopwic/portfolio/commit/5d0a55bbb8f0b5110042cdc88f79aff490a102a4))
+
 # Changelog
 
 All notable changes to this project will be documented in this file by [semantic-release](https://github.com/semantic-release/semantic-release).
