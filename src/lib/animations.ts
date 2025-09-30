@@ -2,6 +2,16 @@
 const EASE_OUT_CUBIC = [0.4, 0, 0.2, 1] as const;
 const ANIMATION_DURATION_MEDIUM = 0.4;
 
+export const THEME_TOGGLE_ANIMATIONS = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+};
+
+export const LOGO_HOVER_ANIMATIONS = {
+  initial: { opacity: 1, y: 0 },
+  animate: { opacity: 0, y: -10 },
+};
+
 const HERO_WIDTH = {
   rest: "var(--hero-width-rest)",
   hover: "var(--hero-width-hover)",
@@ -109,5 +119,25 @@ export const SCROLL_VIEW_ANIMATIONS = {
     duration: 0.3,
     delay: 0.1,
     ease: EASE_OUT_CUBIC,
+  },
+} as const;
+
+export const BLOG_ANIMATIONS = {
+  container: {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  },
+  item: {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: ANIMATION_DURATION_MEDIUM, ease: EASE_OUT_CUBIC },
+    },
   },
 } as const;

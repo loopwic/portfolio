@@ -1,0 +1,217 @@
+import Head from "next/head";
+import { Author } from "@/components/author";
+
+<Head>
+  <title>使用Next.js和MDX构建个人博客</title>
+  <meta name="description" content="介绍如何使用Next.js和MDX快速搭建一个功能完善的个人博客，支持Markdown写作和React组件。" />
+  <meta name="keywords" content="Next.js, MDX, Blog" />
+  <meta name="author" content="Loopwic" />
+  <meta property="og:title" content="使用Next.js和MDX构建个人博客" />
+</Head>
+
+# 使用Next.js和MDX构建个人博客
+
+<Author />
+
+## 介绍
+搞研发嘛，总得有个博客吧，或者你把它当成你大一的课业也行，记录一下自己的学习过程，顺便分享一下自己的经验。再加上Nextjs这强大SEO优化，和MDX这么方便的方案，简直就是天作之合。当然这里没有做后台系统，只是单纯的前端博客，如果你需要后台系统，可以考虑使用Nextjs的Server Actions。
+如果都2025年了，你还不会知道Nextjs和MDX，那我觉得你该醒醒了。
+
+### 仓库
+如果你对这个网站感兴趣的话可以看看我的[仓库](https://github.com/loopwic/portfolio)。如果这个仓库对你有帮助的话，可以点个star支持一下。
+
+### 技术栈
+- Next.js
+- MDX
+- Tailwind CSS
+- Shadcn UI
+- Framer Motion
+- React
+- TypeScript
+- @phosphor-icons/react
+
+> 如果你只是想做一个博客的话，上面有些以来是可以不装的。比如motion,它是一个动画库。
+另外再提一嘴比起lucide我更喜欢phosphor-icons/react，因为它的图标更多，而且更符合我的审美，美中不足的是props有点阴间
+
+### 创建项目
+```bash 
+npx create-next-app@latest #./dirname
+cd dirname
+```
+
+### 安装依赖
+为了保证博客的正常运行，我们至少安装以下依赖：
+```bash
+npm install rehype-pretty-code remark-gfm remark-toc @next/mdx shiki
+```
+
+### 配置Next.js
+首先需要配置一下turbopack(这里注意一下在老版本的tubopack中mdx相关的插件是有兼容性问题的)
+```ts
+import createMDX from "@next/mdx";
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        port: "",
+        pathname: "/**",
+      },
+    ],
+  },
+};
+
+const withMDX = createMDX({
+  options: {
+    remarkPlugins: [
+      // Without options
+      "remark-gfm",
+    ],
+    rehypePlugins: [
+      // Without options
+      "rehype-slug",
+      // With options
+      [
+        "rehype-pretty-code",
+        {
+          theme: {
+            dark: "github-dark-dimmed",
+            light: "gruvbox-light-soft",
+          },
+          keepBackground: false,
+          defaultLang: "plaintext",
+        },
+      ],
+    ],
+  },
+});
+export default withMDX(nextConfig);
+```
+
+
+## 创建MDX组件
+注意无论你是用了src还是没有使用src的项目结构，都必须保证这个`mdx-components.tsx`文件在项目根目录下。
+用法可以参考下面的代码，这里的代码块方案参考了shadcn在docs中的方案。
+```tsx
+// mdx-components.tsx
+import type { MDXComponents } from "mdx/types";
+import React from "react";
+import { CodeBlock } from "@/components/code-block";
+import { CopyButton } from "@/components/copy-button";
+import { cn } from "@/lib/utils";
+
+// Helper function to extract text content from React children
+const extractTextContent = (children: React.ReactNode): string => {
+  if (typeof children === "string") {
+    return children;
+  }
+
+  if (typeof children === "number") {
+    return String(children);
+  }
+
+  if (Array.isArray(children)) {
+    return children.map(extractTextContent).join("");
+  }
+
+  if (React.isValidElement(children)) {
+    const props = children.props as { children?: React.ReactNode };
+    if (props.children) {
+      return extractTextContent(props.children);
+    }
+  }
+
+  return "";
+};
+
+const components: MDXComponents = {
+  code: ({
+    className,
+    __raw__,
+    __src__,
+    ...props
+  }: React.ComponentProps<"code"> & {
+    __raw__?: string;
+    __src__?: string;
+  }) => {
+    // Inline Code.
+    if (typeof props.children === "string") {
+      return (
+        <code
+          className={cn(
+            "relative break-words rounded-md bg-muted px-[0.3rem] py-[0.2rem] font-mono text-[0.8rem] outline-none",
+            className
+          )}
+          {...props}
+        />
+      );
+    }
+
+    // Default codeblock.
+    return (
+      <>
+        {__raw__ && <CopyButton value={__raw__} />}
+        <code {...props} />
+      </>
+    );
+  },
+  pre: (props) => {
+    // rehype-pretty-code adds data-language attribute to pre element
+    const language = props["data-language"] || "text";
+
+    // Extract raw text content for copying
+    const rawContent = props.__raw__ || extractTextContent(props.children);
+
+    return (
+      <CodeBlock language={language} raw={rawContent}>
+        {props.children}
+      </CodeBlock>
+    );
+  },
+};
+
+export function useMDXComponents(): MDXComponents {
+  return components;
+}
+
+```
+
+## 兼容夜间模式
+```css
+/* globals.css */
+code[data-theme*=" "],
+code[data-theme*=" "] span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+.dark code[data-theme*=" "],
+.dark code[data-theme*=" "] span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+```
+
+## Tailwind食用指南
+如果你使用了tailwind的话，那么你会发现mdx的所有样式都被重置了，这个时候我建议你装一下tailwind-typography。
+```bash
+npm install --save-dev @tailwindcss/typography
+```
+
+```css
+/* globals.css */
+@plugin "@tailwindcss/typography";
+```
+
+用法的话就是在你包裹mdx的地方加入`prose`类就行了，比如：
+```tsx
+<article className="prose prose-gray dark:prose-invert max-w-none">
+  {children}
+</article>
+```
+## 完工！！！

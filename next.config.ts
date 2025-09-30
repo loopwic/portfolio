@@ -17,8 +17,27 @@ const nextConfig: NextConfig = {
 };
 
 const withMDX = createMDX({
-  // Add markdown plugins here, as desired
-  extension: /\.(md|mdx)$/,
+  options: {
+    remarkPlugins: [
+      // Without options
+      "remark-gfm",
+    ],
+    rehypePlugins: [
+      // Without options
+      "rehype-slug",
+      // With options
+      [
+        "rehype-pretty-code",
+        {
+          theme: {
+            dark: "github-dark-dimmed",
+            light: "gruvbox-light-soft",
+          },
+          keepBackground: false,
+          defaultLang: "plaintext",
+        },
+      ],
+    ],
+  },
 });
-
 export default withMDX(nextConfig);

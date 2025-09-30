@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 
 @plugin 'tailwind-scrollbar';
-
+@plugin "@tailwindcss/typography";
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -100,12 +100,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  :root {
-    --hero-width-rest: min(100vw, calc(92vh * 6 / 19));
-  }
-}
-
 .dark {
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
@@ -156,5 +150,18 @@
 
   html::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* rehype-pretty-code theme switching */
+  code[data-theme*=" "],
+  code[data-theme*=" "] span {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+  }
+
+  .dark code[data-theme*=" "],
+  .dark code[data-theme*=" "] span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
   }
 }

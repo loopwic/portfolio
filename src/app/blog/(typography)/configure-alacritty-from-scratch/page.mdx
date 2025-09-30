@@ -1,0 +1,300 @@
+import Head from "next/head";
+import { Author } from "@/components/author";
+
+<Head>
+  <title>从零开始配置 Alacritty</title>
+  <meta name="description" content="在macos上配置 Alacritty." />
+  <meta name="keywords" content="alacritty, terminal, configuration" />
+  <meta name="author" content="Loopwic" />
+  <meta property="og:title" content="从零开始配置 Alacritty" />
+</Head>
+
+# 从零开始配置 Alacritty 配置
+
+<Author />
+
+> 这片文档记录了我在 macOS 上从零开始配置 Alacritty 终端的过程。这里用了知乎上面[飞猪前端 | 改良了下传说中最快的终端](https://juejin.cn/post/7199193212777447484)的配置。
+
+## 安装 Alacritty
+
+首先，我们需要安装 Alacritty。在 macOS 上，最简单的方法是使用 Homebrew。如果你还没有安装 Homebrew，可以参考 [Homebrew 官方文档](https://brew.sh/)。
+
+```bash
+brew install alacritty
+```
+
+## 配置文件
+
+> 抄作业, [我的配置](https://github.com/loopwic/alacritty_config)
+
+Alacritty 使用 [Toml](https://alacritty.org/config-alacritty.html) 格式的配置文件。创建配置文件：
+```toml
+# ~/.config/alacritty/alacritty.toml
+
+[window]
+# 窗口尺寸
+dimensions = { columns = 100, lines = 30 }
+# 是否启动时最大化
+start_maximized = false
+# 窗口标题
+title = "Alacritty Terminal"
+
+[font]
+# 字体名称
+normal = { family = "Fira Code", style = "Regular" }
+# 字体大小
+size = 14.0
+
+[colors]
+# 主题示例
+primary = { background = "#1e1e2e", foreground = "#cdd6f4" }
+# 可以在这里配置 ANSI 色彩表
+normal = { black = "#1e1e2e", red = "#f38ba8", green = "#a6e3a1", yellow = "#f9e2af",
+           blue = "#89b4fa", magenta = "#f5c2e7", cyan = "#94e2d5", white = "#bac2de" }
+
+[scrolling]
+# 滚动条滚动行为
+history = 10000
+multiplier = 3
+
+[mouse]
+# 启用或禁用鼠标选择
+double_click = { threshold = 300 }
+triple_click = { threshold = 300 }
+```
+
+## Zsh 配置
+这里没有用 fish， 我是觉得用zsh更好用啦，fish看似用起来很简单实则一点都不简单。所以接下来还是配置oh-my-zsh好了。
+```bash
+# 安装oh-my-zsh
+# 注意安装以后会替换原本的zshrc，默认会备份到~/.zshrc.pre-oh-my-zsh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
+### Powerlevel10k 安装
+这里可能有人会想用startship，为什么不用呢？这是因为他在macos26 + alacritty上显示会有问题。如果你想用的话可以到[这里](https://starship.rs/config/)。
+```bash
+# 推荐用brew安装
+brew install powerlevel10k
+# 或者你可以使用shell
+# git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+```
+
+第一次安装一般默认会配置好，如果不是第一次安装自己看[文档](https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#oh-my-zsh)弄吧。
+
+### 常用插件
+ohmyzsh一般会自动打开git插件，这个插件具体的细节我就不多说了，有兴趣可以到官方文档看看[git](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git)。
+除了git插件，我一般还会安装以下插件:
+- zsh-autosuggestions 自动补全
+- zsh-syntax-highlighting 语法高亮
+- fzf 文件搜索
+- z 跳转目录
+
+### z 是默认带有没打开的
+```bash
+# 找到.zshrc文件，一般在$HOME目录下
+# 在里面加上plugins=(git z)
+# 重启终端或者source ~/.zshrc
+```
+
+```bash
+# 推荐用brew安装
+brew install zsh-autosuggestions
+brew install zsh-syntax-highlighting
+
+# 安装完成以后别忘了修改zshrc添加插件
+```
+
+## Tmux 安装
+Tmux是一个终端复用工具，可以让你在同一个终端中打开多个窗口。毕竟我比较喜欢开终端来跑项目，如果不小心cmd + q 关了，那就尴尬了。
+```bash
+# 安装tmux
+brew install tmux
+
+# 创建tmux配置文件
+vim ~/.tmux.conf
+```
+
+创建了将下面配置粘贴到进去
+```bash
+
+# remap prefix from 'C-b' to 'C-\'
+set-option -g prefix 'C-\'
+unbind-key C-b
+bind-key 'C-\' send-prefix
+
+# disable the repeat
+set-option -g repeat-time 0
+
+# start window numbers at 1 to match keyboard order with tmux window order
+set-option -g base-index 1
+set-window-option -g pane-base-index 1
+
+# renumber windows sequentially after closing any of them
+set-option -g renumber-windows off
+
+# auto window rename
+set-option -g automatic-rename on
+
+# enable activity alerts
+set-window-option -g monitor-activity off
+set-option -g visual-activity off
+
+# increase scrollback lines
+set-option -g history-limit 50000
+
+# enable clipboard
+set-option -g set-clipboard on
+
+# mouse behavior
+set-option -g mouse on
+
+# disable escape delay
+set-option -sg escape-time 0
+
+# truecolor support
+set-option -ga terminal-overrides ",xterm-256color:Tc"
+
+# default terminal is 256 colors
+set-option -g default-terminal "xterm-256color"
+
+# aggressive resize
+set-window-option -g aggressive-resize off
+
+# iTerm2 window name
+set-option -g set-titles on
+
+# moving between panes.
+bind-key -r h select-pane -L
+bind-key -r j select-pane -D
+bind-key -r k select-pane -U
+bind-key -r l select-pane -R
+
+# resize panes with vim movement keys
+bind-key -r H resize-pane -L 5
+bind-key -r J resize-pane -D 5
+bind-key -r K resize-pane -U 5
+bind-key -r L resize-pane -R 5
+
+# remove confirmation questions when closing windows/panes
+bind-key x kill-pane
+bind-key & kill-window
+
+# go to last window
+bind-key ^ last-window
+
+# splitting panes with current path
+bind-key c new-window -c "#{pane_current_path}"
+bind-key % split-window -h -c "#{pane_current_path}"
+bind-key '"' split-window -v -c "#{pane_current_path}"
+
+setw -g mode-style fg=#e9eef9,bg=#312D45
+
+# move panes to another window
+bind-key M-1 join-pane -t :1
+bind-key M-2 join-pane -t :2
+bind-key M-3 join-pane -t :3
+bind-key M-4 join-pane -t :4
+bind-key M-5 join-pane -t :5
+bind-key M-6 join-pane -t :6
+bind-key M-7 join-pane -t :7
+bind-key M-8 join-pane -t :8
+bind-key M-9 join-pane -t :9
+
+# Use vim keybindings in copy mode
+# set-window-option -g mode-keys vi
+
+# Update default binding of `Enter` and `Space to also use copy-pipe
+unbind-key -T copy-mode-vi Enter
+unbind-key -T copy-mode-vi Space
+
+bind-key -T edit-mode-vi Up send-keys -X history-up
+bind-key -T edit-mode-vi Down send-keys -X history-down
+
+# begin selection as in Vim
+bind-key -T copy-mode-vi v send-keys -X begin-selection
+bind-key -T copy-mode-vi C-v send -X rectangle-toggle
+
+# copy text in copy mode
+bind-key -T copy-mode-vi y send -X copy-selection-and-cancel
+
+# popup window for finding command to run
+bind-key R display-popup -E "tmux-commands | xargs -I{} tmux send-keys '{}' enter"
+bind-key C display-popup -E "tmux-commands | xargs tmux new-window -c '#{pane_current_path}'"
+bind-key | display-popup -E "tmux-commands | xargs tmux split-window -v -c '#{pane_current_path}'"
+bind-key - display-popup -E "tmux-commands | xargs tmux split-window -h -c '#{pane_current_path}'"
+
+# popup window for finding session to switch
+bind-key S display-popup -E "tmux-sessions | xargs tmux switch-client -t"
+bind-key P if-shell -F '#{==:#{session_name},popup}' {
+  detach-client
+} {
+  if-shell -F '#{e|==:#{N/s:popup},0}' {
+    new-session -d -s 'popup' 'tmux source-file ~/.dotfiles/tmux/sessions/popup.tmux.conf'
+  }
+  display-popup -w 80% -h 80% -E "tmux attach-session -t popup"
+}
+
+# shortcut for synchronize-panes toggle
+bind-key I set-window-option synchronize-panes
+
+
+# set fish as default shell if available
+# install by linux package manager
+if-shell 'test -e /usr/bin/fish' {
+  set-option -g default-shell /usr/bin/fish
+}
+
+# install by homebrew
+if-shell 'test -e /usr/local/bin/fish' {
+  set-option -g default-shell /usr/local/bin/fish
+}
+
+# install by macports
+if-shell 'test -e /opt/local/bin/fish' {
+  set-option -g default-shell /opt/local/bin/fish
+}
+
+# install by homebrew (Apple Silicon)
+if-shell 'test -e /opt/homebrew/bin/fish' {
+  set-option -g default-shell /opt/homebrew/bin/fish
+}
+
+
+# status bar
+if -F "#{==:#{session_windows},1}" "set -g status off" "set -g status on"
+set-hook -g window-linked 'if -F "#{==:#{session_windows},1}" "set -g status off" "set -g status on"'
+set-hook -g window-unlinked 'if -F "#{==:#{session_windows},1}" "set -g status off" "set -g status on"'
+
+set-option -g status-interval 1
+set-option -g status-position bottom
+set-option -g status-justify left
+set-option -g status-style none
+
+# status bar left right hidden
+set-option -g status-left ""
+set-option -g status-right ""
+# window bar style
+
+# set-option -g status off
+set-option -g window-status-style "fg=#e0def4,bg=#232136"
+set-option -g window-status-current-style "fg=#e0def4,bg=#908caa"
+set-option -g window-status-activity-style "fg=#e0def4,bg=#908caa"
+
+set-option -g window-status-format '#[fg=#e0def4]  #I  '
+set-option -g window-status-current-format '#[fg=#e0def4]  #I  '
+set-option -g window-status-separator ''
+
+# local config
+if-shell 'test -e ~/.tmux.conf.local' {
+  source-file ~/.tmux.conf.local
+}
+```
+
+最后在alacritty的配置文件中添加以下配置
+```toml
+[terminal.shell]
+program = "/bin/zsh"
+args = ["--login", "-c", "tmux attach || tmux new"]
+```
+
+## 完工！！！

@@ -1,6 +1,7 @@
 "use client";
 
 import { animate, useMotionValue, useMotionValueEvent } from "motion/react";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const WHEEL_THRESHOLD = 200;
@@ -15,8 +16,10 @@ const isWithinScrollableContainer = (element: Element | null) =>
 
 type Direction = "up" | "down" | null;
 
-export const usePageScroll = (sections: string[]) => {
+export const usePageScroll = (sections: string[], enabled = true) => {
   const sectionCount = Math.max(sections.length, 1);
+  const pathname = usePathname();
+  const router = useRouter();
 
   const position = useMotionValue(0);
   const translateY = useMotionValue(0);
@@ -47,6 +50,30 @@ export const usePageScroll = (sections: string[]) => {
       idleTimeoutRef.current = null;
     }
   }, []);
+
+  const resetScrollState = useCallback(() => {
+    // 停止任何正在进行的动画
+    controlsRef.current?.stop();
+
+    // 重置所有状态
+    indexRef.current = 0;
+    accumulatedDeltaRef.current = 0;
+    isAnimatingRef.current = false;
+
+    // 重置 motion values
+    position.set(0);
+    translateY.set(0);
+    scrollYProgress.set(0);
+
+    // 重置 React 状态
+    setCurrentSectionIndex(0);
+    setScrollProgress(0);
+    setDirection(null);
+    setIsAnimating(false);
+
+    // 清除计时器
+    clearIdleTimeout();
+  }, [position, translateY, scrollYProgress, clearIdleTimeout]);
 
   const updateGlobalProgress = useCallback(
     (value: number) => {
@@ -90,6 +117,7 @@ export const usePageScroll = (sections: string[]) => {
     setScrollProgress(ratio);
   });
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: this is intended to run only once
   const scrollToSection = useCallback(
     (targetIndex: number) => {
       const clampedTarget = clamp(targetIndex, 0, sectionCount - 1);
@@ -128,6 +156,7 @@ export const usePageScroll = (sections: string[]) => {
           isAnimatingRef.current = false;
           setIsAnimating(false);
           updateGlobalProgress(clampedTarget);
+          router.replace(`/#${sections[clampedTarget]}`, { scroll: false });
         },
       });
     },
@@ -270,26 +299,31 @@ export const usePageScroll = (sections: string[]) => {
     }, IDLE_RESET_DELAY);
   }, [clearIdleTimeout, resetProgressState]);
 
-  useEffect(() => {
-    const handleWheel = (event: WheelEvent) => {
-      const target = event.target as Element | null;
-
-      if (isWithinScrollableContainer(target)) {
-        return;
+  const shouldHandleWheelEvent = useCallback(
+    (event: WheelEvent) => {
+      if (!enabled) {
+        return false;
       }
 
-      event.preventDefault();
+      const target = event.target as Element | null;
+      if (isWithinScrollableContainer(target)) {
+        return false;
+      }
 
       if (isAnimatingRef.current) {
-        return;
+        return false;
       }
+
+      return event.deltaY !== 0;
+    },
+    [enabled]
+  );
+
+  const processWheelEvent = useCallback(
+    (event: WheelEvent) => {
+      event.preventDefault();
 
       const delta = event.deltaY;
-
-      if (delta === 0) {
-        return;
-      }
-
       const { magnitude, threshold, ratio, nextDirection } =
         computeWheelSnapshot(delta);
 
@@ -301,6 +335,22 @@ export const usePageScroll = (sections: string[]) => {
       }
 
       scheduleIdleReset();
+    },
+    [
+      computeWheelSnapshot,
+      applyWheelProgress,
+      handleThresholdCross,
+      scheduleIdleReset,
+    ]
+  );
+
+  useEffect(() => {
+    const handleWheel = (event: WheelEvent) => {
+      if (!shouldHandleWheelEvent(event)) {
+        return;
+      }
+
+      processWheelEvent(event);
     };
 
     window.addEventListener("wheel", handleWheel, { passive: false });
@@ -361,6 +411,11 @@ export const usePageScroll = (sections: string[]) => {
     };
 
     const handleTouchStart = (event: TouchEvent) => {
+      // 如果未启用滑动功能，直接返回
+      if (!enabled) {
+        return;
+      }
+
       if (isAnimatingRef.current) {
         return;
       }
@@ -389,6 +444,10 @@ export const usePageScroll = (sections: string[]) => {
     };
 
     const handleTouchMove = (event: TouchEvent) => {
+      if (!enabled) {
+        return;
+      }
+
       if (!isTouchActiveRef.current) {
         return;
       }
@@ -459,6 +518,9 @@ export const usePageScroll = (sections: string[]) => {
       resetTouchState();
     };
   }, [
+    enabled,
+    shouldHandleWheelEvent,
+    processWheelEvent,
     applyWheelProgress,
     computeWheelSnapshot,
     handleThresholdCross,
@@ -468,6 +530,11 @@ export const usePageScroll = (sections: string[]) => {
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
+      // 如果未启用滑动功能，直接返回
+      if (!enabled) {
+        return;
+      }
+
       if (isAnimatingRef.current) {
         return;
       }
@@ -506,20 +573,28 @@ export const usePageScroll = (sections: string[]) => {
     return () => {
       window.removeEventListener("keydown", handleKeydown);
     };
-  }, [scrollToSection, sectionCount]);
+  }, [enabled, scrollToSection, sectionCount]);
 
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow;
     const previousHtmlOverflow = document.documentElement.style.overflow;
-
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
+    if (enabled) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    }
 
     return () => {
       document.body.style.overflow = previousBodyOverflow;
       document.documentElement.style.overflow = previousHtmlOverflow;
     };
-  }, []);
+  }, [enabled]);
+
+  // 监听路由变化，重置滚动状态
+  useEffect(() => {
+    if (pathname !== "/") {
+      resetScrollState();
+    }
+  }, [pathname, resetScrollState]);
 
   useEffect(() => () => clearIdleTimeout(), [clearIdleTimeout]);
 

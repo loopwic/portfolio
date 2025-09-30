@@ -23,6 +23,14 @@
     },
     "strictNullChecks": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/app/blog/page.tsx",
+    "src/app/blog/configure-alacritty-from-scratch/page.mdx",
+    "src/app/blog/(typography)/build-personal-blog-with-nextjs-and-mdx/page.mdx"
+  ],
   "exclude": ["node_modules"]
 }
