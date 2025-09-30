@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/loopwic/portfolio/compare/v1.1.0...v1.2.0) (2025-09-30)
+
+
+### Features
+
+* enhance blog functionality and styling ([e4f714e](https://github.com/loopwic/portfolio/commit/e4f714e236691f9787fc2b0ba6af89f9e879169f))
+* 添加 @vercel/speed-insights 依赖并在布局中集成，优化页面性能 ([166c8a6](https://github.com/loopwic/portfolio/commit/166c8a6c7afe88d57007fb9570001a7ef37fa039))
+
 # [1.2.0](https://github.com/loopwic/portfolio/compare/v1.1.0...v1.2.0) (2025-09-29)
 
 
