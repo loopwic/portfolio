@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/loopwic/portfolio/compare/v1.2.0...v1.3.0) (2025-09-30)
+
+
+### Features
+
+* add sitemap generation for improved SEO ([c3e5352](https://github.com/loopwic/portfolio/commit/c3e5352e5001b04718dcfedd0d9998ea07195e1f))
+
 # [1.2.0](https://github.com/loopwic/portfolio/compare/v1.1.0...v1.2.0) (2025-09-30)
 
 
