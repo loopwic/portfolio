@@ -9,7 +9,6 @@ type ScrollContextType = {
   isAnimating: boolean;
   direction: "up" | "down" | null;
   scrollYProgress: MotionValue<number>;
-  translateY: MotionValue<number>;
   scrollToSection: (targetIndex: number) => void;
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useAnimate } from "motion/react";
+import { AnimatePresence, motion, useAnimate } from "motion/react";
 import { useEffect, useState } from "react";
 import { About } from "@/components/about";
 import Cursor from "@/components/cursor";
@@ -15,6 +15,10 @@ export default function HomePage() {
   const [buttonScope, animateButton] = useAnimate();
   const isMobile = useIsMobile();
   const [isHovered, setIsHovered] = useState<boolean>(false);
+  const { scrollProgress, isAnimating, direction, currentSectionIndex } =
+    useScrollContext();
+  const isHomeActive = currentSectionIndex === 0;
+  const shouldExpand = isHomeActive && (isMobile || isHovered);
 
   useEffect(() => {
     const scope = buttonScope.current;
@@ -22,7 +26,7 @@ export default function HomePage() {
       return;
     }
 
-    const state = isMobile || isHovered ? "animate" : "initial";
+    const state = shouldExpand ? "animate" : "initial";
 
     animateButton(
       scope,
@@ -39,11 +43,7 @@ export default function HomePage() {
       HERO_ANIMATIONS.text[state],
       HERO_ANIMATIONS.text.transition
     );
-  }, [isMobile, isHovered, animateButton, buttonScope]);
-
-  // 从context获取滚动状态
-  const { scrollProgress, isAnimating, direction, translateY } =
-    useScrollContext();
+  }, [shouldExpand, animateButton, buttonScope]);
 
   // 使用context中的方向
   const scrollDirection = direction;
@@ -52,19 +52,53 @@ export default function HomePage() {
 
   return (
     <div className="relative">
-      <motion.div style={{ y: translateY }}>
-        <div className="flex h-screen items-center justify-center" id="home">
-          <ScrollView
-            buttonScope={buttonScope}
-            handleHoverEnd={handleHoverEnd}
-            handleHoverStart={handleHoverStart}
-          />
-        </div>
+      <AnimatePresence mode="wait">
+        {/* 根据当前section索引显示对应内容 */}
+        {currentSectionIndex === 0 && (
+          <motion.section
+            animate={{ opacity: 1, y: 0 }}
+            className="flex h-screen items-center justify-center"
+            exit={{ opacity: 0, y: -20 }}
+            id="home"
+            initial={{ opacity: 0, y: 20 }}
+            key="home-section"
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <ScrollView
+              buttonScope={buttonScope}
+              handleHoverEnd={handleHoverEnd}
+              handleHoverStart={handleHoverStart}
+              isActive={isHomeActive}
+              isExpanded={shouldExpand}
+              key={`scroll-view-${currentSectionIndex}`}
+            />
+          </motion.section>
+        )}
 
-        <About />
+        {currentSectionIndex === 1 && (
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 20 }}
+            key="about-section"
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <About />
+          </motion.div>
+        )}
 
-        <Project />
-      </motion.div>
+        {currentSectionIndex === 2 && (
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 20 }}
+            key="project-section"
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <Project />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 滚动阈值指示器 */}
       <ScrollThresholdIndicator

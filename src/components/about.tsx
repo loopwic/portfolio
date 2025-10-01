@@ -57,7 +57,7 @@ const CONTSTANDS = {
   ],
   works: [
     {
-      name: "Chengdu kuaiqi Tech Co., Ltd.",
+      name: "kuaiqi Tech Co., Ltd.",
       job: "Frontend Engineer",
       date: "2024.10 - 2025.07",
       icon: "/svgs/kq.svg",
@@ -80,14 +80,7 @@ export function About() {
       className="flex h-screen items-start justify-center pt-18 lg:items-center lg:pt-0"
       id="about"
     >
-      <motion.div
-        className="flex h-full max-w-7xl flex-col gap-6 p-4 lg:h-auto lg:flex-row lg:gap-10"
-        initial="initial"
-        transition={ABOUT_ANIMATIONS.container.transition}
-        variants={ABOUT_ANIMATIONS.container}
-        viewport={{ amount: 0.3 }}
-        whileInView="animate"
-      >
+      <motion.div className="flex h-full max-w-7xl flex-col gap-6 p-4 lg:h-auto lg:flex-row lg:gap-10">
         {/* 头像和名字 */}
         <motion.div className="flex items-center gap-2">
           <div className="relative aspect-square w-14 shrink-0 overflow-hidden rounded-full lg:aspect-[3/4] lg:w-100 lg:rounded">
@@ -191,7 +184,7 @@ export function About() {
             </motion.ul>
           </div>
 
-          <ul className="mt-auto flex items-center gap-4 lg:ml-auto">
+          <ul className="flex items-center gap-4 lg:mt-auto lg:ml-auto">
             {CONTSTANDS.href.map((item) => (
               <li key={item.url}>
                 <IconLink {...item} />

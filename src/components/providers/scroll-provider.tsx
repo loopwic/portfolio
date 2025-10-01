@@ -19,7 +19,6 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
     isAnimating,
     direction,
     scrollYProgress,
-    translateY,
     scrollToSection,
   } = usePageScroll(sections, isHomePage);
 
@@ -29,7 +28,6 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
     isAnimating,
     direction,
     scrollYProgress,
-    translateY,
     scrollToSection,
   };
 

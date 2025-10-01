@@ -19,6 +19,8 @@ type ScrollViewProps = {
   handleHoverStart?: () => void;
   handleHoverEnd?: () => void;
   buttonScope: RefObject<HTMLDivElement>;
+  isActive?: boolean;
+  isExpanded?: boolean;
 };
 
 const IMAGES = [
@@ -34,6 +36,8 @@ const IMAGE_TEXTS = [
   { title: "Create", subtitle: "Build something amazing" },
   { title: "Connect", subtitle: "Join our community" },
 ];
+
+const TEXT_INITIAL_OFFSET = 20;
 
 const computeScrollInfo = (scrollTop: number, containerHeight: number) => {
   if (containerHeight <= 0) {
@@ -61,13 +65,14 @@ export const ScrollView = ({
   handleHoverStart,
   handleHoverEnd,
   buttonScope,
+  isActive = true,
+  isExpanded = false,
 }: ScrollViewProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const progress = useMotionValue(0);
   const scrollProgress = useMotionValue(0);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
 
   const hideIndicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const rafIdRef = useRef<number | null>(null);
@@ -78,6 +83,7 @@ export const ScrollView = ({
   const activeIndicatorAnimationRef = useRef<ReturnType<typeof animate> | null>(
     null
   );
+  const wasActiveRef = useRef(isActive);
 
   const drawImageCover = useCallback(
     (
@@ -253,12 +259,10 @@ export const ScrollView = ({
   }, [renderCanvas]);
 
   const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
     handleHoverStart?.();
   }, [handleHoverStart]);
 
   const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
     handleHoverEnd?.();
   }, [handleHoverEnd]);
 
@@ -392,20 +396,59 @@ export const ScrollView = ({
     };
   }, [scheduleRender]);
 
+  useEffect(() => {
+    const container = containerRef.current;
+    const becameActive = isActive && !wasActiveRef.current;
+    const becameInactive = !isActive && wasActiveRef.current;
+    wasActiveRef.current = isActive;
+
+    if (!container) {
+      return;
+    }
+
+    if (becameInactive) {
+      if (hideIndicatorTimeoutRef.current) {
+        clearTimeout(hideIndicatorTimeoutRef.current);
+        hideIndicatorTimeoutRef.current = null;
+      }
+
+      activeIndicatorAnimationRef.current?.stop();
+      indicatorOpacity.set(0);
+      indicatorOffsetY.set(10);
+      progress.set(0);
+      scrollProgress.set(0);
+      return;
+    }
+
+    if (becameActive) {
+      currentIndexRef.current = 0;
+      setCurrentIndex(0);
+      container.scrollTo({ top: 0, behavior: "auto" });
+      requestAnimationFrame(() => {
+        renderCanvas();
+      });
+    }
+  }, [
+    indicatorOffsetY,
+    indicatorOpacity,
+    isActive,
+    progress,
+    renderCanvas,
+    scrollProgress,
+  ]);
+
   const containerClassName = cn(
     "relative",
     "max-h-[80vh]",
     "overflow-hidden",
-    "rounded-lg",
     "md:cursor-none"
   );
 
   return (
     <motion.div
-      animate={isHovered ? "hover" : "rest"}
+      animate={isExpanded ? "hover" : "rest"}
       className={containerClassName}
       initial="rest"
-      layout
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       ref={buttonScope}
@@ -442,24 +485,32 @@ export const ScrollView = ({
       </div>
 
       <motion.div
+        animate={{ opacity: isExpanded ? 1 : 0 }}
         className="pointer-events-none absolute inset-0 z-20 flex select-none flex-col items-center justify-center bg-black/30"
         id="cover"
         initial={{ opacity: 0 }}
         style={{ willChange: "opacity" }}
+        transition={SCROLL_VIEW_ANIMATIONS.textTransition}
       >
         <motion.p
-          animate={{ y: 0, opacity: 1 }}
+          animate={{
+            y: isExpanded ? 0 : TEXT_INITIAL_OFFSET,
+            opacity: isExpanded ? 1 : 0,
+          }}
           className="hover-text font-semibold text-2xl text-white"
-          initial={{ y: 20, opacity: 0 }}
+          initial={{ y: TEXT_INITIAL_OFFSET, opacity: 0 }}
           key={`title-${currentIndex}`}
           transition={SCROLL_VIEW_ANIMATIONS.textTransition}
         >
           {IMAGE_TEXTS[currentIndex]?.title}
         </motion.p>
         <motion.p
-          animate={{ y: 0, opacity: 1 }}
+          animate={{
+            y: isExpanded ? 0 : TEXT_INITIAL_OFFSET,
+            opacity: isExpanded ? 1 : 0,
+          }}
           className="hover-text text-white"
-          initial={{ y: 20, opacity: 0 }}
+          initial={{ y: TEXT_INITIAL_OFFSET, opacity: 0 }}
           key={`subtitle-${currentIndex}`}
           transition={SCROLL_VIEW_ANIMATIONS.textTransitionDelayed}
         >

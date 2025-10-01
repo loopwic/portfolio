@@ -22,7 +22,6 @@ export const usePageScroll = (sections: string[], enabled = true) => {
   const router = useRouter();
 
   const position = useMotionValue(0);
-  const translateY = useMotionValue(0);
   const scrollYProgress = useMotionValue(0);
 
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
@@ -62,7 +61,6 @@ export const usePageScroll = (sections: string[], enabled = true) => {
 
     // 重置 motion values
     position.set(0);
-    translateY.set(0);
     scrollYProgress.set(0);
 
     // 重置 React 状态
@@ -73,7 +71,7 @@ export const usePageScroll = (sections: string[], enabled = true) => {
 
     // 清除计时器
     clearIdleTimeout();
-  }, [position, translateY, scrollYProgress, clearIdleTimeout]);
+  }, [position, scrollYProgress, clearIdleTimeout]);
 
   const updateGlobalProgress = useCallback(
     (value: number) => {
@@ -93,14 +91,13 @@ export const usePageScroll = (sections: string[], enabled = true) => {
   const applyPosition = useCallback(
     (value: number) => {
       const clampedValue = clamp(value, 0, sectionCount - 1);
-      translateY.set(-clampedValue * viewportHeightRef.current);
 
       updateGlobalProgress(clampedValue);
 
       const nearestIndex = Math.round(clampedValue);
       setCurrentSectionIndex(nearestIndex);
     },
-    [sectionCount, translateY, updateGlobalProgress]
+    [sectionCount, updateGlobalProgress]
   );
 
   useMotionValueEvent(position, "change", (latest) => {
@@ -269,8 +266,6 @@ export const usePageScroll = (sections: string[], enabled = true) => {
     const handleResize = () => {
       viewportHeightRef.current = window.innerHeight;
       wheelThresholdRef.current = WHEEL_THRESHOLD;
-
-      translateY.set(-indexRef.current * viewportHeightRef.current);
     };
 
     handleResize();
@@ -280,7 +275,7 @@ export const usePageScroll = (sections: string[], enabled = true) => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [translateY]);
+  }, []);
 
   useEffect(() => {
     updateGlobalProgress(indexRef.current);
@@ -604,7 +599,6 @@ export const usePageScroll = (sections: string[], enabled = true) => {
     isAnimating,
     direction,
     scrollYProgress,
-    translateY,
     scrollToSection,
   };
 };
