@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/loopwic/portfolio/compare/v1.3.0...v1.3.1) (2025-10-08)
+
+
+### Bug Fixes
+
+* update blog URLs in sitemap for consistency ([05fcf54](https://github.com/loopwic/portfolio/commit/05fcf541c4e71705b249bfe53fea07a7802b9689))
+
 # [1.3.0](https://github.com/loopwic/portfolio/compare/v1.2.0...v1.3.0) (2025-09-30)
 
 
