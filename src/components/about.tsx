@@ -11,7 +11,7 @@ import { IconLink } from "./icon-link";
 
 const CONTSTANDS = {
   name: "Loopwic",
-  image: "/images/hero.webp",
+  image: "https://cdn.loopwic.com/images/hero.webp",
   href: [
     {
       label: "Loopwic",

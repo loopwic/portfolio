@@ -24,10 +24,10 @@ type ScrollViewProps = {
 };
 
 const IMAGES = [
-  "/images/home-0.jpg",
-  "/images/home-1.jpg",
-  "/images/home-2.jpg",
-  "/images/home-3.jpg",
+  "https://cdn.loopwic.com/images/home-0.jpg",
+  "https://cdn.loopwic.com/images/home-1.jpg",
+  "https://cdn.loopwic.com/images/home-2.jpg",
+  "https://cdn.loopwic.com/images/home-3.jpg",
 ];
 
 const IMAGE_TEXTS = [
