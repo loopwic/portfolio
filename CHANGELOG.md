@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/loopwic/portfolio/compare/v1.4.0...v1.5.0) (2026-02-24)
+
+
+### Features
+
+* add Vercel configuration for routing ([3997789](https://github.com/loopwic/portfolio/commit/39977897f7c8f98d76f7db44319d2a8bb37c13f1))
+
 # [1.4.0](https://github.com/loopwic/portfolio/compare/v1.3.1...v1.4.0) (2026-02-24)
 
 
