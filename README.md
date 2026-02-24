@@ -2,7 +2,7 @@
 
 # Portfolio
 
-沉浸式交互式作品集，采用 Next.js App Router 与 Framer Motion 打造整页动态滚动体验。
+沉浸式交互式作品集，采用 TanStack Start + TanStack Router 与 Framer Motion 打造整页动态滚动体验。
 
 </div>
 
@@ -16,7 +16,8 @@
 
 ## 🧱 技术栈
 
-- [Next.js 15](https://nextjs.org/)（App Router）
+- [TanStack Start](https://tanstack.com/start)（React 全栈框架）
+- [TanStack Router](https://tanstack.com/router)
 - [React 19](https://react.dev/)
 - [Framer Motion (motion/react)](https://motion.dev/)
 - [Tailwind CSS 4](https://tailwindcss.com/) & 自定义工具库
@@ -83,25 +84,28 @@ pnpm dlx lefthook install
 
 ```
 src/
-├─ app/
-│  ├─ layout.tsx        # Root layout，挂载 ScrollProvider
-│  └─ page.tsx          # 主页面，消费滚动上下文
+├─ routes/
+│  ├─ __root.tsx        # Root shell，挂载 ThemeProvider 与 ScrollProvider
+│  ├─ index.tsx         # 主页面，消费滚动上下文
+│  └─ blog/*            # 博客列表与文章路由
 ├─ components/
 │  ├─ cursor.tsx        # 自定义光标
 │  ├─ navbar.tsx        # 顶部导航，监听滚动状态
 │  ├─ scroll-view.tsx   # Banner 与按钮交互区
 │  └─ scroll-threshold-indicator.tsx
 ├─ hooks/
-│  └─ usePageScroll.ts  # 分段滚动核心逻辑
-└─ contexts/
-	└─ scroll-context.tsx
+│  └─ use-page-scroll.ts  # 分段滚动核心逻辑
+├─ contexts/
+│  └─ scroll-context.tsx
+└─ content/
+   └─ blog/*.mdx        # 博客文章
 ```
 
 ## 🧪 开发建议
 
 - 修改滚动逻辑后，请同步更新关联组件的依赖状态（如 `ScrollProvider`）。
 - 新增组件时遵守 Biome 规则，避免触发复杂度限制与嵌套三元运算符警告。
-- 若需要扩展滚动段落，只需在 `ClientLayout` 中扩充 `sections` 数组，并在 `page.tsx` 中补充对应内容。
+- 若需要扩展滚动段落，只需在 `src/components/providers/scroll-provider.tsx` 中扩充 `sections` 数组，并在 `src/routes/index.tsx` 中补充对应内容。
 
 ## 📄 协议
 

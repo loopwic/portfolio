@@ -1,5 +1,4 @@
-"use client";
-
+import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion, useAnimate } from "motion/react";
 import { useEffect, useState } from "react";
 import { About } from "@/components/about";
@@ -11,7 +10,13 @@ import { useScrollContext } from "@/contexts/scroll-context";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { HERO_ANIMATIONS } from "@/lib/animations";
 
-export default function HomePage() {
+export const Route = createFileRoute("/")({
+  component: HomePage,
+});
+
+const INDICATOR_MIN_PROGRESS = 0.12;
+
+function HomePage() {
   const [buttonScope, animateButton] = useAnimate();
   const isMobile = useIsMobile();
   const [isHovered, setIsHovered] = useState<boolean>(false);
@@ -19,6 +24,8 @@ export default function HomePage() {
     useScrollContext();
   const isHomeActive = currentSectionIndex === 0;
   const shouldExpand = isHomeActive && (isMobile || isHovered);
+  const showThresholdIndicator =
+    !!direction && !isAnimating && scrollProgress >= INDICATOR_MIN_PROGRESS;
 
   useEffect(() => {
     const scope = buttonScope.current;
@@ -45,7 +52,6 @@ export default function HomePage() {
     );
   }, [shouldExpand, animateButton, buttonScope]);
 
-  // 使用context中的方向
   const scrollDirection = direction;
   const handleHoverStart = () => setIsHovered(true);
   const handleHoverEnd = () => setIsHovered(false);
@@ -53,7 +59,6 @@ export default function HomePage() {
   return (
     <div className="relative">
       <AnimatePresence mode="wait">
-        {/* 根据当前section索引显示对应内容 */}
         {currentSectionIndex === 0 && (
           <motion.section
             animate={{ opacity: 1, y: 0 }}
@@ -100,10 +105,9 @@ export default function HomePage() {
         )}
       </AnimatePresence>
 
-      {/* 滚动阈值指示器 */}
       <ScrollThresholdIndicator
         direction={scrollDirection}
-        isVisible={!!scrollDirection && !isAnimating}
+        isVisible={showThresholdIndicator}
         progress={scrollProgress}
       />
 

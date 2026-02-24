@@ -10,9 +10,10 @@
     "includes": [
       "**/*.{js,jsx,ts,tsx,json,jsonc,css,scss,mdx}",
       "!node_modules",
-      "!.next",
+      "!.tanstack",
       "!dist",
       "!build",
+      "!src/routeTree.gen.ts",
       "!src/components/ui"
     ]
   },
@@ -30,7 +31,7 @@
       }
     },
     "domains": {
-      "next": "recommended",
+      "next": "none",
       "react": "recommended"
     }
   },
