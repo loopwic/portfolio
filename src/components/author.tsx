@@ -1,27 +1,24 @@
-import Link from "next/dist/client/link";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+const AUTHOR = {
+  name: "Loopwic",
+  avatarUrl: "https://avatars.githubusercontent.com/u/88957459?v=4",
+  profileUrl: "https://github.com/loopwic",
+} as const;
 
-export async function Author() {
-  const author = await fetch("https://api.github.com/users/loopwic").then(
-    (res) => res.json()
-  );
-
+export function Author() {
   return (
     <div className="not-prose flex items-center gap-2">
-      <Avatar className="size-10">
-        <AvatarImage alt={author.name} src={author.avatar_url} />
-        <AvatarFallback>
-          {author.name
-            ?.split(" ")
-            .map((n: string) => n[0])
-            .join("")}
-        </AvatarFallback>
-      </Avatar>
+      <img
+        alt={AUTHOR.name}
+        className="size-10 rounded-full"
+        height={40}
+        src={AUTHOR.avatarUrl}
+        width={40}
+      />
 
-      <Link href={author.html_url} rel="noopener" target="_blank">
-        <p className="font-semibold">{author.name}</p>
+      <a href={AUTHOR.profileUrl} rel="noopener noreferrer" target="_blank">
+        <p className="font-semibold">{AUTHOR.name}</p>
         <p className="text-muted-foreground text-xs">Owner</p>
-      </Link>
+      </a>
     </div>
   );
 }
