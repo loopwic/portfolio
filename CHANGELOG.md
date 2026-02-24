@@ -1,3 +1,16 @@
+# [1.4.0](https://github.com/loopwic/portfolio/compare/v1.3.1...v1.4.0) (2026-02-24)
+
+
+### Bug Fixes
+
+* resolve project card lint class ordering ([9dddb86](https://github.com/loopwic/portfolio/commit/9dddb86afb5faa3098ad47586fe40181eaa8f5bc))
+
+
+### Features
+
+* migrate blog content and routes ([d6731ef](https://github.com/loopwic/portfolio/commit/d6731ef2c7ff913c0842af7f43d3929dc9a79605))
+* refine home scroll and projects presentation ([7f6d79d](https://github.com/loopwic/portfolio/commit/7f6d79d21c9928cac3885cddd16e447d7f4dee58))
+
 ## [1.3.1](https://github.com/loopwic/portfolio/compare/v1.3.0...v1.3.1) (2025-10-08)
 
 
