@@ -156,7 +156,7 @@ export function Project() {
                 </div>
 
                 <motion.div
-                  className="min-h-0 flex-1 bg-muted/20 p-3 flex items-center justify-center"
+                  className="flex min-h-0 flex-1 items-center justify-center bg-muted/20 p-3"
                   transition={cardHoverTransition}
                   whileHover={
                     prefersReducedMotion
@@ -164,7 +164,7 @@ export function Project() {
                       : { scale: IMAGE_HOVER_SCALE, y: IMAGE_HOVER_OFFSET }
                   }
                 >
-                  <div className="aspect-2400/1520 w-full  overflow-hidden rounded-md border border-border/60 bg-card/70">
+                  <div className="aspect-[2400/1520] w-full overflow-hidden rounded-md border border-border/60 bg-card/70">
                     <img
                       alt={lattice.previewAlt}
                       className="block h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.01]"
