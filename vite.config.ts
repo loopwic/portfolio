@@ -8,6 +8,8 @@ import remarkGfm from "remark-gfm";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 export default defineConfig({
   plugins: [
     tsconfigPaths({ projects: ["./tsconfig.json"], loose: true }),
@@ -37,5 +39,10 @@ export default defineConfig({
     viteReact({
       include: /\.(mdx|js|jsx|ts|tsx)$/,
     }),
+    cloudflare({
+      viteEnvironment: {
+        name: "ssr"
+      }
+    })
   ],
 });
