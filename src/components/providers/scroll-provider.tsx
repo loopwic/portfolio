@@ -1,17 +1,16 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useLocation } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import Navbar from "@/components/navbar";
 import { ScrollProvider as ScrollProviderContext } from "@/contexts/scroll-context";
 import { usePageScroll } from "@/hooks/use-page-scroll";
 
-export default function ScrollProvider({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const isHomePage = pathname === "/";
+const HOME_SECTIONS = ["home", "about", "projects"];
 
-  // 定义各个section的ID
-  const sections = ["home", "about", "projects"];
+export default function ScrollProvider({ children }: { children: ReactNode }) {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
 
   const {
     currentSectionIndex,
@@ -20,7 +19,7 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
     direction,
     scrollYProgress,
     scrollToSection,
-  } = usePageScroll(sections, isHomePage);
+  } = usePageScroll(HOME_SECTIONS, isHomePage);
 
   const scrollContextValue = {
     currentSectionIndex,
@@ -34,7 +33,7 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
   return (
     <ScrollProviderContext value={scrollContextValue}>
       <Navbar />
-      <main className="container mx-auto">{children}</main>
+      <main className="min-h-screen overflow-x-clip">{children}</main>
     </ScrollProviderContext>
   );
 }

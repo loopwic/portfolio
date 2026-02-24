@@ -1,19 +1,15 @@
 "use client";
+
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { motion, useTransform } from "motion/react";
-import dynamic from "next/dynamic";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 import { useScrollContext } from "@/contexts/scroll-context";
 import {
   LOGO_HOVER_ANIMATIONS,
   THEME_TOGGLE_ANIMATIONS,
 } from "@/lib/animations";
 import { cn } from "@/lib/utils";
-
-const ThemeToggle = dynamic(() => import("./theme-toggle"), {
-  ssr: false,
-});
+import ThemeToggle from "./theme-toggle";
 
 const CONSTANTS = [
   {
@@ -33,13 +29,18 @@ const CONSTANTS = [
 const FULL_ROTATION_DEGREES = 360;
 
 export default function Navbar() {
-  const pathname = usePathname();
-  const router = useRouter();
+  const location = useLocation();
+  const pathname = location.pathname;
+  const navigate = useNavigate();
   const { scrollYProgress, scrollToSection, currentSectionIndex } =
     useScrollContext();
   const [isLogoHovered, setIsLogoHovered] = React.useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
 
-  // 使用 useTransform 来创建响应式的旋转动画
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const rotate = useTransform(
     scrollYProgress,
     [0, 1],
@@ -49,9 +50,11 @@ export default function Navbar() {
   const borderRadius = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
 
   const handleNavClick = (href: string) => {
-    // 如果当前不在主页，先跳转到主页再滚动到对应锚点
     if (pathname !== "/") {
-      router.push(`/${href}`);
+      navigate({
+        to: "/",
+        hash: href.slice(1),
+      });
       return;
     }
 
@@ -89,7 +92,7 @@ export default function Navbar() {
             initial="initial"
             variants={THEME_TOGGLE_ANIMATIONS}
           >
-            <ThemeToggle />
+            {isMounted ? <ThemeToggle /> : null}
             <motion.div
               className="absolute inset-0 z-1 bg-foreground"
               style={{ rotate, borderRadius }}
@@ -118,7 +121,7 @@ export default function Navbar() {
               "font-mono text-sm transition-colors hover:text-primary",
               pathname === "/blog" ? "text-primary" : "text-muted-foreground"
             )}
-            href="/blog"
+            to="/blog"
           >
             Blog
           </Link>

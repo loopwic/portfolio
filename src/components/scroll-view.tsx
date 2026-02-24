@@ -460,6 +460,7 @@ export const ScrollView = ({
         {/* 滚动容器 */}
         <div
           className="scrollbar-none relative z-0 h-full w-full snap-y snap-mandatory overflow-y-auto"
+          data-page-scroll-container="hero"
           ref={containerRef}
           style={{
             willChange: "scroll-position",

@@ -4,7 +4,6 @@ import {
   XLogoIcon,
 } from "@phosphor-icons/react";
 import { motion } from "motion/react";
-import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ABOUT_ANIMATIONS } from "@/lib/animations";
 import { IconLink } from "./icon-link";
@@ -84,13 +83,13 @@ export function About() {
         {/* 头像和名字 */}
         <motion.div className="flex items-center gap-2">
           <div className="relative aspect-square w-14 shrink-0 overflow-hidden rounded-full lg:aspect-[3/4] lg:w-100 lg:rounded">
-            <Image
+            <img
               alt={CONTSTANDS.name}
-              className="object-cover object-top"
-              fill
-              priority
-              sizes="auto"
+              className="h-full w-full object-cover object-top"
+              height={1067}
+              loading="eager"
               src={CONTSTANDS.image}
+              width={800}
             />
           </div>
           {isMobile && <p className="font-semibold text-3xl">Loopwic</p>}
@@ -124,12 +123,12 @@ export function About() {
                 variants={ABOUT_ANIMATIONS.skillItem}
               >
                 <div className="relative size-4 shrink-0">
-                  <Image
+                  <img
                     alt={skill.name}
-                    className="object-contain"
-                    fill
-                    sizes="auto"
+                    className="h-full w-full object-contain"
+                    height={16}
                     src={skill.icon}
+                    width={16}
                   />
                 </div>
                 <span className="text-sm">{skill.name}</span>
@@ -164,12 +163,12 @@ export function About() {
                   variants={ABOUT_ANIMATIONS.skillItem}
                 >
                   <div className="relative mt-2 size-4 shrink-0">
-                    <Image
+                    <img
                       alt={work.name}
-                      className="object-contain"
-                      fill
-                      sizes="auto"
+                      className="h-full w-full object-contain"
+                      height={16}
                       src={work.icon}
+                      width={16}
                     />
                   </div>
                   <div>

@@ -1,27 +1,108 @@
 "use client";
 
+import { useLocation } from "@tanstack/react-router";
 import { animate, useMotionValue, useMotionValueEvent } from "motion/react";
-import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const WHEEL_THRESHOLD = 200;
-const TOUCH_THRESHOLD = 100;
-const IDLE_RESET_DELAY = 800;
+type Direction = "up" | "down" | null;
+
+type InputSnapshot = {
+  value: number;
+  magnitude: number;
+  ratio: number;
+  direction: Direction;
+};
+
+type TouchState = {
+  isActive: boolean;
+  identifier: number | null;
+  lastY: number | null;
+  heroContainer: HTMLElement | null;
+};
+
+const SETTINGS = {
+  wheelThreshold: 220,
+  touchThreshold: 120,
+  idleResetDelay: 700,
+  deltaBufferWindowMs: 260,
+  directionResetDelta: 42,
+  noiseDelta: 2,
+  heroHandoffFactor: 0.4,
+  wheelCooldownMs: 850,
+  momentumGuardMs: 420,
+  heroSelector: '[data-page-scroll-container="hero"]',
+  spring: {
+    type: "spring" as const,
+    stiffness: 180,
+    damping: 26,
+    duration: 0.65,
+  },
+};
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
 
-const isWithinScrollableContainer = (element: Element | null) =>
-  Boolean(element?.closest(".scrollbar-none"));
+const getDirection = (value: number): Direction => {
+  if (value > 0) {
+    return "down";
+  }
 
-type Direction = "up" | "down" | null;
+  if (value < 0) {
+    return "up";
+  }
+
+  return null;
+};
+
+const findHeroContainer = (target: EventTarget | null) => {
+  if (!(target instanceof Element)) {
+    return null;
+  }
+
+  return target.closest<HTMLElement>(SETTINGS.heroSelector);
+};
+
+const canHeroScroll = (container: HTMLElement, delta: number) => {
+  const maxScrollTop = container.scrollHeight - container.clientHeight;
+
+  if (delta > 0) {
+    return container.scrollTop < maxScrollTop - 1;
+  }
+
+  if (delta < 0) {
+    return container.scrollTop > 1;
+  }
+
+  return false;
+};
+
+const createTouchState = (): TouchState => ({
+  isActive: false,
+  identifier: null,
+  lastY: null,
+  heroContainer: null,
+});
+
+const getTrackedTouch = (event: TouchEvent, identifier: number | null) => {
+  if (identifier === null) {
+    return event.changedTouches[0] ?? null;
+  }
+
+  const currentTouches = Array.from(event.touches);
+  const changedTouches = Array.from(event.changedTouches);
+
+  return (
+    currentTouches.find((touch) => touch.identifier === identifier) ??
+    changedTouches.find((touch) => touch.identifier === identifier) ??
+    null
+  );
+};
 
 export const usePageScroll = (sections: string[], enabled = true) => {
+  const location = useLocation();
   const sectionCount = Math.max(sections.length, 1);
-  const pathname = usePathname();
-  const router = useRouter();
 
-  const position = useMotionValue(0);
+  const virtualIndex = useMotionValue(0);
   const scrollYProgress = useMotionValue(0);
 
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
@@ -29,19 +110,18 @@ export const usePageScroll = (sections: string[], enabled = true) => {
   const [direction, setDirection] = useState<Direction>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const indexRef = useRef(0);
-  const accumulatedDeltaRef = useRef(0);
+  const currentIndexRef = useRef(0);
   const isAnimatingRef = useRef(false);
-  const controlsRef = useRef<ReturnType<typeof animate> | null>(null);
+  const animationControlsRef = useRef<ReturnType<typeof animate> | null>(null);
   const animationPathRef = useRef({ start: 0, target: 0 });
+
+  const accumulatedDeltaRef = useRef(0);
+  const lastDeltaTimestampRef = useRef(0);
+  const cooldownUntilRef = useRef(0);
+  const wheelThresholdRef = useRef(SETTINGS.wheelThreshold);
+
   const idleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const viewportHeightRef = useRef(
-    typeof window !== "undefined" ? window.innerHeight : 0
-  );
-  const wheelThresholdRef = useRef(WHEEL_THRESHOLD);
-  const touchIdentifierRef = useRef<number | null>(null);
-  const touchLastYRef = useRef<number | null>(null);
-  const isTouchActiveRef = useRef(false);
+  const touchStateRef = useRef<TouchState>(createTouchState());
 
   const clearIdleTimeout = useCallback(() => {
     if (idleTimeoutRef.current) {
@@ -49,29 +129,6 @@ export const usePageScroll = (sections: string[], enabled = true) => {
       idleTimeoutRef.current = null;
     }
   }, []);
-
-  const resetScrollState = useCallback(() => {
-    // 停止任何正在进行的动画
-    controlsRef.current?.stop();
-
-    // 重置所有状态
-    indexRef.current = 0;
-    accumulatedDeltaRef.current = 0;
-    isAnimatingRef.current = false;
-
-    // 重置 motion values
-    position.set(0);
-    scrollYProgress.set(0);
-
-    // 重置 React 状态
-    setCurrentSectionIndex(0);
-    setScrollProgress(0);
-    setDirection(null);
-    setIsAnimating(false);
-
-    // 清除计时器
-    clearIdleTimeout();
-  }, [position, scrollYProgress, clearIdleTimeout]);
 
   const updateGlobalProgress = useCallback(
     (value: number) => {
@@ -82,205 +139,124 @@ export const usePageScroll = (sections: string[], enabled = true) => {
         return;
       }
 
-      const clampedValue = clamp(value, 0, sectionCount - 1);
-      scrollYProgress.set(clampedValue / total);
+      scrollYProgress.set(clamp(value, 0, sectionCount - 1) / total);
     },
-    [sectionCount, scrollYProgress]
+    [scrollYProgress, sectionCount]
   );
 
-  const applyPosition = useCallback(
-    (value: number) => {
-      const clampedValue = clamp(value, 0, sectionCount - 1);
+  const clearPreview = useCallback(() => {
+    setScrollProgress(0);
+    setDirection(null);
+    updateGlobalProgress(currentIndexRef.current);
+  }, [updateGlobalProgress]);
 
-      updateGlobalProgress(clampedValue);
+  const resetAccumulator = useCallback(() => {
+    accumulatedDeltaRef.current = 0;
+    lastDeltaTimestampRef.current = 0;
+  }, []);
 
-      const nearestIndex = Math.round(clampedValue);
-      setCurrentSectionIndex(nearestIndex);
+  const resetTouchState = useCallback(() => {
+    touchStateRef.current = createTouchState();
+    wheelThresholdRef.current = SETTINGS.wheelThreshold;
+  }, []);
+
+  const isBlockedDirection = useCallback(
+    (nextDirection: Direction) => {
+      if (nextDirection === null) {
+        return true;
+      }
+
+      const atFirst = currentIndexRef.current === 0;
+      const atLast = currentIndexRef.current === sectionCount - 1;
+
+      return (
+        (atFirst && nextDirection === "up") ||
+        (atLast && nextDirection === "down")
+      );
     },
-    [sectionCount, updateGlobalProgress]
+    [sectionCount]
   );
 
-  useMotionValueEvent(position, "change", (latest) => {
-    applyPosition(latest);
+  const applyPreview = useCallback(
+    (nextDirection: Direction, ratio: number) => {
+      if (!nextDirection || isBlockedDirection(nextDirection)) {
+        clearPreview();
+        return false;
+      }
 
-    if (!isAnimatingRef.current) {
-      return;
-    }
+      setDirection(nextDirection);
+      setScrollProgress(ratio);
 
-    const { start, target } = animationPathRef.current;
-    const distance = Math.abs(target - start);
-    const travelled = Math.abs(latest - start);
-    const ratio = distance === 0 ? 0 : Math.min(1, travelled / distance);
-    setScrollProgress(ratio);
-  });
+      const simulatedValue =
+        nextDirection === "down"
+          ? currentIndexRef.current + ratio
+          : currentIndexRef.current - ratio;
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: this is intended to run only once
+      updateGlobalProgress(simulatedValue);
+      return true;
+    },
+    [clearPreview, isBlockedDirection, updateGlobalProgress]
+  );
+
   const scrollToSection = useCallback(
     (targetIndex: number) => {
       const clampedTarget = clamp(targetIndex, 0, sectionCount - 1);
 
-      if (clampedTarget === indexRef.current) {
-        setScrollProgress(0);
-        setDirection(null);
+      if (clampedTarget === currentIndexRef.current) {
+        clearPreview();
         return;
       }
 
-      controlsRef.current?.stop();
+      animationControlsRef.current?.stop();
 
       animationPathRef.current = {
-        start: indexRef.current,
+        start: currentIndexRef.current,
         target: clampedTarget,
       };
 
       isAnimatingRef.current = true;
       setIsAnimating(true);
+      setDirection(clampedTarget > currentIndexRef.current ? "down" : "up");
       setScrollProgress(0);
-      setDirection(clampedTarget > indexRef.current ? "down" : "up");
 
-      accumulatedDeltaRef.current = 0;
+      cooldownUntilRef.current = Date.now() + SETTINGS.wheelCooldownMs;
+      resetAccumulator();
       clearIdleTimeout();
 
-      controlsRef.current = animate(position, clampedTarget, {
-        type: "spring",
-        stiffness: 180,
-        damping: 26,
-        duration: 0.65,
+      animationControlsRef.current = animate(virtualIndex, clampedTarget, {
+        ...SETTINGS.spring,
         onComplete: () => {
-          indexRef.current = clampedTarget;
-          position.set(clampedTarget);
-          setScrollProgress(0);
-          setDirection(null);
+          currentIndexRef.current = clampedTarget;
+          virtualIndex.set(clampedTarget);
+
           isAnimatingRef.current = false;
           setIsAnimating(false);
-          updateGlobalProgress(clampedTarget);
-          router.replace(`/#${sections[clampedTarget]}`, { scroll: false });
+          clearPreview();
+
+          cooldownUntilRef.current = Math.max(
+            cooldownUntilRef.current,
+            Date.now() + SETTINGS.momentumGuardMs
+          );
+
+          if (typeof window !== "undefined") {
+            window.history.replaceState(
+              null,
+              "",
+              `/#${sections[clampedTarget]}`
+            );
+          }
         },
       });
     },
-    [clearIdleTimeout, position, sectionCount, updateGlobalProgress]
+    [
+      clearIdleTimeout,
+      clearPreview,
+      resetAccumulator,
+      sectionCount,
+      sections,
+      virtualIndex,
+    ]
   );
-
-  const determineDirection = useCallback((value: number): Direction => {
-    if (value > 0) {
-      return "down";
-    }
-
-    if (value < 0) {
-      return "up";
-    }
-
-    return null;
-  }, []);
-
-  const resetProgressState = useCallback(() => {
-    accumulatedDeltaRef.current = 0;
-    setScrollProgress(0);
-    setDirection(null);
-    updateGlobalProgress(indexRef.current);
-  }, [updateGlobalProgress]);
-
-  const attemptSectionChange = useCallback(
-    (nextDirection: Direction) => {
-      if (!nextDirection) {
-        resetProgressState();
-        return;
-      }
-
-      const offset = nextDirection === "down" ? 1 : -1;
-      const targetIndex = clamp(indexRef.current + offset, 0, sectionCount - 1);
-
-      if (targetIndex === indexRef.current) {
-        resetProgressState();
-        return;
-      }
-
-      scrollToSection(targetIndex);
-    },
-    [resetProgressState, scrollToSection, sectionCount]
-  );
-
-  const computeWheelSnapshot = useCallback(
-    (delta: number) => {
-      if (
-        Math.sign(delta) !== Math.sign(accumulatedDeltaRef.current) &&
-        accumulatedDeltaRef.current !== 0
-      ) {
-        accumulatedDeltaRef.current = 0;
-      }
-
-      accumulatedDeltaRef.current += delta;
-
-      const magnitude = Math.abs(accumulatedDeltaRef.current);
-      const threshold = wheelThresholdRef.current;
-      const ratio = clamp(magnitude / threshold, 0, 1);
-      const nextDirection = determineDirection(accumulatedDeltaRef.current);
-
-      return { magnitude, threshold, ratio, nextDirection };
-    },
-    [determineDirection]
-  );
-
-  const applyWheelProgress = useCallback(
-    (nextDirection: Direction, ratio: number) => {
-      // 检查边界条件
-      const isAtFirstPage = indexRef.current === 0;
-      const isAtLastPage = indexRef.current === sectionCount - 1;
-
-      // 在第一页且尝试向上滚动时，完全忽略
-      if (isAtFirstPage && nextDirection === "up") {
-        return;
-      }
-
-      // 在最后一页且尝试向下滚动时，完全忽略
-      if (isAtLastPage && nextDirection === "down") {
-        return;
-      }
-
-      setScrollProgress(nextDirection ? ratio : 0);
-      setDirection(nextDirection);
-
-      if (!nextDirection) {
-        updateGlobalProgress(indexRef.current);
-        return;
-      }
-
-      const simulatedValue =
-        nextDirection === "down"
-          ? indexRef.current + ratio
-          : indexRef.current - ratio;
-
-      updateGlobalProgress(simulatedValue);
-    },
-    [updateGlobalProgress, sectionCount]
-  );
-
-  const handleThresholdCross = useCallback(
-    (nextDirection: Direction) => {
-      accumulatedDeltaRef.current = 0;
-      attemptSectionChange(nextDirection);
-    },
-    [attemptSectionChange]
-  );
-
-  useEffect(() => {
-    const handleResize = () => {
-      viewportHeightRef.current = window.innerHeight;
-      wheelThresholdRef.current = WHEEL_THRESHOLD;
-    };
-
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    updateGlobalProgress(indexRef.current);
-    applyPosition(indexRef.current);
-  }, [applyPosition, updateGlobalProgress]);
 
   const scheduleIdleReset = useCallback(() => {
     clearIdleTimeout();
@@ -290,138 +266,133 @@ export const usePageScroll = (sections: string[], enabled = true) => {
         return;
       }
 
-      resetProgressState();
-    }, IDLE_RESET_DELAY);
-  }, [clearIdleTimeout, resetProgressState]);
+      resetAccumulator();
+      clearPreview();
+    }, SETTINGS.idleResetDelay);
+  }, [clearIdleTimeout, clearPreview, resetAccumulator]);
 
-  const shouldHandleWheelEvent = useCallback(
-    (event: WheelEvent) => {
-      if (!enabled) {
-        return false;
+  const makeSnapshot = useCallback((delta: number): InputSnapshot => {
+    const now = Date.now();
+
+    if (Math.abs(delta) <= SETTINGS.noiseDelta) {
+      const value = accumulatedDeltaRef.current;
+      const magnitude = Math.abs(value);
+      const threshold = wheelThresholdRef.current;
+
+      return {
+        value,
+        magnitude,
+        ratio: clamp(magnitude / threshold, 0, 1),
+        direction: getDirection(value),
+      };
+    }
+
+    if (now - lastDeltaTimestampRef.current > SETTINGS.deltaBufferWindowMs) {
+      accumulatedDeltaRef.current = 0;
+    }
+
+    if (
+      Math.sign(delta) !== Math.sign(accumulatedDeltaRef.current) &&
+      accumulatedDeltaRef.current !== 0 &&
+      Math.abs(delta) >= SETTINGS.directionResetDelta
+    ) {
+      accumulatedDeltaRef.current = 0;
+    }
+
+    accumulatedDeltaRef.current += delta;
+    lastDeltaTimestampRef.current = now;
+
+    const value = accumulatedDeltaRef.current;
+    const magnitude = Math.abs(value);
+    const threshold = wheelThresholdRef.current;
+
+    return {
+      value,
+      magnitude,
+      ratio: clamp(magnitude / threshold, 0, 1),
+      direction: getDirection(value),
+    };
+  }, []);
+
+  const processDelta = useCallback(
+    (delta: number, options?: { hidePreview?: boolean }) => {
+      const snapshot = makeSnapshot(delta);
+
+      if (options?.hidePreview) {
+        clearPreview();
+      } else {
+        const canPreview = applyPreview(snapshot.direction, snapshot.ratio);
+
+        if (!canPreview) {
+          scheduleIdleReset();
+          return;
+        }
       }
 
-      const target = event.target as Element | null;
-      if (isWithinScrollableContainer(target)) {
-        return false;
-      }
-
-      if (isAnimatingRef.current) {
-        return false;
-      }
-
-      return event.deltaY !== 0;
-    },
-    [enabled]
-  );
-
-  const processWheelEvent = useCallback(
-    (event: WheelEvent) => {
-      event.preventDefault();
-
-      const delta = event.deltaY;
-      const { magnitude, threshold, ratio, nextDirection } =
-        computeWheelSnapshot(delta);
-
-      applyWheelProgress(nextDirection, ratio);
-
-      if (nextDirection && magnitude >= threshold) {
-        handleThresholdCross(nextDirection);
+      if (
+        snapshot.direction &&
+        !isBlockedDirection(snapshot.direction) &&
+        snapshot.magnitude >= wheelThresholdRef.current
+      ) {
+        resetAccumulator();
+        const offset = snapshot.direction === "down" ? 1 : -1;
+        scrollToSection(currentIndexRef.current + offset);
         return;
       }
 
       scheduleIdleReset();
     },
     [
-      computeWheelSnapshot,
-      applyWheelProgress,
-      handleThresholdCross,
+      applyPreview,
+      clearPreview,
+      isBlockedDirection,
+      makeSnapshot,
+      resetAccumulator,
       scheduleIdleReset,
+      scrollToSection,
     ]
   );
 
-  useEffect(() => {
-    const handleWheel = (event: WheelEvent) => {
-      if (!shouldHandleWheelEvent(event)) {
+  const handleWheel = useCallback(
+    (event: WheelEvent) => {
+      if (!enabled || event.deltaY === 0) {
         return;
       }
 
-      processWheelEvent(event);
-    };
+      const now = Date.now();
 
-    window.addEventListener("wheel", handleWheel, { passive: false });
-
-    const resetTouchState = () => {
-      touchIdentifierRef.current = null;
-      touchLastYRef.current = null;
-      isTouchActiveRef.current = false;
-      accumulatedDeltaRef.current = 0;
-      wheelThresholdRef.current = WHEEL_THRESHOLD;
-    };
-
-    const getTrackedTouch = (event: TouchEvent) => {
-      const identifier = touchIdentifierRef.current;
-
-      if (identifier === null) {
-        return event.changedTouches[0] ?? null;
+      if (isAnimatingRef.current) {
+        cooldownUntilRef.current = now + SETTINGS.momentumGuardMs;
+        return;
       }
 
-      const currentTouches = Array.from(event.touches);
-      const updatedTouches = Array.from(event.changedTouches);
-
-      return (
-        currentTouches.find((touch) => touch.identifier === identifier) ??
-        updatedTouches.find((touch) => touch.identifier === identifier) ??
-        null
-      );
-    };
-
-    const shouldResetTouch = (event: TouchEvent) => {
-      if (event.touches.length > 1) {
-        return true;
+      if (now < cooldownUntilRef.current) {
+        cooldownUntilRef.current = now + SETTINGS.momentumGuardMs;
+        return;
       }
 
-      const target = event.target as Element | null;
-      return isWithinScrollableContainer(target);
-    };
-
-    const processTouchDelta = (event: TouchEvent, delta: number) => {
-      if (delta === 0) {
+      const heroContainer = findHeroContainer(event.target);
+      if (heroContainer && canHeroScroll(heroContainer, event.deltaY)) {
+        processDelta(event.deltaY * SETTINGS.heroHandoffFactor, {
+          hidePreview: true,
+        });
         return;
       }
 
       event.preventDefault();
+      processDelta(event.deltaY);
+    },
+    [enabled, processDelta]
+  );
 
-      const { magnitude, threshold, ratio, nextDirection } =
-        computeWheelSnapshot(delta);
-
-      applyWheelProgress(nextDirection, ratio);
-
-      if (nextDirection && magnitude >= threshold) {
-        handleThresholdCross(nextDirection);
-        resetTouchState();
-        return;
-      }
-
-      scheduleIdleReset();
-    };
-
-    const handleTouchStart = (event: TouchEvent) => {
-      // 如果未启用滑动功能，直接返回
-      if (!enabled) {
-        return;
-      }
-
-      if (isAnimatingRef.current) {
+  const handleTouchStart = useCallback(
+    (event: TouchEvent) => {
+      if (!enabled || isAnimatingRef.current) {
         return;
       }
 
       if (event.touches.length > 1) {
         resetTouchState();
-        return;
-      }
-
-      const target = event.target as Element | null;
-      if (isWithinScrollableContainer(target)) {
         return;
       }
 
@@ -430,107 +401,96 @@ export const usePageScroll = (sections: string[], enabled = true) => {
         return;
       }
 
-      touchIdentifierRef.current = touch.identifier;
-      touchLastYRef.current = touch.clientY;
-      isTouchActiveRef.current = true;
-      accumulatedDeltaRef.current = 0;
-      wheelThresholdRef.current = TOUCH_THRESHOLD;
+      touchStateRef.current = {
+        isActive: true,
+        identifier: touch.identifier,
+        lastY: touch.clientY,
+        heroContainer: findHeroContainer(event.target),
+      };
+
+      resetAccumulator();
+      wheelThresholdRef.current = SETTINGS.touchThreshold;
       clearIdleTimeout();
-    };
+    },
+    [clearIdleTimeout, enabled, resetAccumulator, resetTouchState]
+  );
 
-    const handleTouchMove = (event: TouchEvent) => {
-      if (!enabled) {
+  const handleTouchMove = useCallback(
+    (event: TouchEvent) => {
+      if (!(enabled && touchStateRef.current.isActive)) {
         return;
       }
 
-      if (!isTouchActiveRef.current) {
-        return;
-      }
-
-      if (shouldResetTouch(event)) {
+      if (event.touches.length > 1) {
         resetTouchState();
         return;
       }
 
-      const touch = getTrackedTouch(event);
-
-      if (!touch) {
+      const trackedTouch = getTrackedTouch(
+        event,
+        touchStateRef.current.identifier
+      );
+      if (!trackedTouch) {
         return;
       }
 
-      const lastY = touchLastYRef.current ?? touch.clientY;
-      const delta = lastY - touch.clientY;
+      const previousY = touchStateRef.current.lastY ?? trackedTouch.clientY;
+      const delta = previousY - trackedTouch.clientY;
+      touchStateRef.current.lastY = trackedTouch.clientY;
 
-      touchLastYRef.current = touch.clientY;
-
-      processTouchDelta(event, delta);
-    };
-
-    const handleTouchEnd = (event: TouchEvent) => {
-      if (!isTouchActiveRef.current) {
+      if (delta === 0) {
         return;
       }
 
-      const identifier = touchIdentifierRef.current;
+      const heroContainer = touchStateRef.current.heroContainer;
+      if (heroContainer && canHeroScroll(heroContainer, delta)) {
+        processDelta(delta * SETTINGS.heroHandoffFactor, { hidePreview: true });
+        return;
+      }
+
+      event.preventDefault();
+      processDelta(delta);
+    },
+    [enabled, processDelta, resetTouchState]
+  );
+
+  const handleTouchEnd = useCallback(
+    (event: TouchEvent) => {
+      if (!touchStateRef.current.isActive) {
+        return;
+      }
+
+      const identifier = touchStateRef.current.identifier;
       if (identifier === null) {
         resetTouchState();
         return;
       }
 
-      const endedTouch = Array.from(event.changedTouches).some(
+      const ended = Array.from(event.changedTouches).some(
         (touch) => touch.identifier === identifier
       );
 
-      if (!endedTouch) {
+      if (!ended) {
         return;
       }
 
       resetTouchState();
       scheduleIdleReset();
-    };
+    },
+    [resetTouchState, scheduleIdleReset]
+  );
 
-    const handleTouchCancel = () => {
-      if (!isTouchActiveRef.current) {
-        return;
-      }
+  const handleTouchCancel = useCallback(() => {
+    if (!touchStateRef.current.isActive) {
+      return;
+    }
 
-      resetTouchState();
-    };
+    resetTouchState();
+  }, [resetTouchState]);
 
-    window.addEventListener("touchstart", handleTouchStart, {
-      passive: false,
-    });
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
-    window.addEventListener("touchend", handleTouchEnd);
-    window.addEventListener("touchcancel", handleTouchCancel);
-
-    return () => {
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
-      window.removeEventListener("touchcancel", handleTouchCancel);
-      resetTouchState();
-    };
-  }, [
-    enabled,
-    shouldHandleWheelEvent,
-    processWheelEvent,
-    applyWheelProgress,
-    computeWheelSnapshot,
-    handleThresholdCross,
-    clearIdleTimeout,
-    scheduleIdleReset,
-  ]);
-
-  useEffect(() => {
-    const handleKeydown = (event: KeyboardEvent) => {
-      // 如果未启用滑动功能，直接返回
-      if (!enabled) {
-        return;
-      }
-
-      if (isAnimatingRef.current) {
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (!enabled || isAnimatingRef.current) {
         return;
       }
 
@@ -539,11 +499,11 @@ export const usePageScroll = (sections: string[], enabled = true) => {
       switch (event.key) {
         case "ArrowDown":
         case "PageDown":
-          targetIndex = clamp(indexRef.current + 1, 0, sectionCount - 1);
+          targetIndex = clamp(currentIndexRef.current + 1, 0, sectionCount - 1);
           break;
         case "ArrowUp":
         case "PageUp":
-          targetIndex = clamp(indexRef.current - 1, 0, sectionCount - 1);
+          targetIndex = clamp(currentIndexRef.current - 1, 0, sectionCount - 1);
           break;
         case "Home":
           targetIndex = 0;
@@ -555,24 +515,70 @@ export const usePageScroll = (sections: string[], enabled = true) => {
           return;
       }
 
-      if (targetIndex === null || targetIndex === indexRef.current) {
+      if (targetIndex === null || targetIndex === currentIndexRef.current) {
         return;
       }
 
       event.preventDefault();
       scrollToSection(targetIndex);
-    };
+    },
+    [enabled, scrollToSection, sectionCount]
+  );
 
-    window.addEventListener("keydown", handleKeydown);
+  useMotionValueEvent(virtualIndex, "change", (latest) => {
+    const clamped = clamp(latest, 0, sectionCount - 1);
+
+    setCurrentSectionIndex(Math.round(clamped));
+    updateGlobalProgress(clamped);
+
+    if (!isAnimatingRef.current) {
+      return;
+    }
+
+    const { start, target } = animationPathRef.current;
+    const distance = Math.abs(target - start);
+    const travelled = Math.abs(clamped - start);
+    const ratio = distance === 0 ? 0 : Math.min(1, travelled / distance);
+    setScrollProgress(ratio);
+  });
+
+  useEffect(() => {
+    currentIndexRef.current = 0;
+    virtualIndex.set(0);
+    updateGlobalProgress(0);
+  }, [updateGlobalProgress, virtualIndex]);
+
+  useEffect(() => {
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: false });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd);
+    window.addEventListener("touchcancel", handleTouchCancel);
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", handleKeydown);
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("touchcancel", handleTouchCancel);
+      window.removeEventListener("keydown", handleKeyDown);
+      resetTouchState();
     };
-  }, [enabled, scrollToSection, sectionCount]);
+  }, [
+    handleKeyDown,
+    handleTouchCancel,
+    handleTouchEnd,
+    handleTouchMove,
+    handleTouchStart,
+    handleWheel,
+    resetTouchState,
+  ]);
 
   useEffect(() => {
     const previousBodyOverflow = document.body.style.overflow;
     const previousHtmlOverflow = document.documentElement.style.overflow;
+
     if (enabled) {
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
@@ -584,12 +590,35 @@ export const usePageScroll = (sections: string[], enabled = true) => {
     };
   }, [enabled]);
 
-  // 监听路由变化，重置滚动状态
   useEffect(() => {
-    if (pathname !== "/") {
-      resetScrollState();
+    if (location.pathname === "/") {
+      return;
     }
-  }, [pathname, resetScrollState]);
+
+    animationControlsRef.current?.stop();
+    clearIdleTimeout();
+    resetAccumulator();
+    resetTouchState();
+
+    currentIndexRef.current = 0;
+    isAnimatingRef.current = false;
+    cooldownUntilRef.current = 0;
+
+    setCurrentSectionIndex(0);
+    setIsAnimating(false);
+    clearPreview();
+
+    virtualIndex.set(0);
+    updateGlobalProgress(0);
+  }, [
+    clearIdleTimeout,
+    clearPreview,
+    location.pathname,
+    resetAccumulator,
+    resetTouchState,
+    updateGlobalProgress,
+    virtualIndex,
+  ]);
 
   useEffect(() => () => clearIdleTimeout(), [clearIdleTimeout]);
 

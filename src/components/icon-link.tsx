@@ -1,5 +1,4 @@
 import type { Icon } from "@phosphor-icons/react";
-import Link from "next/link";
 
 export type IconLinkProps = {
   url: string;
@@ -8,8 +7,13 @@ export type IconLinkProps = {
 };
 export const IconLink = ({ url, icon: LinkIcon }: IconLinkProps) => {
   return (
-    <Link className="flex items-center gap-1.5" href={url}>
+    <a
+      className="flex items-center gap-1.5"
+      href={url}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
       <LinkIcon className="size-5" />
-    </Link>
+    </a>
   );
 };
