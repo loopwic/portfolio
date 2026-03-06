@@ -30,6 +30,7 @@ const SETTINGS = {
   heroHandoffFactor: 0.4,
   wheelCooldownMs: 850,
   momentumGuardMs: 420,
+  animationFailSafeMs: 1800,
   heroSelector: '[data-page-scroll-container="hero"]',
   spring: {
     type: "spring" as const,
@@ -74,6 +75,23 @@ const canHeroScroll = (container: HTMLElement, delta: number) => {
   }
 
   return false;
+};
+
+const shouldDelegateToHero = (
+  target: EventTarget | null,
+  delta: number,
+  currentSectionIndex: number
+) => {
+  if (currentSectionIndex !== 0) {
+    return false;
+  }
+
+  const heroContainer = findHeroContainer(target);
+  if (!heroContainer) {
+    return false;
+  }
+
+  return canHeroScroll(heroContainer, delta);
 };
 
 const createTouchState = (): TouchState => ({
@@ -122,11 +140,21 @@ export const usePageScroll = (sections: string[], enabled = true) => {
 
   const idleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStateRef = useRef<TouchState>(createTouchState());
+  const animationFailSafeTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   const clearIdleTimeout = useCallback(() => {
     if (idleTimeoutRef.current) {
       clearTimeout(idleTimeoutRef.current);
       idleTimeoutRef.current = null;
+    }
+  }, []);
+
+  const clearAnimationFailSafeTimeout = useCallback(() => {
+    if (animationFailSafeTimeoutRef.current) {
+      clearTimeout(animationFailSafeTimeoutRef.current);
+      animationFailSafeTimeoutRef.current = null;
     }
   }, []);
 
@@ -198,6 +226,26 @@ export const usePageScroll = (sections: string[], enabled = true) => {
     [clearPreview, isBlockedDirection, updateGlobalProgress]
   );
 
+  const completeSectionTransition = useCallback(
+    (targetIndex: number) => {
+      clearAnimationFailSafeTimeout();
+
+      currentIndexRef.current = targetIndex;
+      virtualIndex.set(targetIndex);
+
+      isAnimatingRef.current = false;
+      setIsAnimating(false);
+      clearPreview();
+
+      cooldownUntilRef.current = Date.now() + SETTINGS.momentumGuardMs;
+
+      if (typeof window !== "undefined") {
+        window.history.replaceState(null, "", `/#${sections[targetIndex]}`);
+      }
+    },
+    [clearAnimationFailSafeTimeout, clearPreview, sections, virtualIndex]
+  );
+
   const scrollToSection = useCallback(
     (targetIndex: number) => {
       const clampedTarget = clamp(targetIndex, 0, sectionCount - 1);
@@ -208,6 +256,7 @@ export const usePageScroll = (sections: string[], enabled = true) => {
       }
 
       animationControlsRef.current?.stop();
+      clearAnimationFailSafeTimeout();
 
       animationPathRef.current = {
         start: currentIndexRef.current,
@@ -226,34 +275,25 @@ export const usePageScroll = (sections: string[], enabled = true) => {
       animationControlsRef.current = animate(virtualIndex, clampedTarget, {
         ...SETTINGS.spring,
         onComplete: () => {
-          currentIndexRef.current = clampedTarget;
-          virtualIndex.set(clampedTarget);
-
-          isAnimatingRef.current = false;
-          setIsAnimating(false);
-          clearPreview();
-
-          cooldownUntilRef.current = Math.max(
-            cooldownUntilRef.current,
-            Date.now() + SETTINGS.momentumGuardMs
-          );
-
-          if (typeof window !== "undefined") {
-            window.history.replaceState(
-              null,
-              "",
-              `/#${sections[clampedTarget]}`
-            );
-          }
+          completeSectionTransition(clampedTarget);
         },
       });
+
+      animationFailSafeTimeoutRef.current = setTimeout(() => {
+        if (!isAnimatingRef.current) {
+          return;
+        }
+
+        completeSectionTransition(clampedTarget);
+      }, SETTINGS.animationFailSafeMs);
     },
     [
+      clearAnimationFailSafeTimeout,
       clearIdleTimeout,
       clearPreview,
+      completeSectionTransition,
       resetAccumulator,
       sectionCount,
-      sections,
       virtualIndex,
     ]
   );
@@ -362,17 +402,22 @@ export const usePageScroll = (sections: string[], enabled = true) => {
       const now = Date.now();
 
       if (isAnimatingRef.current) {
-        cooldownUntilRef.current = now + SETTINGS.momentumGuardMs;
+        event.preventDefault();
         return;
       }
 
       if (now < cooldownUntilRef.current) {
-        cooldownUntilRef.current = now + SETTINGS.momentumGuardMs;
+        event.preventDefault();
         return;
       }
 
-      const heroContainer = findHeroContainer(event.target);
-      if (heroContainer && canHeroScroll(heroContainer, event.deltaY)) {
+      if (
+        shouldDelegateToHero(
+          event.target,
+          event.deltaY,
+          currentIndexRef.current
+        )
+      ) {
         processDelta(event.deltaY * SETTINGS.heroHandoffFactor, {
           hidePreview: true,
         });
@@ -443,7 +488,11 @@ export const usePageScroll = (sections: string[], enabled = true) => {
       }
 
       const heroContainer = touchStateRef.current.heroContainer;
-      if (heroContainer && canHeroScroll(heroContainer, delta)) {
+      if (
+        heroContainer &&
+        currentIndexRef.current === 0 &&
+        canHeroScroll(heroContainer, delta)
+      ) {
         processDelta(delta * SETTINGS.heroHandoffFactor, { hidePreview: true });
         return;
       }
@@ -527,11 +576,16 @@ export const usePageScroll = (sections: string[], enabled = true) => {
 
   useMotionValueEvent(virtualIndex, "change", (latest) => {
     const clamped = clamp(latest, 0, sectionCount - 1);
+    const rounded = Math.round(clamped);
 
-    setCurrentSectionIndex(Math.round(clamped));
+    setCurrentSectionIndex(rounded);
     updateGlobalProgress(clamped);
 
     if (!isAnimatingRef.current) {
+      if (currentIndexRef.current !== rounded) {
+        currentIndexRef.current = rounded;
+      }
+
       return;
     }
 
@@ -596,6 +650,7 @@ export const usePageScroll = (sections: string[], enabled = true) => {
     }
 
     animationControlsRef.current?.stop();
+    clearAnimationFailSafeTimeout();
     clearIdleTimeout();
     resetAccumulator();
     resetTouchState();
@@ -612,6 +667,7 @@ export const usePageScroll = (sections: string[], enabled = true) => {
     updateGlobalProgress(0);
   }, [
     clearIdleTimeout,
+    clearAnimationFailSafeTimeout,
     clearPreview,
     location.pathname,
     resetAccumulator,
@@ -620,7 +676,13 @@ export const usePageScroll = (sections: string[], enabled = true) => {
     virtualIndex,
   ]);
 
-  useEffect(() => () => clearIdleTimeout(), [clearIdleTimeout]);
+  useEffect(
+    () => () => {
+      clearIdleTimeout();
+      clearAnimationFailSafeTimeout();
+    },
+    [clearAnimationFailSafeTimeout, clearIdleTimeout]
+  );
 
   return {
     currentSectionIndex,

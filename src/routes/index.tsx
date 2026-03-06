@@ -63,7 +63,7 @@ function HomePage() {
           <motion.section
             animate={{ opacity: 1, y: 0 }}
             className="flex h-screen items-center justify-center"
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -20, pointerEvents: "none" }}
             id="home"
             initial={{ opacity: 0, y: 20 }}
             key="home-section"
@@ -83,7 +83,7 @@ function HomePage() {
         {currentSectionIndex === 1 && (
           <motion.div
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -20, pointerEvents: "none" }}
             initial={{ opacity: 0, y: 20 }}
             key="about-section"
             transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -95,7 +95,7 @@ function HomePage() {
         {currentSectionIndex === 2 && (
           <motion.div
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -20, pointerEvents: "none" }}
             initial={{ opacity: 0, y: 20 }}
             key="project-section"
             transition={{ duration: 0.3, ease: "easeInOut" }}
