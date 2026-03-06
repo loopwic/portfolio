@@ -41,19 +41,19 @@ export const ScrollThresholdIndicator = ({
       animate={{ opacity: 1, scale: 1 }}
       className={cn(
         "-translate-y-1/2 fixed z-99",
-        isMobile ? "inset-x-0 top-18" : "top-1/2 right-8"
+        isMobile ? "inset-x-0 top-18 px-4" : "top-1/2 right-8"
       )}
       exit={{ opacity: 0, scale: 0.8 }}
       initial={{ opacity: 0, scale: 0.8 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-2 rounded-2xl border border-border/70 bg-card/80 px-3 py-2 backdrop-blur-sm">
         {/* 方向指示器 */}
         <motion.div
           animate={{
             y: direction === "up" ? -ANIMATION_OFFSET : ANIMATION_OFFSET,
           }}
-          className="font-mono text-sm text-white/80"
+          className="font-mono text-foreground/80 text-sm"
           transition={{
             duration: 0.5,
             repeat: Number.POSITIVE_INFINITY,
@@ -66,12 +66,12 @@ export const ScrollThresholdIndicator = ({
         {/* 进度条 */}
         <div
           className={cn(
-            "h-20 w-1 rounded-full bg-foreground/10",
+            "h-20 w-1.5 rounded-full bg-foreground/10",
             isMobile && "h-1 w-full"
           )}
         >
           <motion.div
-            className="h-full w-full rounded-full bg-foreground"
+            className="h-full w-full rounded-full bg-gradient-to-b from-foreground to-foreground/75"
             style={{
               scaleY: isMobile ? undefined : progress,
               scaleX: isMobile ? progress : undefined,

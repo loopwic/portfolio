@@ -2,6 +2,7 @@
 
 import { animate, motion, useMotionValue } from "motion/react";
 import {
+  type MouseEvent as ReactMouseEvent,
   type RefObject,
   useCallback,
   useEffect,
@@ -31,13 +32,27 @@ const IMAGES = [
 ];
 
 const IMAGE_TEXTS = [
-  { title: "Welcome", subtitle: "Scroll to explore" },
-  { title: "Explore", subtitle: "Journey begins here" },
-  { title: "Create", subtitle: "Build something amazing" },
-  { title: "Connect", subtitle: "Join our community" },
+  {
+    title: "Loopwic 的交互作品集",
+    subtitle: "往下滑，先看体验，再看实现。",
+  },
+  {
+    title: "前端 / 动效 / 工程",
+    subtitle: "同一套页面，滚轮、触控板和键盘都能顺滑翻页。",
+  },
+  {
+    title: "不做一次性特效",
+    subtitle: "状态清晰、结构稳定，后续迭代不会越改越乱。",
+  },
+  {
+    title: "继续下滑",
+    subtitle: "下一页是关于我和项目细节。",
+  },
 ];
 
 const TEXT_INITIAL_OFFSET = 20;
+const POINTER_CENTER = 0.5;
+const TILT_MAX_DEGREES = 4;
 
 const computeScrollInfo = (scrollTop: number, containerHeight: number) => {
   if (containerHeight <= 0) {
@@ -84,6 +99,8 @@ export const ScrollView = ({
     null
   );
   const wasActiveRef = useRef(isActive);
+  const tiltX = useMotionValue(0);
+  const tiltY = useMotionValue(0);
 
   const drawImageCover = useCallback(
     (
@@ -263,8 +280,34 @@ export const ScrollView = ({
   }, [handleHoverStart]);
 
   const handleMouseLeave = useCallback(() => {
+    tiltX.set(0);
+    tiltY.set(0);
     handleHoverEnd?.();
-  }, [handleHoverEnd]);
+  }, [handleHoverEnd, tiltX, tiltY]);
+
+  const handleMouseMove = useCallback(
+    (event: ReactMouseEvent<HTMLDivElement>) => {
+      if (!isExpanded) {
+        tiltX.set(0);
+        tiltY.set(0);
+        return;
+      }
+
+      const rect = event.currentTarget.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        return;
+      }
+
+      const normalizedX =
+        (event.clientX - rect.left) / rect.width - POINTER_CENTER;
+      const normalizedY =
+        (event.clientY - rect.top) / rect.height - POINTER_CENTER;
+
+      tiltX.set(-normalizedY * TILT_MAX_DEGREES);
+      tiltY.set(normalizedX * TILT_MAX_DEGREES);
+    },
+    [isExpanded, tiltX, tiltY]
+  );
 
   useEffect(() => {
     const container = containerRef.current;
@@ -441,6 +484,9 @@ export const ScrollView = ({
     "relative",
     "max-h-[80vh]",
     "overflow-hidden",
+    "rounded-[1.05rem]",
+    "border border-white/18",
+    "bg-black/12",
     "md:cursor-none"
   );
 
@@ -451,15 +497,22 @@ export const ScrollView = ({
       initial="rest"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
       ref={buttonScope}
-      style={{ maxWidth: "100%" }}
+      style={{
+        maxWidth: "100%",
+        transformPerspective: 1200,
+        rotateX: tiltX,
+        rotateY: tiltY,
+      }}
       transition={SCROLL_VIEW_CONTAINER_TRANSITION}
       variants={SCROLL_VIEW_CONTAINER_VARIANTS}
     >
+      <div className="pointer-events-none absolute inset-0 z-40 rounded-[inherit] border border-white/14" />
       <div className="relative h-full w-full">
         {/* 滚动容器 */}
         <div
-          className="scrollbar-none relative z-0 h-full w-full snap-y snap-mandatory overflow-y-auto"
+          className="scrollbar-none relative z-0 h-full w-full snap-y snap-mandatory overflow-y-auto rounded-[inherit]"
           data-page-scroll-container="hero"
           ref={containerRef}
           style={{
@@ -487,44 +540,65 @@ export const ScrollView = ({
 
       <motion.div
         animate={{ opacity: isExpanded ? 1 : 0 }}
-        className="pointer-events-none absolute inset-0 z-20 flex select-none flex-col items-center justify-center bg-black/30"
+        className="pointer-events-none absolute inset-0 z-20 flex select-none flex-col justify-between bg-gradient-to-b from-black/34 via-black/6 to-black/56 p-4 lg:p-5"
         id="cover"
         initial={{ opacity: 0 }}
         style={{ willChange: "opacity" }}
         transition={SCROLL_VIEW_ANIMATIONS.textTransition}
       >
-        <motion.p
-          animate={{
-            y: isExpanded ? 0 : TEXT_INITIAL_OFFSET,
-            opacity: isExpanded ? 1 : 0,
-          }}
-          className="hover-text font-semibold text-2xl text-white"
-          initial={{ y: TEXT_INITIAL_OFFSET, opacity: 0 }}
-          key={`title-${currentIndex}`}
-          transition={SCROLL_VIEW_ANIMATIONS.textTransition}
-        >
-          {IMAGE_TEXTS[currentIndex]?.title}
-        </motion.p>
-        <motion.p
-          animate={{
-            y: isExpanded ? 0 : TEXT_INITIAL_OFFSET,
-            opacity: isExpanded ? 1 : 0,
-          }}
-          className="hover-text text-white"
-          initial={{ y: TEXT_INITIAL_OFFSET, opacity: 0 }}
-          key={`subtitle-${currentIndex}`}
-          transition={SCROLL_VIEW_ANIMATIONS.textTransitionDelayed}
-        >
-          {IMAGE_TEXTS[currentIndex]?.subtitle}
-        </motion.p>
+        <div className="flex items-start justify-between">
+          <span className="rounded-full border border-white/30 bg-black/25 px-3 py-1 font-mono text-[0.66rem] text-white/92 uppercase tracking-[0.14em]">
+            主页 · 作品集
+          </span>
+          <span className="rounded-full border border-white/25 bg-black/20 px-3 py-1 font-mono text-[0.66rem] text-white/85">
+            {String(currentIndex + 1).padStart(2, "0")} /{" "}
+            {String(IMAGES.length).padStart(2, "0")}
+          </span>
+        </div>
+
+        <div className="max-w-xl lg:max-w-2xl">
+          <motion.p
+            animate={{
+              y: isExpanded ? 0 : TEXT_INITIAL_OFFSET,
+              opacity: isExpanded ? 1 : 0,
+            }}
+            className="font-semibold text-2xl text-white tracking-tight lg:text-3xl"
+            initial={{ y: TEXT_INITIAL_OFFSET, opacity: 0 }}
+            key={`title-${currentIndex}`}
+            transition={SCROLL_VIEW_ANIMATIONS.textTransition}
+          >
+            {IMAGE_TEXTS[currentIndex]?.title}
+          </motion.p>
+          <motion.p
+            animate={{
+              y: isExpanded ? 0 : TEXT_INITIAL_OFFSET,
+              opacity: isExpanded ? 1 : 0,
+            }}
+            className="mt-2 text-sm text-white/90 leading-relaxed lg:text-base"
+            initial={{ y: TEXT_INITIAL_OFFSET, opacity: 0 }}
+            key={`subtitle-${currentIndex}`}
+            transition={SCROLL_VIEW_ANIMATIONS.textTransitionDelayed}
+          >
+            {IMAGE_TEXTS[currentIndex]?.subtitle}
+          </motion.p>
+        </div>
+
+        <div className="flex items-end justify-between gap-3">
+          <span className="rounded-full border border-white/24 bg-black/25 px-3 py-1 font-mono text-[0.66rem] text-white/82">
+            滚轮 / 触控板 / ↑↓
+          </span>
+          <span className="rounded-full border border-white/24 bg-black/25 px-3 py-1 font-mono text-[0.66rem] text-white/82">
+            滚动可预览
+          </span>
+        </div>
       </motion.div>
 
       <motion.div
-        className="-translate-x-1/2 absolute bottom-4 left-1/2 z-30 h-1 w-24 rounded-full bg-white/30"
+        className="-translate-x-1/2 absolute bottom-4 left-1/2 z-30 h-1.5 w-34 overflow-hidden rounded-full border border-white/24 bg-black/28"
         style={{ opacity: indicatorOpacity, y: indicatorOffsetY }}
       >
         <motion.div
-          className="h-full rounded-full bg-white"
+          className="h-full rounded-full bg-gradient-to-r from-white/88 via-white to-white/84"
           style={{
             scaleX: progress,
             transformOrigin: "left center",
