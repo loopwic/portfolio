@@ -1,3 +1,16 @@
+# [1.6.0](https://github.com/loopwic/portfolio/compare/v1.5.0...v1.6.0) (2026-03-06)
+
+
+### Bug Fixes
+
+* **scroll:** prevent section lock after home-about transition ([a418eff](https://github.com/loopwic/portfolio/commit/a418eff27a801da8d489cba8d7fdb1bd246a26ba))
+
+
+### Features
+
+* **blog-ui:** modernize blog list and article reading experience ([42a98a0](https://github.com/loopwic/portfolio/commit/42a98a03abf3e222fcf39140ef632f223fb240e9))
+* **home-about:** refresh hero interaction and localized about section ([08c77e2](https://github.com/loopwic/portfolio/commit/08c77e25a8d893514177e87bc87d312cc03601e7))
+
 # [1.5.0](https://github.com/loopwic/portfolio/compare/v1.4.0...v1.5.0) (2026-02-24)
 
 
