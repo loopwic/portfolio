@@ -169,8 +169,8 @@ export function TableOfContents() {
   const minLevel = Math.min(...headings.map((h) => h.level));
 
   return (
-    <nav className="sticky top-18 overflow-y-auto">
-      <div className="mb-4 font-medium text-foreground text-sm">目录</div>
+    <nav className="max-h-[calc(100vh-9rem)] overflow-y-auto pr-1">
+      <div className="mb-3 font-medium text-foreground text-sm">目录</div>
       <ul className="space-y-1 text-sm">
         {headings.map((heading) => (
           <li
@@ -178,10 +178,10 @@ export function TableOfContents() {
             key={heading.id}
           >
             <button
-              className={`block w-full rounded-md px-2 py-1 text-left transition-colors hover:bg-muted ${
+              className={`block w-full rounded-md border px-2.5 py-1.5 text-left transition-colors ${
                 activeId === heading.id
-                  ? "bg-muted font-medium text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "border-border bg-muted/65 font-medium text-primary"
+                  : "border-transparent text-muted-foreground hover:border-border/60 hover:bg-muted/45 hover:text-foreground"
               }`}
               onClick={() => scrollToHeading(heading.id)}
               type="button"

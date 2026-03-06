@@ -20,13 +20,13 @@ export function CopyButton({ value }: CopyButtonProps) {
 
   return (
     <Button
-      className="h-6 px-2 text-xs"
+      className="h-6 border-border/70 bg-background/75 px-2 text-[0.68rem] text-muted-foreground hover:bg-background"
       onClick={handleCopy}
       size="sm"
       type="button"
       variant="ghost"
     >
-      {copied ? "Copied!" : "Copy"}
+      {copied ? "已复制" : "复制"}
     </Button>
   );
 }

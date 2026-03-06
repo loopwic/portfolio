@@ -164,3 +164,25 @@
     background-color: var(--shiki-dark-bg);
   }
 }
+
+@layer components {
+  .blog-prose {
+    @apply prose prose-gray prose-headings:scroll-mt-28 prose-headings:tracking-tight prose-h2:mt-10 prose-h2:border-border/70 prose-h2:border-b prose-h2:pb-2 prose-h3:mt-8 prose-p:leading-8 prose-a:font-medium prose-a:text-primary prose-a:no-underline hover:prose-a:text-primary/80 prose-blockquote:border-border prose-blockquote:bg-muted/25 prose-blockquote:px-4 prose-blockquote:py-2 prose-blockquote:text-foreground prose-li:my-1 prose-code:font-mono prose-code:text-[0.85em] dark:prose-invert lg:prose-lg;
+  }
+
+  .blog-prose :where(code):not(:where(pre *)) {
+    @apply rounded bg-muted px-1.5 py-0.5 font-mono text-[0.82em] font-normal text-foreground before:content-none after:content-none;
+  }
+
+  .blog-prose :where(hr) {
+    @apply border-border/70;
+  }
+
+  .blog-prose :where(img) {
+    @apply rounded-xl border border-border/75;
+  }
+
+  .blog-prose :where(table) {
+    @apply block w-full overflow-x-auto rounded-lg border border-border/75;
+  }
+}
