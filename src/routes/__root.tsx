@@ -4,40 +4,35 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import { SiteNav } from "@/components/nav/site-nav";
 import ScrollProvider from "@/components/providers/scroll-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import appCss from "@/styles.css?url";
+import { SITE } from "@/lib/site-data";
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
-      {
-        charSet: "utf-8",
-      },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
-      },
-      {
-        title: "Loopwic's Portfolio",
-      },
-      {
-        name: "description",
-        content: "Welcome to my personal portfolio website.",
-      },
-      {
-        name: "keywords",
-        content: "portfolio, developer, projects, about me, blog",
-      },
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: `${SITE.name} — ${SITE.subtitle}` },
+      { name: "description", content: SITE.description },
     ],
     links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/favicon.ico" },
       {
-        rel: "stylesheet",
-        href: appCss,
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
       },
       {
-        rel: "icon",
-        href: "/favicon.ico",
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
       },
     ],
   }),
@@ -54,7 +49,10 @@ function RootLayout() {
       enableSystem
     >
       <ScrollProvider>
-        <Outlet />
+        <SiteNav />
+        <main className="min-h-screen overflow-x-clip">
+          <Outlet />
+        </main>
       </ScrollProvider>
     </ThemeProvider>
   );

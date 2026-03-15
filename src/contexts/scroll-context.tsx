@@ -4,12 +4,9 @@ import type { MotionValue } from "motion/react";
 import { createContext, type ReactNode, useContext } from "react";
 
 type ScrollContextType = {
-  currentSectionIndex: number;
-  scrollProgress: number;
-  isAnimating: boolean;
-  direction: "up" | "down" | null;
   scrollYProgress: MotionValue<number>;
-  scrollToSection: (targetIndex: number) => void;
+  currentSectionIndex: number;
+  scrollToSection: (id: string) => void;
 };
 
 const ScrollContext = createContext<ScrollContextType | null>(null);

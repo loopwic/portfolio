@@ -1,0 +1,387 @@
+[    1429ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <SafeFragment fallback={null}>
+      <SafeFragment getResetKey={function getResetKey} errorComponent={function ErrorComponent} ...>
+        <SafeFragment fallback={function fallback}>
+          <MatchInnerImpl matchId="//">
+            <Lazy>
+              <HomePage>
+                <div className="relative">
+                  <HeroSection>
+                    <section className="relative f..." id="hero" ref={{current:null}}>
+                      <motion.div className="relative z..." style={{opacity:{...}, ...}}>
+                        <div className="relative z..." style={{...}} ref={function}>
+                          <KineticText as="h1" className="font-displ..." mode="scatter" text="LOOPWIC">
+                            <h1 className="font-displ..." ref={{current:null}}>
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(62.45919043641095px, 51.69377484337767px) rotate(-6.5714512562..."
+-                                 transform: "translate(-170.226px, -97.6735px) rotate(31.2735deg)"
++                                 transitionDelay: "0ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "0ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               L
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(56.98673018100635px, -126.49419083494386px) rotate(1.174849945..."
+-                                 transform: "translate(-102.145px, -26.0009px) rotate(9.04681deg)"
++                                 transitionDelay: "57.142857142857146ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "57.1429ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               O
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(7.206000046496985px, -84.14400565215354px) rotate(2.7016845206..."
+-                                 transform: "translate(-136.583px, -157.819px) rotate(-1.59232deg)"
++                                 transitionDelay: "114.28571428571429ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "114.286ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               O
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(195.26319516018364px, -35.2442566647988px) rotate(1.3895175023..."
+-                                 transform: "translate(111.117px, -105.715px) rotate(-38.8506deg)"
++                                 transitionDelay: "171.42857142857144ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "171.429ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               P
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(-287.4181427687497px, 75.98971431710093px) rotate(43.728872360..."
+-                                 transform: "translate(289.144px, -51.9396px) rotate(-22.6335deg)"
++                                 transitionDelay: "228.57142857142858ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "228.571ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               W
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(225.36602886641987px, -115.58832270145136px) rotate(12.9389419..."
+-                                 transform: "translate(260.094px, -85.3467px) rotate(9.38673deg)"
++                                 transitionDelay: "285.7142857142857ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "285.714ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               I
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(142.9500623434968px, -166.1993036846063px) rotate(-13.58235237..."
+-                                 transform: "translate(-145.93px, -127.153px) rotate(14.8506deg)"
++                                 transitionDelay: "342.8571428571429ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "342.857ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               C
+                          ...
+                      ...
+                  ...
+ @ http://localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=de34468c:3498
+[    1907ms] [WARNING] Please ensure that the container has a non-static position, like 'relative', 'fixed', or 'absolute' to ensure scroll offset is calculated correctly. @ http://localhost:3003/node_modules/.vite/deps/motion_react.js?v=de34468c:195
+[   19078ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <SafeFragment fallback={null}>
+      <SafeFragment getResetKey={function getResetKey} errorComponent={function ErrorComponent} ...>
+        <SafeFragment fallback={function fallback}>
+          <MatchInnerImpl matchId="//">
+            <Lazy>
+              <HomePage>
+                <div className="relative">
+                  <HeroSection>
+                    <section className="relative f..." id="hero" ref={{current:null}}>
+                      <motion.div className="relative z..." style={{opacity:{...}, ...}}>
+                        <div className="relative z..." style={{...}} ref={function}>
+                          <KineticText as="h1" className="font-displ..." mode="scatter" text="LOOPWIC">
+                            <h1 className="font-displ..." ref={{current:null}}>
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(-121.79258172368388px, -0.16641871226048544px) rotate(-31.7086..."
+-                                 transform: "translate(144.229px, -42.0081px) rotate(-8.37831deg)"
++                                 transitionDelay: "0ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "0ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               L
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(-144.66061016024753px, -0.6402929647603361px) rotate(-15.38392..."
+-                                 transform: "translate(134.882px, 68.7605px) rotate(-10.4079deg)"
++                                 transitionDelay: "57.142857142857146ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "57.1429ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               O
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(-178.3338811807178px, -74.28920552712822px) rotate(-42.1476294..."
+-                                 transform: "translate(-6.75107px, -94.8482px) rotate(-7.0567deg)"
++                                 transitionDelay: "114.28571428571429ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "114.286ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               O
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(238.01200049764324px, 13.292964514571981px) rotate(6.159341065..."
+-                                 transform: "translate(-135.15px, 18.8027px) rotate(-44.6542deg)"
++                                 transitionDelay: "171.42857142857144ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "171.429ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               P
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(-258.014910643316px, -176.46844113977863px) rotate(17.34922980..."
+-                                 transform: "translate(65.442px, -154.957px) rotate(7.19232deg)"
++                                 transitionDelay: "228.57142857142858ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "228.571ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               W
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(53.48753385209655px, 151.94191852594318px) rotate(13.637835406..."
+-                                 transform: "translate(-15.1472px, 54.3026px) rotate(-38.1184deg)"
++                                 transitionDelay: "285.7142857142857ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "285.714ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               I
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(274.92856525459604px, 147.23183804299995px) rotate(12.51694439..."
+-                                 transform: "translate(-262.233px, -67.024px) rotate(3.96822deg)"
++                                 transitionDelay: "342.8571428571429ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "342.857ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               C
+                          ...
+                      ...
+                  ...
+ @ http://localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=de34468c:3498
+[   19094ms] [WARNING] Please ensure that the container has a non-static position, like 'relative', 'fixed', or 'absolute' to ensure scroll offset is calculated correctly. @ http://localhost:3003/node_modules/.vite/deps/motion_react.js?v=de34468c:195
+[   72082ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <SafeFragment fallback={null}>
+      <SafeFragment getResetKey={function getResetKey} errorComponent={function ErrorComponent} ...>
+        <SafeFragment fallback={function fallback}>
+          <MatchInnerImpl matchId="//">
+            <Lazy>
+              <HomePage>
+                <div className="relative">
+                  <HeroSection>
+                    <section className="relative f..." id="hero" ref={{current:null}}>
+                      <motion.div className="relative z..." style={{opacity:{...}, ...}}>
+                        <div className="relative z..." style={{...}} ref={function}>
+                          <KineticText as="h1" className="font-displ..." mode="scatter" text="LOOPWIC">
+                            <h1 className="font-displ..." ref={{current:null}}>
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(-259.9175810496247px, -134.23152665901924px) rotate(4.89320164..."
+-                                 transform: "translate(251.293px, 171.326px) rotate(-41.9539deg)"
++                                 transitionDelay: "0ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "0ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               L
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(-129.63980865807955px, 158.63885371763402px) rotate(5.73549642..."
+-                                 transform: "translate(251.386px, -36.0815px) rotate(38.9469deg)"
++                                 transitionDelay: "57.142857142857146ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "57.1429ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               O
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(73.13428567773883px, 146.3677612245545px) rotate(-29.916832823..."
+-                                 transform: "translate(3.03018px, -81.2235px) rotate(19.1419deg)"
++                                 transitionDelay: "114.28571428571429ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "114.286ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               O
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(-295.63483296947663px, 120.14613264539675px) rotate(-5.1536191..."
+-                                 transform: "translate(-277.606px, -135.744px) rotate(36.0426deg)"
++                                 transitionDelay: "171.42857142857144ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "171.429ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               P
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(-224.23399578438205px, -127.09577061772674px) rotate(-5.673358..."
+-                                 transform: "translate(-23.6534px, -55.1299px) rotate(-12.0376deg)"
++                                 transitionDelay: "228.57142857142858ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "228.571ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               W
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(267.3633928704656px, 18.87916515086583px) rotate(-3.5952556044..."
+-                                 transform: "translate(162.492px, 101.855px) rotate(23.349deg)"
++                                 transitionDelay: "285.7142857142857ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "285.714ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               I
+                              <span
+                                className="inline-block transition-all duration-600"
+                                style={{
++                                 opacity: 0
+-                                 opacity: "0"
++                                 transform: "translate(217.392329051012px, -54.89220729486184px) rotate(-13.631996436..."
+-                                 transform: "translate(-82.1672px, 163.246px) rotate(37.9633deg)"
++                                 transitionDelay: "342.8571428571429ms"
++                                 transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)"
+-                                 transition-delay: "342.857ms"
+-                                 transition-timing-function: "cubic-bezier(0.16, 1, 0.3, 1)"
+                                }}
+                              >
++                               C
+                          ...
+                      ...
+                  ...
+ @ http://localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=de34468c:3498
+[   72094ms] [WARNING] Please ensure that the container has a non-static position, like 'relative', 'fixed', or 'absolute' to ensure scroll offset is calculated correctly. @ http://localhost:3003/node_modules/.vite/deps/motion_react.js?v=de34468c:195

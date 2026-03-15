@@ -1,0 +1,243 @@
+[     151ms] Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <MatchInnerImpl matchId="__root__/">
+      <RootLayout>
+        <ThemeProvider attribute="class" defaultTheme="system" disableTransitionOnChange={true} enableSystem={true}>
+          <J attribute="class" defaultTheme="system" disableTransitionOnChange={true} enableSystem={true}>
+            <V attribute="class" defaultTheme="system" disableTransitionOnChange={true} enableSystem={true}>
+              <script>
+              <SiteShell>
+                <SiteHeader>
+                  <header className="fixed inse...">
+                    <motion.div>
+                    <div className="relative m...">
+                      <a>
+                      <nav aria-label="主导航" className="flex items...">
+                        <a>
+                        <a>
+                        <a>
+                        <a>
+                        <SiteThemeToggle>
+                          <motion.button aria-label="切换到浅色模式" className="ml-2 flex ..." onClick={function onClick} ...>
+                            <button
++                             aria-label="切换到浅色模式"
+-                             aria-label="切换到深色模式"
+                              className="ml-2 flex size-8 items-center justify-center rounded-lg text-muted-foreground..."
+                              onClick={function onClick}
+                              type="button"
+                              tabIndex={0}
+                              style={{}}
+                              ref={function}
+                            >
+                              <SunMedium className="size-4">
+                                <svg
+                                  ref={null}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width={24}
+                                  height={24}
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth={2}
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
++                                 className="lucide lucide-sun-medium size-4"
+-                                 className="lucide lucide-moon-star size-4"
+                                  aria-hidden="true"
+                                >
++                                 <circle cx="12" cy="12" r="4">
+-                                 <path d="M18 5h4">
+                                  ...
+                ...
+              ...
+
+    at throwOnHydrationMismatch (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:3354:13)
+    at beginWork (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:7823:196)
+    at runWithFiberInDEV (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:1485:72)
+    at performUnitOfWork (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10868:98)
+    at workLoopConcurrentByScheduler (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10864:11)
+    at renderRootConcurrent (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10844:71)
+    at performWorkOnRoot (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10330:178)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:11623:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:36:50)
+[     204ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[     204ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[     204ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[     204ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[     204ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[     204ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[     204ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[     204ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[   16953ms] Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <MatchInnerImpl matchId="__root__/">
+      <RootLayout>
+        <ThemeProvider attribute="class" defaultTheme="system" disableTransitionOnChange={true} enableSystem={true}>
+          <J attribute="class" defaultTheme="system" disableTransitionOnChange={true} enableSystem={true}>
+            <V attribute="class" defaultTheme="system" disableTransitionOnChange={true} enableSystem={true}>
+              <script>
+              <SiteShell>
+                <SiteHeader>
+                  <header className="fixed inse...">
+                    <motion.div>
+                    <div className="relative m...">
+                      <a>
+                      <nav aria-label="主导航" className="flex items...">
+                        <a>
+                        <a>
+                        <a>
+                        <a>
+                        <SiteThemeToggle>
+                          <motion.button aria-label="切换到浅色模式" className="ml-2 flex ..." onClick={function onClick} ...>
+                            <button
++                             aria-label="切换到浅色模式"
+-                             aria-label="切换到深色模式"
+                              className="ml-2 flex size-8 items-center justify-center rounded-lg text-muted-foreground..."
+                              onClick={function onClick}
+                              type="button"
+                              tabIndex={0}
+                              style={{}}
+                              ref={function}
+                            >
+                              <SunMedium className="size-4">
+                                <svg
+                                  ref={null}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width={24}
+                                  height={24}
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth={2}
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
++                                 className="lucide lucide-sun-medium size-4"
+-                                 className="lucide lucide-moon-star size-4"
+                                  aria-hidden="true"
+                                >
++                                 <circle cx="12" cy="12" r="4">
+-                                 <path d="M18 5h4">
+                                  ...
+                ...
+              ...
+
+    at throwOnHydrationMismatch (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:3354:13)
+    at beginWork (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:7823:196)
+    at runWithFiberInDEV (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:1485:72)
+    at performUnitOfWork (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10868:98)
+    at workLoopConcurrentByScheduler (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10864:11)
+    at renderRootConcurrent (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10844:71)
+    at performWorkOnRoot (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10330:178)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:11623:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:36:50)
+[   17004ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[   17004ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[   17004ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[   17004ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[   17004ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[   17005ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[   17005ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[   17005ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[  411020ms] Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <MatchInnerImpl matchId="__root__/">
+      <RootLayout>
+        <ThemeProvider attribute="class" defaultTheme="system" disableTransitionOnChange={true} enableSystem={true}>
+          <J attribute="class" defaultTheme="system" disableTransitionOnChange={true} enableSystem={true}>
+            <V attribute="class" defaultTheme="system" disableTransitionOnChange={true} enableSystem={true}>
+              <script>
+              <SiteShell>
+                <SiteHeader>
+                  <header className="fixed inse...">
+                    <motion.div>
+                    <div className="relative m...">
+                      <a>
+                      <nav aria-label="主导航" className="flex items...">
+                        <a>
+                        <a>
+                        <a>
+                        <a>
+                        <SiteThemeToggle>
+                          <motion.button aria-label="切换到浅色模式" className="ml-2 flex ..." onClick={function onClick} ...>
+                            <button
++                             aria-label="切换到浅色模式"
+-                             aria-label="切换到深色模式"
+                              className="ml-2 flex size-8 items-center justify-center rounded-lg text-muted-foreground..."
+                              onClick={function onClick}
+                              type="button"
+                              tabIndex={0}
+                              style={{}}
+                              ref={function}
+                            >
+                              <SunMedium className="size-4">
+                                <svg
+                                  ref={null}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width={24}
+                                  height={24}
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth={2}
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
++                                 className="lucide lucide-sun-medium size-4"
+-                                 className="lucide lucide-moon-star size-4"
+                                  aria-hidden="true"
+                                >
++                                 <circle cx="12" cy="12" r="4">
+-                                 <path d="M18 5h4">
+                                  ...
+                ...
+              ...
+
+    at throwOnHydrationMismatch (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:3354:13)
+    at beginWork (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:7823:196)
+    at runWithFiberInDEV (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:1485:72)
+    at performUnitOfWork (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10868:98)
+    at workLoopConcurrentByScheduler (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10864:11)
+    at renderRootConcurrent (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10844:71)
+    at performWorkOnRoot (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:10330:178)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:11623:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3004/node_modules/.vite/deps/react-dom_client.js?v=6d6b1313:36:50)
+[  411089ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[  411089ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[  411089ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[  411089ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[  411089ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[  411089ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[  411089ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707
+[  411089ms] [ERROR] Error: <ellipse> attribute ry: Expected length, "undefined". @ http://localhost:3004/node_modules/.vite/deps/motion_react.js?v=bed6b5f1:5707

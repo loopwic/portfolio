@@ -1,0 +1,22 @@
+[  986523ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/src/components/layout/site-shell.tsx?t=1773568966235:0
+[  986523ms] [ERROR] [vite] Failed to reload /src/components/layout/site-shell.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:3000/@vite/client:808
+[  986610ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/src/components/layout/site-shell.tsx?t=1773568966333:0
+[  986610ms] [ERROR] [vite] Failed to reload /src/routes/__root.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:3000/@vite/client:808
+[  999086ms] [ERROR] %o
+
+%s
+
+%s
+ NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.
+    at removeChild (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=c51b6601:13969:24)
+    at runWithFiberInDEV (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=c51b6601:1485:72)
+    at commitDeletionEffectsOnFiber (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=c51b6601:9192:19)
+    at recursivelyTraverseDeletionEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=c51b6601:9118:11)
+    at commitDeletionEffectsOnFiber (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=c51b6601:9239:13)
+    at recursivelyTraverseDeletionEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=c51b6601:9118:11)
+    at commitDeletionEffectsOnFiber (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=c51b6601:9239:13)
+    at recursivelyTraverseDeletionEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=c51b6601:9118:11)
+    at commitDeletionEffectsOnFiber (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=c51b6601:9148:13)
+    at recursivelyTraverseDeletionEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=c51b6601:9118:11) The above error occurred in the <link> component. React will try to recreate this component tree from scratch using the error boundary you provided, CatchBoundaryImpl. @ http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=c51b6601:6263
+[  999086ms] [WARNING] Warning: The following error wasn't caught by any route! At the very least, consider setting an 'errorComponent' in your RootRoute! @ http://localhost:3000/node_modules/.pnpm/tiny-warning@1.0.3/node_modules/tiny-warning/dist/tiny-warning.esm.js?v=c51b6601:8
+[  999086ms] [WARNING] Warning: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node. @ http://localhost:3000/node_modules/.pnpm/tiny-warning@1.0.3/node_modules/tiny-warning/dist/tiny-warning.esm.js?v=c51b6601:8

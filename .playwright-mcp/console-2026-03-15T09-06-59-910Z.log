@@ -1,0 +1,35 @@
+[     236ms] Error: Invalid easing type 'steps(1)'. For more information and steps for solving, visit https://motion.dev/troubleshooting/invalid-easing-type
+    at invariant (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:107:13)
+    at easingDefinitionToFunction (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:302:5)
+    at keyframes (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1307:90)
+    at JSAnimation.initAnimation (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1422:23)
+    at new JSAnimation (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1404:10)
+    at AsyncMotionValueAnimation.onKeyframesResolved (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:2325:10)
+    at DOMKeyframesResolver.onComplete (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:2298:115)
+    at DOMKeyframesResolver.complete (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1880:10)
+    at http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1805:44
+    at Set.forEach (<anonymous>)
+[   51605ms] Error: Invalid easing type 'steps(1)'. For more information and steps for solving, visit https://motion.dev/troubleshooting/invalid-easing-type
+    at invariant (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:107:13)
+    at easingDefinitionToFunction (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:302:5)
+    at keyframes (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1307:90)
+    at JSAnimation.initAnimation (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1422:23)
+    at new JSAnimation (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1404:10)
+    at AsyncMotionValueAnimation.onKeyframesResolved (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:2325:10)
+    at DOMKeyframesResolver.onComplete (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:2298:115)
+    at DOMKeyframesResolver.complete (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1880:10)
+    at http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1805:44
+    at Set.forEach (<anonymous>)
+[   65080ms] Error: Invalid easing type 'steps(1)'. For more information and steps for solving, visit https://motion.dev/troubleshooting/invalid-easing-type
+    at invariant (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:107:13)
+    at easingDefinitionToFunction (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:302:5)
+    at keyframes (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1307:90)
+    at JSAnimation.initAnimation (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1422:23)
+    at new JSAnimation (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1404:10)
+    at AsyncMotionValueAnimation.onKeyframesResolved (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:2325:10)
+    at DOMKeyframesResolver.onComplete (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:2298:115)
+    at DOMKeyframesResolver.complete (http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1880:10)
+    at http://localhost:3001/node_modules/.vite/deps/motion_react.js?v=c51b6601:1805:44
+    at Set.forEach (<anonymous>)
+[   92740ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/src/components/layout/site-header.tsx?t=1773565712643:0
+[   92740ms] [ERROR] [vite] Failed to reload /src/components/layout/site-header.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:3001/@vite/client:808

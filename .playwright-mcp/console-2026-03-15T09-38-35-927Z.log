@@ -1,0 +1,7 @@
+[    1781ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://api-meting.imsyy.top/api?server=netease&type=playlist&id=9379831714:0
+[    1783ms] TypeError: Failed to fetch
+    at https://www.imsyy.top/assets/index-8744cd07.js:32:55121
+    at https://www.imsyy.top/assets/index-8744cd07.js:32:55682
+[    1864ms] [ERROR] Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID @ https://api.oioweb.cn/api/weather/GetWeather:0
+[    1864ms] [ERROR] 天气信息获取失败:TypeError: Failed to fetch @ https://www.imsyy.top/assets/index-8744cd07.js:31
+[    1866ms] [ERROR] 天气信息获取失败 @ https://www.imsyy.top/assets/index-8744cd07.js:31

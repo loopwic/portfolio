@@ -1,143 +1,140 @@
-/** biome-ignore-all lint/style/noMagicNumbers: this file will contain magic numbers */
-const EASE_OUT_CUBIC = [0.4, 0, 0.2, 1] as const;
-const ANIMATION_DURATION_MEDIUM = 0.4;
+/** biome-ignore-all lint/style/noMagicNumbers: animation constants */
 
-export const THEME_TOGGLE_ANIMATIONS = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-};
+/* ── Core easing curves ── */
+export const EASE_BRUTAL = [0.16, 1, 0.3, 1] as const;
+export const EASE_ENTER = [0.0, 0.0, 0.2, 1] as const;
+export const EASE_OUT_CUBIC = [0.4, 0, 0.2, 1] as const;
 
-export const LOGO_HOVER_ANIMATIONS = {
-  initial: { opacity: 1, y: 0 },
-  animate: { opacity: 0, y: -10 },
-};
+/* ── Durations ── */
+export const DURATION_SNAP = 0.18;
+export const DURATION_FAST = 0.25;
+export const DURATION_SECTION = 0.4;
+export const DURATION_KINETIC = 0.6;
+export const DURATION_REDUCED = 0.3;
 
-const HERO_WIDTH = {
-  rest: "var(--hero-width-rest)",
-  hover: "var(--hero-width-hover)",
-} as const;
-
-const HERO_ASPECT = {
-  rest: "var(--hero-aspect-rest)",
-  hover: "var(--hero-aspect-hover)",
-} as const;
-
-export const HERO_ANIMATIONS = {
-  button: {
-    initial: {
-      width: HERO_WIDTH.rest,
-      aspectRatio: HERO_ASPECT.rest,
-      borderRadius: "var(--radius)",
-    },
+/* ── Kinetic text presets ── */
+export const KINETIC_TEXT = {
+  scatter: {
+    initial: (_i: number) => ({
+      x: (Math.random() - 0.5) * 600,
+      y: (Math.random() - 0.5) * 400,
+      rotate: (Math.random() - 0.5) * 90,
+      opacity: 0,
+    }),
     animate: {
-      width: HERO_WIDTH.hover,
-      aspectRatio: HERO_ASPECT.hover,
-      borderRadius: 0,
+      x: 0,
+      y: 0,
+      rotate: 0,
+      opacity: 1,
     },
-    transition: { duration: 0.3 },
+    transition: (i: number, total: number) => ({
+      duration: DURATION_KINETIC,
+      delay: i * (0.4 / total),
+      ease: EASE_BRUTAL,
+    }),
   },
-  cover: {
+  typewriter: {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    staggerDelay: 0.02,
+    transition: {
+      duration: DURATION_SNAP,
+      ease: EASE_BRUTAL,
+    },
+  },
+  cipherIterations: 6,
+  cipherIntervalMs: 50,
+} as const;
+
+/* ── Section reveal animations ── */
+export const REVEAL = {
+  fadeUp: {
+    initial: { opacity: 0, y: 40 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: DURATION_SECTION, ease: EASE_BRUTAL },
+  },
+  fadeIn: {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
-    transition: { duration: 0.2 },
+    transition: { duration: DURATION_SECTION, ease: EASE_ENTER },
   },
-  text: {
-    initial: { y: 20, opacity: 0 },
-    animate: { y: 0, opacity: 1 },
-    transition: { duration: 0.3 },
+  slideLeft: {
+    initial: { opacity: 0, x: -60 },
+    animate: { opacity: 1, x: 0 },
+    transition: { duration: DURATION_SECTION, ease: EASE_BRUTAL },
   },
-} as const;
-
-export const SCROLL_VIEW_CONTAINER_VARIANTS = {
-  rest: {
-    scale: 1,
-    opacity: 1,
-    width: HERO_WIDTH.rest,
-    aspectRatio: HERO_ASPECT.rest,
+  slideRight: {
+    initial: { opacity: 0, x: 60 },
+    animate: { opacity: 1, x: 0 },
+    transition: { duration: DURATION_SECTION, ease: EASE_BRUTAL },
   },
-  hover: {
-    scale: 1.02,
-    opacity: 1,
-    width: HERO_WIDTH.hover,
-    aspectRatio: HERO_ASPECT.hover,
-  },
-} as const;
-
-export const SCROLL_VIEW_CONTAINER_TRANSITION = {
-  duration: 0.35,
-  ease: "easeOut",
-} as const;
-
-export const ABOUT_ANIMATIONS = {
-  container: {
-    initial: { opacity: 0.5, y: 70 },
-    animate: { opacity: 1, y: 0 },
-    transition: {
-      duration: 0.3,
-      staggerChildren: 0.3,
-      when: "beforeChildren",
-    },
-  },
-  List: {
-    initial: { opacity: 0.3 },
+  reduced: {
+    initial: { opacity: 0 },
     animate: { opacity: 1 },
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-  },
-  skillItem: {
-    initial: { opacity: 0, x: 20, scale: 0.9 },
-    animate: { opacity: 1, x: 0, scale: 1 },
-    transition: { duration: ANIMATION_DURATION_MEDIUM, ease: EASE_OUT_CUBIC },
-  },
-  workItem: {
-    initial: { opacity: 0, y: -20, scale: 0.9 },
-    animate: { opacity: 1, y: 0, scale: 1 },
-    transition: { duration: ANIMATION_DURATION_MEDIUM, ease: EASE_OUT_CUBIC },
-  },
-  workLine: {
-    initial: { scaleY: 0, opacity: 0 },
-    animate: { scaleY: 1, opacity: 1 },
-    transition: {
-      duration: ANIMATION_DURATION_MEDIUM,
-      delay: 0.3,
-      ease: EASE_OUT_CUBIC,
-    },
-  },
-};
-export const SCROLL_VIEW_ANIMATIONS = {
-  scrollIdleTimeout: 1800,
-  indicatorFadeDuration: 0.22,
-  imageTransform: {
-    translateYRange: [0, -100],
-    opacityInputRange: [0, 0.1, 0.9, 1],
-    opacityOutputRange: [1, 0.8, 0.8, 1],
-  },
-  textTransition: {
-    duration: 0.3,
-    ease: EASE_OUT_CUBIC,
-  },
-  textTransitionDelayed: {
-    duration: 0.3,
-    delay: 0.1,
-    ease: EASE_OUT_CUBIC,
+    transition: { duration: DURATION_REDUCED },
   },
 } as const;
 
-export const BLOG_ANIMATIONS = {
+/* ── Interaction animations ── */
+export const INTERACTION = {
+  cardHover: { y: -4 },
+  cardHoverReduced: { y: -1 },
+  cardTransition: {
+    duration: DURATION_SNAP,
+    ease: EASE_BRUTAL,
+  },
+  rowShift: { x: 12 },
+  rowShiftReduced: { x: 2 },
+} as const;
+
+/* ── Stagger presets ── */
+export const STAGGER = {
+  fast: { staggerChildren: 0.05 },
+  normal: { staggerChildren: 0.1 },
+  slow: { staggerChildren: 0.2 },
+} as const;
+
+/* ── Scroll-linked 3D ── */
+export const SPATIAL = {
+  perspective: 1200,
+  heroParallaxZ: -200,
+  sectionTiltX: 2,
+  cardHoverZ: 20,
+} as const;
+
+/* ── Nav animations ── */
+export const NAV = {
+  show: { y: 0 },
+  hide: { y: "-100%" },
+  transition: {
+    duration: DURATION_FAST,
+    ease: EASE_BRUTAL,
+  },
+} as const;
+
+/* ── Blog animations ── */
+export const BLOG = {
   container: {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
+      transition: { staggerChildren: 0.08 },
     },
   },
   item: {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, x: -20 },
     visible: {
       opacity: 1,
-      y: 0,
-      transition: { duration: ANIMATION_DURATION_MEDIUM, ease: EASE_OUT_CUBIC },
+      x: 0,
+      transition: { duration: DURATION_SECTION, ease: EASE_BRUTAL },
     },
   },
+} as const;
+
+/* ── Route transition ── */
+export const ROUTE_TRANSITION = {
+  enter: { opacity: 0, x: 40 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -40 },
+  transition: { duration: DURATION_FAST, ease: EASE_BRUTAL },
 } as const;

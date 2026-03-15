@@ -8,15 +8,13 @@ type Heading = {
   level: number;
 };
 
-// 滚动偏移量常量
-const NAVBAR_HEIGHT = 72; // 导航栏高度
+const NAVBAR_HEIGHT = 72;
 const PARENT_PADDING_TOP = 18;
 const TOTAL_OFFSET = NAVBAR_HEIGHT + PARENT_PADDING_TOP;
-const SCROLL_SPACING = 20; // 滚动时的额外间距
-const THROTTLE_DELAY = 50; // 节流延迟（毫秒）
-const READING_OFFSET = 100; // 阅读位置偏移量
+const SCROLL_SPACING = 20;
+const THROTTLE_DELAY = 50;
+const READING_OFFSET = 100;
 
-// 计算相对于最小层级的缩进
 const calculateIndent = (level: number, minLevel: number): string => {
   const relativeLevel = level - minLevel;
   const indentMap = {
@@ -35,7 +33,6 @@ export function TableOfContents() {
   const [activeId, setActiveId] = useState<string>("");
 
   useEffect(() => {
-    // 提取页面中的所有标题，排除 H1（文档标题）
     const headingElements = document.querySelectorAll("h2, h3, h4, h5, h6");
     const headingList: Heading[] = Array.from(headingElements)
       .filter((heading) => heading.id && heading.textContent?.trim())
@@ -47,16 +44,13 @@ export function TableOfContents() {
 
     setHeadings(headingList);
 
-    // 计算标题信息的辅助函数
     const getHeadingInfo = (
       heading: Heading,
       readingPosition: number,
       viewportTop: number
     ) => {
       const element = document.getElementById(heading.id);
-      if (!element) {
-        return null;
-      }
+      if (!element) return null;
 
       const elementTop = element.offsetTop;
       const elementHeight = element.offsetHeight;
@@ -74,7 +68,6 @@ export function TableOfContents() {
       };
     };
 
-    // 选择目标标题的辅助函数
     const findTargetHeading = (
       headingInfos: NonNullable<ReturnType<typeof getHeadingInfo>>[]
     ) => {
@@ -93,11 +86,8 @@ export function TableOfContents() {
       return lastPassed || headingInfos[0];
     };
 
-    // 精细化的滚动高亮逻辑
     const updateActiveHeading = () => {
-      if (headingList.length === 0) {
-        return;
-      }
+      if (headingList.length === 0) return;
 
       const scrollTop = window.scrollY;
       const viewportTop = scrollTop + TOTAL_OFFSET;
@@ -108,36 +98,26 @@ export function TableOfContents() {
         .filter((item): item is NonNullable<typeof item> => item !== null)
         .sort((a, b) => a.elementTop - b.elementTop);
 
-      if (headingInfos.length === 0) {
-        return;
-      }
+      if (headingInfos.length === 0) return;
 
       const targetHeading = findTargetHeading(headingInfos);
       setActiveId(targetHeading.id);
     };
 
-    // 初始化时设置第一个标题为活跃
     if (headingList.length > 0) {
       setActiveId(headingList[0].id);
     }
 
-    // 使用简单的节流优化
     let lastUpdateTime = 0;
 
     const throttledUpdateActiveHeading = () => {
       const now = Date.now();
-      if (now - lastUpdateTime < THROTTLE_DELAY) {
-        return;
-      }
-
+      if (now - lastUpdateTime < THROTTLE_DELAY) return;
       lastUpdateTime = now;
       requestAnimationFrame(updateActiveHeading);
     };
 
-    // 添加滚动监听
     window.addEventListener("scroll", throttledUpdateActiveHeading);
-
-    // 初始调用一次
     updateActiveHeading();
 
     return () => {
@@ -151,37 +131,28 @@ export function TableOfContents() {
       const elementPosition = element.offsetTop;
       const offsetPosition = elementPosition - TOTAL_OFFSET - SCROLL_SPACING;
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
-
-      // 立即更新活跃状态，提供即时反馈
+      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
       setActiveId(id);
     }
   };
 
-  if (headings.length === 0) {
-    return null;
-  }
+  if (headings.length === 0) return null;
 
-  // 找到最小层级作为基准（通常是 H2 = level 2）
   const minLevel = Math.min(...headings.map((h) => h.level));
 
   return (
     <nav className="max-h-[calc(100vh-9rem)] overflow-y-auto pr-1">
-      <div className="mb-3 font-medium text-foreground text-sm">目录</div>
-      <ul className="space-y-1 text-sm">
+      <ul className="space-y-0.5 text-sm">
         {headings.map((heading) => (
           <li
             className={calculateIndent(heading.level, minLevel)}
             key={heading.id}
           >
             <button
-              className={`block w-full rounded-md border px-2.5 py-1.5 text-left transition-colors ${
+              className={`block w-full border-l-2 px-2.5 py-1.5 text-left transition-colors ${
                 activeId === heading.id
-                  ? "border-border bg-muted/65 font-medium text-primary"
-                  : "border-transparent text-muted-foreground hover:border-border/60 hover:bg-muted/45 hover:text-foreground"
+                  ? "border-signal-a font-medium text-foreground"
+                  : "border-transparent text-muted-foreground hover:border-border-hard hover:text-foreground"
               }`}
               onClick={() => scrollToHeading(heading.id)}
               type="button"

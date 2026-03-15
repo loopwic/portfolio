@@ -1,0 +1,4 @@
+[   25145ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/src/routes/__root.tsx?t=1773567511576:0
+[   25146ms] [ERROR] [vite] Failed to reload /src/routes/__root.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:3001/@vite/client:808
+[   25262ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/projects:0
+[   77608ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/projects:0
