@@ -28,18 +28,18 @@
 ### 环境要求
 
 - Node.js ≥ 20
-- [pnpm](https://pnpm.io/) ≥ 8（项目使用 `packageManager` 锁定版本）
+- [Bun](https://bun.sh/) 1.3.x（项目使用 `packageManager` 锁定版本）
 
 ### 安装依赖
 
 ```bash
-pnpm install
+bun install
 ```
 
 ### 开发模式
 
 ```bash
-pnpm dev
+bun run dev
 ```
 
 默认访问地址：<http://localhost:3000>
@@ -47,29 +47,29 @@ pnpm dev
 ### 构建与启动
 
 ```bash
-pnpm build
-pnpm start
+bun run build
+bun run start
 ```
 
 ### 代码质量
 
 ```bash
-pnpm lint   # Biome 检查
-pnpm format # Biome 自动格式化
+bun run lint   # Biome 检查
+bun run format # Biome 自动格式化
 ```
 
 ### Git 钩子
 
 项目集成了 [lefthook](https://github.com/evilmartians/lefthook)：
 
-- `pre-commit`：执行 `pnpm lint-staged`（针对暂存区文件运行 Biome 修复）
+- `pre-commit`：执行 `bunx lint-staged`（针对暂存区文件运行 Biome 修复）
 - `commit-msg`：使用 `@commitlint/config-conventional` 校验提交信息
-- `pre-push`：推送前运行 `pnpm lint`
+- `pre-push`：推送前运行 `bun run lint`
 
 首次克隆后运行一次：
 
 ```bash
-pnpm dlx lefthook install
+bunx lefthook install
 ```
 
 ### 语义化发布
@@ -77,7 +77,7 @@ pnpm dlx lefthook install
 项目通过 [semantic-release](https://semantic-release.gitbook.io/) 自动生成版本与变更记录：
 
 1. 使用 Conventional Commits 规则书写提交信息
-2. 在 CI 中执行 `pnpm semantic-release`
+2. 在 CI 中执行 `bun run release`
 3. 自动更新版本号、发布标签并写入 `CHANGELOG.md`
 
 ## 🗂️ 项目结构
