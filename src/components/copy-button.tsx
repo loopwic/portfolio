@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 
 const COPY_TIMEOUT = 2000;
@@ -12,9 +13,10 @@ const STATUS_LABELS = {
 
 type CopyButtonProps = {
   value: string;
+  variant?: "default" | "inverted";
 };
 
-export function CopyButton({ value }: CopyButtonProps) {
+export function CopyButton({ value, variant = "default" }: CopyButtonProps) {
   const [status, setStatus] =
     React.useState<keyof typeof STATUS_LABELS>("idle");
   const timeoutRef = React.useRef<number | null>(null);
@@ -61,7 +63,12 @@ export function CopyButton({ value }: CopyButtonProps) {
   return (
     <Button
       aria-live="polite"
-      className="h-6 border-border/70 bg-background/75 px-2 text-[0.68rem] text-muted-foreground hover:bg-background"
+      className={cn(
+        "h-6 rounded-md px-2.5 font-medium font-mono text-[0.62rem] tracking-[0.08em] transition-colors duration-200",
+        variant === "inverted"
+          ? "border border-background/20 bg-transparent text-background/70 hover:bg-background/10 hover:text-background"
+          : "border border-foreground/10 bg-transparent text-foreground/40 hover:bg-foreground/5 hover:text-foreground"
+      )}
       onClick={handleCopy}
       size="sm"
       type="button"

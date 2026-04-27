@@ -2,14 +2,14 @@ pre-commit:
   parallel: true
   commands:
     lint_staged:
-      run: pnpm lint-staged
+      run: bunx lint-staged
 
 commit-msg:
   commands:
     commitlint:
-      run: pnpm exec commitlint --edit "$1"
+      run: bunx commitlint --edit "$1"
 
 pre-push:
   commands:
     lint:
-      run: pnpm lint
+      run: bun run lint

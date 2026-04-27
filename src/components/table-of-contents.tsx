@@ -50,7 +50,9 @@ export function TableOfContents() {
       viewportTop: number
     ) => {
       const element = document.getElementById(heading.id);
-      if (!element) return null;
+      if (!element) {
+        return null;
+      }
 
       const elementTop = element.offsetTop;
       const elementHeight = element.offsetHeight;
@@ -87,7 +89,9 @@ export function TableOfContents() {
     };
 
     const updateActiveHeading = () => {
-      if (headingList.length === 0) return;
+      if (headingList.length === 0) {
+        return;
+      }
 
       const scrollTop = window.scrollY;
       const viewportTop = scrollTop + TOTAL_OFFSET;
@@ -98,7 +102,9 @@ export function TableOfContents() {
         .filter((item): item is NonNullable<typeof item> => item !== null)
         .sort((a, b) => a.elementTop - b.elementTop);
 
-      if (headingInfos.length === 0) return;
+      if (headingInfos.length === 0) {
+        return;
+      }
 
       const targetHeading = findTargetHeading(headingInfos);
       setActiveId(targetHeading.id);
@@ -112,7 +118,9 @@ export function TableOfContents() {
 
     const throttledUpdateActiveHeading = () => {
       const now = Date.now();
-      if (now - lastUpdateTime < THROTTLE_DELAY) return;
+      if (now - lastUpdateTime < THROTTLE_DELAY) {
+        return;
+      }
       lastUpdateTime = now;
       requestAnimationFrame(updateActiveHeading);
     };
@@ -136,7 +144,9 @@ export function TableOfContents() {
     }
   };
 
-  if (headings.length === 0) return null;
+  if (headings.length === 0) {
+    return null;
+  }
 
   const minLevel = Math.min(...headings.map((h) => h.level));
 

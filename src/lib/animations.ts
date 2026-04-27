@@ -1,5 +1,3 @@
-/** biome-ignore-all lint/style/noMagicNumbers: animation constants */
-
 /* ── Core easing curves ── */
 export const EASE_BRUTAL = [0.16, 1, 0.3, 1] as const;
 export const EASE_ENTER = [0.0, 0.0, 0.2, 1] as const;

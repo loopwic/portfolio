@@ -1,10 +1,8 @@
 "use client";
 
-import type { MotionValue } from "motion/react";
 import { createContext, type ReactNode, useContext } from "react";
 
 type ScrollContextType = {
-  scrollYProgress: MotionValue<number>;
   currentSectionIndex: number;
   scrollToSection: (id: string) => void;
 };

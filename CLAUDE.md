@@ -5,13 +5,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-pnpm dev              # Start dev server on port 3000
-pnpm build            # Production build
-pnpm lint             # Biome lint check
-pnpm format           # Biome auto-format
-pnpm preview          # Build + local Cloudflare Workers preview
-pnpm deploy           # Build + deploy to Cloudflare Workers
-pnpm release          # Semantic versioning (CI runs this on push to main)
+bun run dev           # Start dev server on port 3000
+bun run build         # Production build
+bun run lint          # Biome lint check
+bun run format        # Biome auto-format
+bun run preview       # Build + local Cloudflare Workers preview
+bun run deploy        # Build + deploy to Cloudflare Workers
+bun run release       # Semantic versioning (CI runs this on push to main)
 ```
 
 ## Tech Stack
@@ -22,7 +22,7 @@ pnpm release          # Semantic versioning (CI runs this on push to main)
 - **Content:** MDX blog articles with rehype-pretty-code, remark-gfm
 - **Deploy:** Cloudflare Workers via Wrangler
 - **Linting:** Biome (extends ultracite), enforced via lefthook pre-commit/pre-push hooks
-- **Package manager:** pnpm
+- **Package manager:** Bun only. Do not use pnpm/npm/yarn commands in this project.
 
 ## Architecture
 
@@ -71,6 +71,7 @@ Blog articles are MDX files in `src/content/`. Code blocks use dual themes: GitH
 - **Commits:** Conventional Commits required (feat:, fix:, chore:, etc.) — enforced by commitlint
 - **Path alias:** `@/*` maps to `src/*`
 - **Biome ignores:** `src/routeTree.gen.ts`, `src/components/ui/`, `.tanstack/`, `dist/`, `build/`
+- **Agent command rule:** use `bun`, `bunx`, and `bun run <script>` for all dependency, script, lint, format, build, and hook commands.
 
 ## Design Context
 

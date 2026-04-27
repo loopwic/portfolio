@@ -1,20 +1,33 @@
 "use client";
 
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import {
-  motion,
-  useMotionValueEvent,
-  useScroll,
-  useTransform,
-} from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useEffect, useRef, useState } from "react";
 import { useScrollContext } from "@/contexts/scroll-context";
-import { NAV_ITEMS, HOME_SECTIONS, SITE } from "@/lib/site-data";
-import { NAV, EASE_BRUTAL, DURATION_FAST } from "@/lib/animations";
+import { HOME_SECTIONS } from "@/lib/site-data";
 import { cn } from "@/lib/utils";
 
 const SCROLL_HIDE_THRESHOLD = 80;
+
+const sectionLabels: Partial<Record<(typeof HOME_SECTIONS)[number], string>> = {
+  hero: "Home",
+  about: "Protocol",
+  projects: "Output",
+  writing: "Log",
+  cta: "Ping",
+};
+
+function PixelLogo() {
+  return (
+    <div className="group inline-flex items-center gap-2">
+      <span className="h-2 w-2 bg-current transition-transform group-hover:translate-x-0.5" />
+      <span className="font-display text-[1.05rem] font-black uppercase leading-none tracking-[0.12em]">
+        Loopwic
+      </span>
+    </div>
+  );
+}
 
 export function SiteNav() {
   const location = useLocation();
@@ -30,17 +43,25 @@ export function SiteNav() {
     setIsMounted(true);
   }, []);
 
-  const { scrollY } = useScroll();
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (latest < SCROLL_HIDE_THRESHOLD) {
-      setIsVisible(true);
+  useEffect(() => {
+    const updateVisibility = () => {
+      const latest = window.scrollY;
+      if (latest < SCROLL_HIDE_THRESHOLD) {
+        setIsVisible(true);
+        lastScrollY.current = latest;
+        return;
+      }
+      setIsVisible(latest < lastScrollY.current);
       lastScrollY.current = latest;
-      return;
-    }
-    setIsVisible(latest < lastScrollY.current);
-    lastScrollY.current = latest;
-  });
+    };
+
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", updateVisibility);
+    };
+  }, []);
 
   const handleSectionClick = (sectionId: string) => {
     if (pathname !== "/") {
@@ -54,126 +75,100 @@ export function SiteNav() {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
-  const homeSectionLinks = HOME_SECTIONS.filter(
-    (s) => s === "hero" || s === "about" || s === "projects"
-  );
-  const sectionLabels: Record<string, string> = {
-    hero: "HOME",
-    about: "ABOUT",
-    projects: "PROJECTS",
-  };
-
   return (
     <>
-      {/* Desktop nav — top bar */}
-      <motion.header
-        animate={isVisible ? NAV.show : NAV.hide}
-        className="fixed inset-x-0 top-0 z-99 hidden border-border-hard border-b-2 bg-background/90 backdrop-blur-md md:block"
-        initial={NAV.show}
-        transition={NAV.transition}
+      <header
+        className={cn(
+          "fixed inset-x-0 top-0 z-50 hidden border-foreground/10 border-b bg-background/95 px-5 py-3 text-foreground transition-transform duration-300 ease-out md:block",
+          isVisible ? "translate-y-0" : "-translate-y-full"
+        )}
       >
-        <nav className="container mx-auto flex h-14 items-center justify-between px-4">
-          <button
-            className="font-display font-bold text-lg tracking-tight"
-            onClick={() => handleSectionClick("hero")}
-            type="button"
-          >
-            {SITE.title}
-          </button>
+        <div className="mx-auto flex max-w-[1520px] items-center justify-between gap-4">
+          <nav className="flex items-center gap-6">
+            <button
+              className="mr-6 outline-none"
+              onClick={() => handleSectionClick("hero")}
+              type="button"
+            >
+              <PixelLogo />
+            </button>
 
-          <div className="flex items-center gap-6">
-            {homeSectionLinks.map((sectionId, index) => (
+            {HOME_SECTIONS.map((sectionId, index) => (
               <button
                 className={cn(
-                  "brutal-mono relative py-1 transition-colors hover:text-foreground",
+                  "relative py-1 font-black font-mono text-[0.65rem] uppercase tracking-[0.25em] transition-all hover:opacity-100 outline-none",
                   pathname === "/" && index === currentSectionIndex
-                    ? "text-foreground"
-                    : "text-muted-foreground"
+                    ? "opacity-100 before:absolute before:left-0 before:-bottom-1 before:h-0.5 before:w-full before:bg-foreground"
+                    : "opacity-45 hover:before:absolute hover:before:left-0 hover:before:-bottom-1 hover:before:h-px hover:before:w-full hover:before:bg-foreground/40"
                 )}
                 key={sectionId}
                 onClick={() => handleSectionClick(sectionId)}
                 type="button"
               >
                 {sectionLabels[sectionId]}
-                {pathname === "/" && index === currentSectionIndex && (
-                  <motion.span
-                    className="absolute inset-x-0 -bottom-0.5 h-[3px] bg-signal-a"
-                    layoutId="nav-underline"
-                    transition={{
-                      duration: DURATION_FAST,
-                      ease: EASE_BRUTAL,
-                    }}
-                  />
-                )}
               </button>
             ))}
+
+            <span className="mx-2 h-3 w-px bg-foreground/15" />
+
             <Link
               className={cn(
-                "brutal-mono relative py-1 transition-colors hover:text-foreground",
+                "relative py-1 font-black font-mono text-[0.65rem] uppercase tracking-[0.25em] transition-all hover:opacity-100 outline-none",
                 pathname.startsWith("/blog")
-                  ? "text-foreground"
-                  : "text-muted-foreground"
+                  ? "opacity-100 before:absolute before:left-0 before:-bottom-1 before:h-0.5 before:w-full before:bg-foreground"
+                  : "opacity-45 hover:before:absolute hover:before:left-0 hover:before:-bottom-1 hover:before:h-px hover:before:w-full hover:before:bg-foreground/40"
               )}
               to="/blog"
             >
-              BLOG
-              {pathname.startsWith("/blog") && (
-                <span className="absolute inset-x-0 -bottom-0.5 h-[3px] bg-signal-a" />
-              )}
+              Blog
             </Link>
+          </nav>
 
-            <button
-              aria-label="Toggle theme"
-              className="brutal-mono ml-2 border-2 border-border-hard px-2 py-1 transition-colors hover:bg-foreground hover:text-background"
-              onClick={toggleTheme}
-              type="button"
-            >
-              {isMounted ? (resolvedTheme === "dark" ? "LIGHT" : "DARK") : "—"}
-            </button>
-          </div>
-        </nav>
-      </motion.header>
-
-      {/* Mobile nav — bottom bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-99 flex h-12 items-center justify-around border-border-hard border-t-2 bg-background/90 backdrop-blur-md md:hidden">
-        {homeSectionLinks.map((sectionId, index) => (
           <button
-            className={cn(
-              "brutal-mono transition-colors",
-              pathname === "/" && index === currentSectionIndex
-                ? "text-signal-a"
-                : "text-muted-foreground"
-            )}
-            key={sectionId}
-            onClick={() => handleSectionClick(sectionId)}
+            aria-label="Toggle theme"
+            className="grid h-8 w-8 place-items-center opacity-60 hover:opacity-100 transition-opacity outline-none"
+            onClick={toggleTheme}
             type="button"
           >
-            {sectionLabels[sectionId]}
+            {isMounted && resolvedTheme === "dark" ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
           </button>
-        ))}
-        <Link
-          className={cn(
-            "brutal-mono transition-colors",
-            pathname.startsWith("/blog")
-              ? "text-signal-a"
-              : "text-muted-foreground"
-          )}
-          to="/blog"
-        >
-          BLOG
-        </Link>
+        </div>
+      </header>
+
+      <header className="fixed inset-x-0 top-0 z-50 flex h-20 items-center justify-between bg-background/80 backdrop-blur-md px-5 md:hidden border-b border-foreground/10">
         <button
-          aria-label="Toggle theme"
-          className={cn(
-            "brutal-mono transition-colors",
-            "text-muted-foreground"
-          )}
-          onClick={toggleTheme}
+          className="outline-none"
+          onClick={() => handleSectionClick("hero")}
           type="button"
         >
-          {isMounted ? (resolvedTheme === "dark" ? "LT" : "DK") : "—"}
+          <PixelLogo />
         </button>
-      </nav>
+
+        <div className="flex items-center gap-4">
+          <Link
+            className="font-black font-mono text-[0.68rem] uppercase tracking-[0.2em] opacity-60"
+            to="/blog"
+          >
+            Blog
+          </Link>
+          <button
+            aria-label="Toggle theme"
+            className="grid h-8 w-8 place-items-center opacity-60"
+            onClick={toggleTheme}
+            type="button"
+          >
+            {isMounted && resolvedTheme === "dark" ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+      </header>
     </>
   );
 }

@@ -1,38 +1,31 @@
-export type BlogPost = {
-  title: string;
-  slug: string;
-  to: `/blog/${string}`;
-  date: string;
-  summary: string;
-  tags: string[];
-};
-
-export const BLOG_POSTS: BlogPost[] = [
+export const BLOG_POSTS = [
   {
-    title: "从零开始构建Alacrity终端",
+    title: "把终端调成工作台",
     slug: "configure-alacritty-from-scratch",
     to: "/blog/configure-alacritty-from-scratch",
     date: "2025-09-29",
     summary:
-      "分享我如何从零开始配置Alacritty终端，包括字体、配色方案、快捷键等，让终端更高效美观。",
+      "从字体、主题到快捷键，记录我如何把日常开发入口做得顺手、克制、可复用。",
     tags: ["Alacritty", "Terminal", "Configuration"],
   },
   {
-    title: "使用Next.js和MDX构建个人博客",
+    title: "用 MDX 做写作系统",
     slug: "build-personal-blog-with-nextjs-and-mdx",
     to: "/blog/build-personal-blog-with-nextjs-and-mdx",
     date: "2025-08-15",
     summary:
-      "介绍如何使用Next.js和MDX快速搭建一个功能完善的个人博客，支持Markdown写作和React组件。",
+      "把内容、组件和路由放进同一个工程节奏里，让个人站既能表达，也方便长期维护。",
     tags: ["Next.js", "MDX", "Blog"],
   },
   {
-    title: "Lattice 项目全景：Mod + Backend + Desktop 的一体化风控系统",
+    title: "Lattice 风控系统拆解",
     slug: "lattice-backend-ddd-refactor",
     to: "/blog/lattice-backend-ddd-refactor",
     date: "2026-02-24",
     summary:
-      "不讲空话，直接讲我在做 Lattice 时的真实问题和做法：事件不丢、告警降噪、扫描稳定、权限可追踪、配置可验证。",
+      "拆解我在 Lattice 中处理事件可靠性、告警降噪、扫描稳定和权限追踪的真实做法。",
     tags: ["Lattice", "Minecraft", "Rust", "Tauri", "Ops"],
   },
-];
+] as const;
+
+export type BlogPost = (typeof BLOG_POSTS)[number];

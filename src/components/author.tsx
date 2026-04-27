@@ -6,23 +6,26 @@ const AUTHOR = {
 
 export function Author() {
   return (
-    <div className="not-prose my-5 flex items-center gap-3 rounded-xl border border-border/75 bg-muted/25 px-3 py-2">
+    <div className="not-prose my-7 flex items-center gap-4 border-foreground/15 border-y py-3">
       <img
         alt={AUTHOR.name}
-        className="size-10 rounded-full border border-border/70"
+        className="size-11 border border-foreground/15 grayscale"
         height={40}
         src={AUTHOR.avatarUrl}
         width={40}
       />
 
       <a
-        className="transition-colors hover:text-primary"
+        className="group grid gap-1 transition-colors hover:text-primary"
         href={AUTHOR.profileUrl}
         rel="noopener noreferrer"
         target="_blank"
       >
-        <p className="font-semibold text-sm">{AUTHOR.name}</p>
-        <p className="text-muted-foreground text-xs">作者</p>
+        <p className="flex items-center gap-2 font-black font-mono text-[0.72rem] uppercase tracking-[0.18em]">
+          <span className="h-2 w-2 bg-signal-a transition-transform group-hover:translate-x-1" />
+          {AUTHOR.name}
+        </p>
+        <p className="text-muted-foreground text-xs">Author / Frontend</p>
       </a>
     </div>
   );

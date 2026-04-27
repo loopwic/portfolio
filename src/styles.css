@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -12,7 +13,7 @@
   --color-surface-elevated: var(--surface-elevated);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-geist-display);
+  --font-display: var(--font-serif);
   --color-border: var(--border);
   --color-border-hard: var(--border-hard);
   --color-border-soft: var(--border-soft);
@@ -36,51 +37,50 @@
 }
 
 :root {
-  --font-geist-sans: "IBM Plex Sans", "Noto Sans SC", "Segoe UI", sans-serif;
+  --font-geist-sans: "IBM Plex Sans", "Helvetica Neue", "Arial", sans-serif;
   --font-geist-mono: "JetBrains Mono", "SFMono-Regular", "Menlo", monospace;
-  --font-geist-display:
-    "Space Grotesk", "IBM Plex Sans", "Noto Sans SC", sans-serif;
+  --font-serif: "Playfair Display", "Georgia", "Times New Roman", serif;
 
-  /* Core palette — high contrast brutalist */
-  --background: oklch(0.98 0 0);
-  --foreground: oklch(0.12 0.005 285);
-  --surface: oklch(0.95 0 0);
-  --surface-elevated: oklch(0.92 0 0);
+  /* Core palette — Pixel Fusion */
+  --background: oklch(0.965 0.012 72);
+  --foreground: oklch(0.145 0.018 250);
+  --surface: oklch(0.935 0.014 72);
+  --surface-elevated: oklch(0.985 0.008 72);
 
-  /* Borders — the core brutalist element */
-  --border-hard: oklch(0.12 0 0);
-  --border-soft: oklch(0.12 0 0 / 15%);
-  --border: oklch(0.12 0 0 / 15%);
+  /* Borders — elegant print lines */
+  --border-hard: oklch(0.15 0.02 250);
+  --border-soft: oklch(0.15 0.02 250 / 15%);
+  --border: oklch(0.15 0.02 250 / 20%);
 
-  /* Signal colors — aggressive accents */
-  --signal-a: oklch(0.62 0.26 29);
-  --signal-b: oklch(0.72 0.18 142);
+  /* Signal colors — shader accents */
+  --signal-a: oklch(0.69 0.18 36);
+  --signal-b: oklch(0.68 0.11 220);
 
   /* Semantic */
-  --primary: oklch(0.12 0.005 285);
-  --primary-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.15 0.02 250);
+  --primary-foreground: oklch(0.98 0.01 75);
   --secondary: oklch(0.95 0 0);
-  --secondary-foreground: oklch(0.12 0.005 285);
+  --secondary-foreground: oklch(0.15 0.02 250);
   --muted: oklch(0.92 0 0);
-  --muted-foreground: oklch(0.45 0.01 285);
-  --accent: oklch(0.95 0 0);
-  --accent-foreground: oklch(0.12 0.005 285);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.9 0.035 54);
+  --accent-foreground: oklch(0.15 0.02 250);
   --destructive: oklch(0.577 0.245 27.325);
-  --input: oklch(0.12 0 0 / 15%);
-  --ring: oklch(0.62 0.26 29);
-  --card: oklch(0.98 0 0);
-  --card-foreground: oklch(0.12 0.005 285);
-  --popover: oklch(0.98 0 0);
-  --popover-foreground: oklch(0.12 0.005 285);
+  --input: oklch(0.15 0.02 250 / 15%);
+  --ring: oklch(0.15 0.02 250);
+  --card: oklch(0.98 0.01 75);
+  --card-foreground: oklch(0.15 0.02 250);
+  --popover: oklch(0.98 0.01 75);
+  --popover-foreground: oklch(0.15 0.02 250);
 
-  /* Typography scale */
-  --type-hero: clamp(4rem, 10vw + 1rem, 12rem);
-  --type-display: clamp(2.5rem, 5vw + 1rem, 6rem);
-  --type-h1: clamp(2rem, 3vw + 0.5rem, 3.5rem);
-  --type-h2: clamp(1.5rem, 2vw + 0.5rem, 2.5rem);
-  --type-h3: 1.25rem;
-  --type-body: 1rem;
-  --type-small: 0.875rem;
+  /* Typography scale - fluid for display */
+  --type-hero: clamp(5rem, 12vw + 1rem, 15rem);
+  --type-display: clamp(3.5rem, 8vw + 1rem, 9rem);
+  --type-h1: clamp(2.5rem, 5vw + 0.5rem, 5rem);
+  --type-h2: clamp(2rem, 3vw + 0.5rem, 3.5rem);
+  --type-h3: clamp(1.35rem, 2vw + 0.5rem, 1.75rem);
+  --type-body: 1.125rem;
+  --type-small: 0.9rem;
   --type-micro: 0.75rem;
   --type-index: clamp(6rem, 15vw, 14rem);
 
@@ -93,42 +93,70 @@
   --space-2xl: 12rem;
   --space-3xl: 20rem;
 
-  /* Shadow — brutal offset */
-  --shadow-brutal: 4px 4px 0 var(--border-hard);
-  --shadow-brutal-lg: 6px 6px 0 var(--border-hard);
+  /* Shadow — elegant */
+  --shadow-brutal: none;
+  --shadow-brutal-lg: none;
 }
 
 .dark {
-  --background: oklch(0.08 0.005 285);
-  --foreground: oklch(0.96 0 0);
-  --surface: oklch(0.12 0.005 285);
-  --surface-elevated: oklch(0.16 0.005 285);
+  --background: oklch(0.12 0.014 250);
+  --foreground: oklch(0.94 0.014 72);
+  --surface: oklch(0.16 0.018 250);
+  --surface-elevated: oklch(0.2 0.02 250);
 
-  --border-hard: oklch(0.96 0 0);
-  --border-soft: oklch(0.96 0 0 / 15%);
-  --border: oklch(0.96 0 0 / 15%);
+  --border-hard: oklch(0.95 0.01 75);
+  --border-soft: oklch(0.95 0.01 75 / 15%);
+  --border: oklch(0.95 0.01 75 / 20%);
 
-  --signal-a: oklch(0.7 0.22 29);
-  --signal-b: oklch(0.78 0.16 142);
+  --signal-a: oklch(0.7 0.18 36);
+  --signal-b: oklch(0.72 0.11 220);
 
-  --primary: oklch(0.96 0 0);
-  --primary-foreground: oklch(0.08 0.005 285);
-  --secondary: oklch(0.16 0.005 285);
-  --secondary-foreground: oklch(0.96 0 0);
-  --muted: oklch(0.16 0.005 285);
-  --muted-foreground: oklch(0.6 0.01 285);
-  --accent: oklch(0.16 0.005 285);
-  --accent-foreground: oklch(0.96 0 0);
+  --primary: oklch(0.95 0.01 75);
+  --primary-foreground: oklch(0.12 0.01 250);
+  --secondary: oklch(0.2 0.01 250);
+  --secondary-foreground: oklch(0.95 0.01 75);
+  --muted: oklch(0.2 0.01 250);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.2 0.01 250);
+  --accent-foreground: oklch(0.95 0.01 75);
   --destructive: oklch(0.704 0.191 22.216);
-  --input: oklch(0.96 0 0 / 15%);
-  --ring: oklch(0.7 0.22 29);
-  --card: oklch(0.12 0.005 285);
-  --card-foreground: oklch(0.96 0 0);
-  --popover: oklch(0.12 0.005 285);
-  --popover-foreground: oklch(0.96 0 0);
+  --input: oklch(0.95 0.01 75 / 15%);
+  --ring: oklch(0.95 0.01 75);
+  --card: oklch(0.12 0.01 250);
+  --card-foreground: oklch(0.95 0.01 75);
+  --popover: oklch(0.12 0.01 250);
+  --popover-foreground: oklch(0.95 0.01 75);
+}
 
-  --shadow-brutal: 4px 4px 0 var(--border-hard);
-  --shadow-brutal-lg: 6px 6px 0 var(--border-hard);
+body {
+  background-color: var(--background);
+}
+
+html {
+  scrollbar-color: color-mix(in oklch, var(--foreground) 42%, transparent)
+    var(--background);
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+  border-left: 1px solid var(--border-soft);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid var(--background);
+  border-radius: 0;
+  background: color-mix(in oklch, var(--foreground) 38%, transparent);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
 }
 
 @layer base {
@@ -136,7 +164,20 @@
     @apply border-border outline-ring/50;
   }
 
-  /* rehype-pretty-code theme switching */
+  body {
+    @apply text-[length:var(--type-body)] font-sans antialiased;
+    image-rendering: auto;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display tracking-normal;
+  }
+
   code[data-theme*=" "],
   code[data-theme*=" "] span {
     color: var(--shiki-light);
@@ -151,144 +192,360 @@
 }
 
 @layer components {
-  /* ── Brutal card: hard borders, no radius, offset shadow ── */
-  .brutal-card {
-    border: 2px solid var(--border-hard);
-    background: var(--background);
+  .pixel-grid-bg {
+    background-image: linear-gradient(
+      to right,
+      oklch(from var(--foreground) l c h / 0.06) 1px,
+      transparent 1px
+    );
+    background-size: 24px 100%;
   }
 
-  .brutal-card[data-shadow] {
-    box-shadow: var(--shadow-brutal);
+  .pixel-fusion-surface {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    background: color-mix(in oklch, var(--surface-elevated) 86%, transparent);
   }
 
-  .brutal-card[data-shadow="lg"] {
-    box-shadow: var(--shadow-brutal-lg);
-  }
-
-  /* ── Brutal label: signal-colored badge ── */
-  .brutal-label {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em];
-    border: 2px solid var(--border-hard);
+  .pixel-fusion-surface::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2.6rem;
+    height: 0.45rem;
+    pointer-events: none;
+    content: "";
     background: var(--signal-a);
-    color: var(--primary-foreground);
+    box-shadow:
+      0.75rem 0.75rem 0 var(--signal-b),
+      1.55rem 0 0 oklch(from var(--foreground) l c h / 0.35);
+    opacity: 0.58;
   }
 
-  .brutal-label[data-tone="b"] {
-    background: var(--signal-b);
+  .pixel-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid var(--border-soft);
+    background: color-mix(in oklch, var(--background) 72%, transparent);
+    padding: 0.45rem 0.65rem;
+    font-family: var(--font-geist-mono);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
 
-  .brutal-label[data-tone="ghost"] {
-    background: transparent;
-    color: var(--foreground);
+  .pixel-chip::before {
+    width: 0.48rem;
+    height: 0.48rem;
+    content: "";
+    background: var(--signal-a);
+    box-shadow: 0.48rem 0 var(--signal-b);
   }
 
-  /* ── Brutal tag: minimal text pill ── */
-  .brutal-tag {
-    @apply inline-flex items-center px-2 py-0.5 font-mono text-[0.72rem] uppercase tracking-[0.12em];
-    border: 1px solid var(--border-hard);
-    color: var(--foreground);
-    transition:
-      background 0.15s,
-      color 0.15s;
+  .pixel-rule {
+    height: 1px;
+    width: 100%;
+    background: var(--border-soft);
+    opacity: 0.35;
   }
 
-  .brutal-tag:hover {
-    background: var(--foreground);
+  .pixel-noise-mask {
+    mask-image: linear-gradient(90deg, black 0 72%, transparent 100%);
+  }
+
+  .scanline-overlay {
+    position: relative;
+  }
+
+  .scanline-overlay::after {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    content: "";
+    border-top: 1px solid oklch(from var(--foreground) l c h / 0.08);
+    border-bottom: 1px solid oklch(from var(--foreground) l c h / 0.08);
+  }
+
+  .pixel-title {
+    text-shadow:
+      0.035em 0 oklch(from var(--signal-a) l c h / 0.22),
+      -0.025em 0 oklch(from var(--signal-b) l c h / 0.18);
+  }
+
+  .hero-title-reaction {
     color: var(--background);
+    opacity: 1;
+    mix-blend-mode: normal;
+    mask-image: radial-gradient(
+      ellipse var(--hero-mask-rx, 11rem) var(--hero-mask-ry, 14rem) at
+        var(--hero-mask-x, 83%) var(--hero-mask-y, 50%),
+      black 0 52%,
+      transparent 72%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse var(--hero-mask-rx, 11rem) var(--hero-mask-ry, 14rem) at
+        var(--hero-mask-x, 83%) var(--hero-mask-y, 50%),
+      black 0 52%,
+      transparent 72%
+    );
   }
 
-  /* ── Brutal callout: thick left border ── */
-  .brutal-callout {
-    @apply py-3 pl-4 pr-3;
-    border-left: 4px solid var(--signal-a);
+  .hero-title-object {
+    filter: contrast(1.06) saturate(0.92);
   }
 
-  .brutal-callout[data-tone="b"] {
-    border-left-color: var(--signal-b);
+  .hero-shader-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
-  /* ── Brutal mono: uppercase monospace label ── */
-  .brutal-mono {
-    @apply font-mono text-[0.72rem] uppercase tracking-[0.2em] text-muted-foreground;
+  .tech-logo-img {
+    filter: saturate(1.04) drop-shadow(0 1px 0 oklch(0.98 0.01 75 / 0.42));
   }
 
-  .brutal-mono[data-size="sm"] {
-    @apply text-[0.66rem];
+  .dark .tech-logo-img {
+    filter: saturate(1.14) brightness(1.12)
+      drop-shadow(0 0 0.6rem oklch(0.95 0.01 75 / 0.22));
   }
 
-  .brutal-mono[data-size="lg"] {
-    @apply text-[0.8rem] tracking-[0.24em];
+  .pixel-smiley {
+    position: relative;
   }
 
-  /* ── Brutal divider: thick separator line ── */
-  .brutal-divider {
+  .pixel-smiley-outline {
+    stroke-dasharray: 290;
+    stroke-dashoffset: 290;
+  }
+
+  .pixel-smiley.is-drawing .pixel-smiley-outline {
+    animation: draw-smiley-outline 1.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .liquid-image {
+    --liquid-x: 0;
+    --liquid-y: 0;
+    --liquid-spot-x: 50%;
+    --liquid-spot-y: 50%;
+    --liquid-drift-x: 0rem;
+    --liquid-drift-y: 0rem;
+    --liquid-img-x: 0rem;
+    --liquid-img-y: 0rem;
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: oklch(from var(--foreground) l c h / 0.06);
+    isolation: isolate;
+  }
+
+  .liquid-image-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0.22;
+    mix-blend-mode: normal;
+    transition: opacity 360ms ease;
+  }
+
+  .liquid-image img {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.08);
+    transition: filter 480ms ease;
+  }
+
+  .liquid-image::before {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    content: "";
+    transition: opacity 360ms ease;
+  }
+
+  .liquid-image::before {
+    z-index: 1;
+    background: repeating-linear-gradient(
+      90deg,
+      oklch(from var(--background) l c h / 0.1) 0 0.5rem,
+      transparent 0.5rem 1.1rem
+    );
+    opacity: 0.18;
+  }
+
+  .liquid-image:hover img {
+    filter: grayscale(0.25) contrast(1.14) saturate(0.92);
+  }
+
+  .liquid-image:hover .liquid-image-canvas {
+    opacity: 0.86;
+  }
+
+  @keyframes draw-smiley-outline {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* ── Editorial Layout Primitives ── */
+  .editorial-card {
+    border: 1px solid var(--border-soft);
+    background: var(--background);
+    padding: 1.5rem;
+  }
+
+  .editorial-label {
+    @apply inline-flex items-center gap-1.5 px-2 py-1 font-sans text-[0.75rem] font-medium uppercase tracking-widest text-foreground;
+    border-bottom: 1px solid var(--foreground);
+  }
+
+  .editorial-tag {
+    @apply inline-flex items-center px-3 py-1 font-sans text-[0.75rem] italic tracking-wide;
+    border: 1px solid var(--border-soft);
+    color: var(--muted-foreground);
+    border-radius: 999px;
+    transition: all 0.2s;
+  }
+
+  .editorial-tag:hover {
+    border-color: var(--foreground);
+    color: var(--foreground);
+  }
+
+  /* ── Editorial typography markers ── */
+  .editorial-meta {
+    @apply font-sans text-[0.8rem] uppercase tracking-widest text-muted-foreground;
+  }
+
+  .editorial-divider {
+    height: 1px;
+    background: var(--border-hard);
+    width: 100%;
+  }
+
+  .editorial-divider-thick {
     height: 4px;
     background: var(--border-hard);
+    width: 100%;
+    margin-top: 2px;
+    margin-bottom: 2px;
   }
 
-  .brutal-divider[data-size="sm"] {
-    height: 2px;
+  .editorial-divider-double {
+    border-top: 1px solid var(--border-hard);
+    border-bottom: 4px solid var(--border-hard);
+    height: 8px;
+    width: 100%;
   }
 
-  .brutal-divider[data-size="lg"] {
-    height: 6px;
-  }
-
-  .brutal-divider[data-signal] {
-    background: var(--signal-a);
-  }
-
-  /* ── Brutal number: massive watermark index ── */
-  .brutal-number {
-    font-size: var(--type-index);
-    font-weight: 800;
-    line-height: 0.85;
+  .editorial-number {
+    font-family: var(--font-serif);
+    font-size: var(--type-h1);
+    font-weight: 400;
+    font-style: italic;
     color: var(--border-soft);
-    user-select: none;
-    pointer-events: none;
   }
 
-  /* ── Blog prose: brutal editorial typography ── */
+  /* Keep brutal aliases for backwards compatibility with unchanged components */
+  .brutal-card {
+    border: 1px solid var(--border-soft);
+    background: var(--background);
+    padding: 1.5rem;
+  }
+  .brutal-label {
+    @apply inline-flex items-center gap-1.5 px-2 py-1 font-sans text-[0.75rem] font-medium uppercase tracking-widest text-foreground;
+    border-bottom: 1px solid var(--foreground);
+  }
+  .brutal-tag {
+    @apply inline-flex items-center px-3 py-1 font-sans text-[0.75rem] italic tracking-wide;
+    border: 1px solid var(--border-soft);
+    color: var(--muted-foreground);
+    border-radius: 999px;
+    transition: all 0.2s;
+  }
+  .brutal-tag:hover {
+    border-color: var(--foreground);
+    color: var(--foreground);
+  }
+  .brutal-mono {
+    @apply font-sans text-[0.8rem] uppercase tracking-widest text-muted-foreground;
+  }
+  .brutal-divider {
+    height: 1px;
+    background: var(--border-hard);
+    width: 100%;
+  }
+  .brutal-callout {
+    @apply border-l-2 border-foreground py-3 pl-4 pr-3 font-serif italic text-muted-foreground;
+  }
+
+  /* ── Blog prose: Pixel fusion reading surface ── */
   .blog-prose {
-    @apply prose prose-neutral prose-headings:tracking-tight prose-p:leading-8 prose-a:font-medium prose-a:text-signal-a prose-a:no-underline hover:prose-a:underline prose-blockquote:border-signal-a prose-blockquote:not-italic prose-li:my-1 prose-code:font-mono prose-code:text-[0.85em] dark:prose-invert lg:prose-lg;
+    @apply prose prose-neutral max-w-none prose-p:leading-relaxed prose-a:underline prose-a:underline-offset-4 hover:prose-a:text-muted-foreground prose-blockquote:border-l-2 prose-blockquote:border-signal-a prose-blockquote:pl-6 prose-blockquote:font-sans prose-blockquote:text-xl prose-blockquote:font-semibold prose-blockquote:text-foreground prose-li:my-2 prose-code:font-mono prose-code:text-[0.85em] prose-code:before:content-none prose-code:after:content-none dark:prose-invert lg:prose-lg;
+  }
+
+  .blog-prose :where(p):first-of-type::first-letter {
+    @apply float-left mr-3 font-mono text-[3.2rem] font-bold leading-[0.85] text-signal-a;
   }
 
   .blog-prose :where(h2) {
-    @apply mt-12 mb-4 border-l-4 border-signal-a pl-4 text-[length:var(--type-h2)] font-bold;
+    @apply mt-16 mb-6 border-border-soft border-b pb-4 font-display text-[length:var(--type-h2)] font-black uppercase;
   }
 
   .blog-prose :where(h3) {
-    @apply mt-8 text-[length:var(--type-h3)] font-bold;
+    @apply mt-10 mb-4 font-mono text-[length:var(--type-h3)] font-bold uppercase tracking-wide;
   }
 
   .blog-prose :where(code):not(:where(pre *)) {
-    @apply border border-border-hard bg-surface px-1.5 py-0.5 font-mono text-[0.82em] font-normal text-foreground before:content-none after:content-none;
+    @apply border border-foreground/15 bg-surface px-1.5 py-0.5 font-mono text-[0.85em] text-signal-a;
   }
 
   .blog-prose :where(hr) {
-    @apply border-border-hard;
-    border-width: 2px;
+    height: 1px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--foreground) 0 8px,
+      transparent 8px 14px
+    );
+    width: 100%;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    border: none;
   }
 
   .blog-prose :where(img) {
-    @apply border-2 border-border-hard;
+    @apply w-full grayscale contrast-125; /* B&W editorial image style */
   }
 
   .blog-prose :where(table) {
-    @apply block w-full overflow-x-auto border-2 border-border-hard;
+    @apply block w-full overflow-x-auto border-y border-foreground;
+  }
+
+  .blog-prose :where(th) {
+    @apply uppercase tracking-wider text-[0.8em] font-medium border-b border-border-soft;
   }
 
   .blog-prose :where(pre) {
-    @apply border-2 border-border-hard;
+    @apply rounded-none border border-border-soft bg-surface p-4;
   }
 
-  /* ── Focus styles: brutal focus ring ── */
-  .brutal-focus {
-    @apply outline-none ring-0;
+  .blog-prose .code-panel :where(pre, code) {
+    border: 0;
+    background: transparent;
+    padding: 0;
   }
 
-  .brutal-focus:focus-visible {
-    outline: 3px solid var(--signal-a);
-    outline-offset: 2px;
+  .blog-prose .code-panel code[data-theme*=" "],
+  .blog-prose .code-panel code[data-theme*=" "] span {
+    background-color: transparent;
   }
 }

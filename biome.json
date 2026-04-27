@@ -13,6 +13,8 @@
       "!.tanstack",
       "!dist",
       "!build",
+      "!reference",
+      "!src/components/scrollytelling",
       "!src/routeTree.gen.ts",
       "!src/components/ui"
     ]
@@ -26,7 +28,18 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "off"
+      },
+      "nursery": {
+        "useConsistentTypeDefinitions": "off",
+        "useSortedClasses": "off"
+      },
+      "style": {
+        "noMagicNumbers": "off"
+      },
       "suspicious": {
+        "noArrayIndexKey": "off",
         "noUnknownAtRules": "off"
       }
     },

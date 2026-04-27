@@ -4,11 +4,18 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import { lazy, type ReactNode, Suspense } from "react";
 import { SiteNav } from "@/components/nav/site-nav";
 import ScrollProvider from "@/components/providers/scroll-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import appCss from "@/styles.css?url";
 import { SITE } from "@/lib/site-data";
+import appCss from "@/styles.css?url";
+
+const CustomCursor = lazy(() =>
+  import("@/components/ui/custom-cursor").then((module) => ({
+    default: module.CustomCursor,
+  }))
+);
 
 export const Route = createRootRoute({
   head: () => ({
@@ -49,6 +56,9 @@ function RootLayout() {
       enableSystem
     >
       <ScrollProvider>
+        <Suspense fallback={null}>
+          <CustomCursor />
+        </Suspense>
         <SiteNav />
         <main className="min-h-screen overflow-x-clip">
           <Outlet />
@@ -58,7 +68,7 @@ function RootLayout() {
   );
 }
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
