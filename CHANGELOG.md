@@ -1,3 +1,16 @@
+# [1.7.0](https://github.com/loopwic/portfolio/compare/v1.6.0...v1.7.0) (2026-04-27)
+
+
+### Bug Fixes
+
+* use bun for deployment builds ([11fb6e4](https://github.com/loopwic/portfolio/commit/11fb6e4ec99d9b348da71d95baf186b1cc42a109))
+
+
+### Features
+
+* **ui:** redesign pixel fusion portfolio ([75fcbe5](https://github.com/loopwic/portfolio/commit/75fcbe5b413c63857e6f1897d91597a55aa372ab))
+* update to v2 ([03331f4](https://github.com/loopwic/portfolio/commit/03331f49c08e32a5916260e829ef934e690f9167))
+
 # [1.6.0](https://github.com/loopwic/portfolio/compare/v1.5.0...v1.6.0) (2026-03-06)
 
 
