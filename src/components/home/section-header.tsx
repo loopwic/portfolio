@@ -14,18 +14,18 @@ export function SectionHeader({
   return (
     <div
       className={cn(
-        "scroll-fade flex items-center gap-4 font-mono font-black text-xs uppercase tracking-[0.3em]",
+        "scroll-fade section-header flex items-center gap-4 font-mono font-black text-xs uppercase tracking-[0.3em]",
         inverse ? "text-background/50" : "text-foreground/40"
       )}
     >
-      <span>[{index}]</span>
+      <span className="section-header-number inline-block">[{index}]</span>
       <span
         className={cn(
-          "h-px w-12",
+          "section-header-rule h-px w-12",
           inverse ? "bg-background/30" : "bg-foreground/20"
         )}
       />
-      <span>{title}</span>
+      <span className="section-header-title">{title}</span>
     </div>
   );
 }

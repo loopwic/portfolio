@@ -25,11 +25,17 @@ export function CTASection() {
               into code? Let's connect.
             </p>
             <a
-              className="inline-block max-w-full break-all border-background/32 border-b-4 pb-2 text-left font-black font-display text-title-narrow leading-[0.92] transition-colors hover:border-background lg:whitespace-nowrap"
+              className="cta-email group inline-flex items-baseline gap-3 max-w-full break-all border-background/32 border-b-4 pb-2 text-left font-black font-display text-title-narrow leading-[0.92] transition-colors hover:border-background lg:whitespace-nowrap"
               data-magnetic
               href={`mailto:${SITE.email}`}
             >
-              {SITE.email}
+              <span className="cta-email-text">{SITE.email}</span>
+              <span
+                aria-hidden="true"
+                className="cta-email-arrow inline-block translate-x-[-0.4em] opacity-0 transition-[transform,opacity] duration-300 ease-out group-hover:translate-x-0 group-hover:opacity-100"
+              >
+                →
+              </span>
             </a>
             <div className="mt-16 flex flex-wrap gap-6">
               {SOCIAL_LINKS.map((link) => (

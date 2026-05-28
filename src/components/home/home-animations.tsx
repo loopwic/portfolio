@@ -20,27 +20,29 @@ export function HomeAnimations({
         "(prefers-reduced-motion: reduce)"
       ).matches;
 
-      gsap.set(".intro-line", { yPercent: 110, opacity: 0, skewY: 10 });
-      gsap.set(".fade-in", { y: 24, opacity: 0 });
+      gsap.set(".intro-line", { yPercent: 110, opacity: 0, skewY: 8 });
+      gsap.set(".fade-in", { y: 16, opacity: 0 });
 
-      const intro = gsap.timeline({ defaults: { ease: "power4.out" } });
+      const intro = gsap.timeline({
+        defaults: { ease: "expo.out" },
+      });
       intro
         .to(".intro-line", {
           yPercent: 0,
           opacity: 1,
           skewY: 0,
-          duration: reduceMotion ? 0.2 : 1.4,
-          stagger: 0.15,
+          duration: reduceMotion ? 0.2 : 0.85,
+          stagger: 0.08,
         })
         .to(
           ".fade-in",
           {
             y: 0,
             opacity: 1,
-            duration: reduceMotion ? 0.2 : 1.0,
-            stagger: 0.1,
+            duration: reduceMotion ? 0.2 : 0.45,
+            stagger: 0.06,
           },
-          "-=1.0"
+          "-=0.55"
         );
 
       if (reduceMotion) {
@@ -114,22 +116,71 @@ export function HomeAnimations({
       for (const section of gsap.utils.toArray<HTMLElement>(
         ".scroll-section"
       )) {
-        gsap.fromTo(
-          section.querySelectorAll(".scroll-fade"),
-          { y: 40, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 1.2,
-            stagger: 0.1,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: section,
-              start: "top 80%",
-              toggleActions: "play none none reverse",
-            },
-          }
+        const header = section.querySelector<HTMLElement>(
+          ".scroll-fade.section-header"
         );
+        const fades = Array.from(
+          section.querySelectorAll<HTMLElement>(".scroll-fade")
+        ).filter((el) => el !== header);
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: "top 80%",
+            toggleActions: "play none none reverse",
+          },
+        });
+
+        if (header) {
+          tl.fromTo(
+            header,
+            { x: -24, opacity: 0 },
+            { x: 0, opacity: 1, duration: 0.42, ease: "back.out(1.8)" }
+          );
+          const numberEl = header.querySelector(".section-header-number");
+          const ruleEl = header.querySelector(".section-header-rule");
+          const titleEl = header.querySelector(".section-header-title");
+          if (numberEl && ruleEl && titleEl) {
+            tl.fromTo(
+              numberEl,
+              { scale: 0.6 },
+              { scale: 1, duration: 0.32, ease: "back.out(2)" },
+              "<"
+            );
+            tl.fromTo(
+              ruleEl,
+              { scaleX: 0 },
+              {
+                scaleX: 1,
+                duration: 0.32,
+                ease: "expo.out",
+                transformOrigin: "left center",
+              },
+              "<+=0.1"
+            );
+            tl.fromTo(
+              titleEl,
+              { opacity: 0 },
+              { opacity: 1, duration: 0.24, ease: "power2.out" },
+              "<+=0.05"
+            );
+          }
+        }
+
+        if (fades.length > 0) {
+          tl.fromTo(
+            fades,
+            { y: 28, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.65,
+              stagger: 0.05,
+              ease: "expo.out",
+            },
+            header ? "-=0.2" : 0
+          );
+        }
       }
 
       for (const item of gsap.utils.toArray<HTMLElement>(".project-item")) {
