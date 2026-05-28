@@ -4,7 +4,7 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
-import { lazy, type ReactNode, Suspense } from "react";
+import { lazy, type ReactNode, Suspense, useEffect, useState } from "react";
 import { SiteNav } from "@/components/nav/site-nav";
 import ScrollProvider from "@/components/providers/scroll-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -16,6 +16,30 @@ const CustomCursor = lazy(() =>
     default: module.CustomCursor,
   }))
 );
+
+function useCustomCursorEnabled() {
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    const coarse = window.matchMedia("(pointer: coarse)");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const update = () => {
+      setEnabled(!(coarse.matches || reduce.matches));
+    };
+
+    update();
+    coarse.addEventListener("change", update);
+    reduce.addEventListener("change", update);
+
+    return () => {
+      coarse.removeEventListener("change", update);
+      reduce.removeEventListener("change", update);
+    };
+  }, []);
+
+  return enabled;
+}
 
 const PERSON_LD = JSON.stringify(personJsonLd());
 
@@ -52,6 +76,8 @@ export const Route = createRootRoute({
 });
 
 function RootLayout() {
+  const cursorEnabled = useCustomCursorEnabled();
+
   return (
     <ThemeProvider
       attribute="class"
@@ -60,9 +86,11 @@ function RootLayout() {
       enableSystem
     >
       <ScrollProvider>
-        <Suspense fallback={null}>
-          <CustomCursor />
-        </Suspense>
+        {cursorEnabled ? (
+          <Suspense fallback={null}>
+            <CustomCursor />
+          </Suspense>
+        ) : null}
         <SiteNav />
         <main className="min-h-screen overflow-x-clip">
           <Outlet />
