@@ -289,6 +289,10 @@ export default function HeroTitleObject({ objectRef }: HeroTitleObjectProps) {
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, wireIndexBuffer);
       gl.drawElements(gl.LINES, wireIndexCount, gl.UNSIGNED_SHORT, 0);
 
+      if (!canvas.classList.contains("is-ready")) {
+        canvas.classList.add("is-ready");
+      }
+
       frame = window.requestAnimationFrame(render);
     };
 
