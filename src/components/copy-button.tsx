@@ -64,7 +64,7 @@ export function CopyButton({ value, variant = "default" }: CopyButtonProps) {
     <Button
       aria-live="polite"
       className={cn(
-        "h-6 rounded-md px-2.5 font-medium font-mono text-[0.62rem] tracking-[0.08em] transition-colors duration-200",
+        "h-6 rounded-md px-2.5 font-medium font-mono text-3xs tracking-[0.08em] transition-colors duration-200",
         variant === "inverted"
           ? "border border-background/20 bg-transparent text-background/70 hover:bg-background/10 hover:text-background"
           : "border border-foreground/10 bg-transparent text-foreground/40 hover:bg-foreground/5 hover:text-foreground"

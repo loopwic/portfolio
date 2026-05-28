@@ -9,13 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
-import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
+import { Route as BlogPixelFusionPortfolioRedesignRouteImport } from './routes/blog/pixel-fusion-portfolio-redesign'
+import { Route as BlogLiquidImageWebglPreviewRouteImport } from './routes/blog/liquid-image-webgl-preview'
 import { Route as BlogLatticeBackendDddRefactorRouteImport } from './routes/blog/lattice-backend-ddd-refactor'
 import { Route as BlogConfigureAlacrittyFromScratchRouteImport } from './routes/blog/configure-alacritty-from-scratch'
 import { Route as BlogBuildPersonalBlogWithNextjsAndMdxRouteImport } from './routes/blog/build-personal-blog-with-nextjs-and-mdx'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -26,11 +33,18 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
   path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapXmlRoute = SitemapXmlRouteImport.update({
-  id: '/sitemap/xml',
-  path: '/sitemap/xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const BlogPixelFusionPortfolioRedesignRoute =
+  BlogPixelFusionPortfolioRedesignRouteImport.update({
+    id: '/blog/pixel-fusion-portfolio-redesign',
+    path: '/blog/pixel-fusion-portfolio-redesign',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const BlogLiquidImageWebglPreviewRoute =
+  BlogLiquidImageWebglPreviewRouteImport.update({
+    id: '/blog/liquid-image-webgl-preview',
+    path: '/blog/liquid-image-webgl-preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BlogLatticeBackendDddRefactorRoute =
   BlogLatticeBackendDddRefactorRouteImport.update({
     id: '/blog/lattice-backend-ddd-refactor',
@@ -52,67 +66,88 @@ const BlogBuildPersonalBlogWithNextjsAndMdxRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/blog/build-personal-blog-with-nextjs-and-mdx': typeof BlogBuildPersonalBlogWithNextjsAndMdxRoute
   '/blog/configure-alacritty-from-scratch': typeof BlogConfigureAlacrittyFromScratchRoute
   '/blog/lattice-backend-ddd-refactor': typeof BlogLatticeBackendDddRefactorRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
+  '/blog/liquid-image-webgl-preview': typeof BlogLiquidImageWebglPreviewRoute
+  '/blog/pixel-fusion-portfolio-redesign': typeof BlogPixelFusionPortfolioRedesignRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/blog/build-personal-blog-with-nextjs-and-mdx': typeof BlogBuildPersonalBlogWithNextjsAndMdxRoute
   '/blog/configure-alacritty-from-scratch': typeof BlogConfigureAlacrittyFromScratchRoute
   '/blog/lattice-backend-ddd-refactor': typeof BlogLatticeBackendDddRefactorRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
+  '/blog/liquid-image-webgl-preview': typeof BlogLiquidImageWebglPreviewRoute
+  '/blog/pixel-fusion-portfolio-redesign': typeof BlogPixelFusionPortfolioRedesignRoute
   '/blog': typeof BlogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/blog/build-personal-blog-with-nextjs-and-mdx': typeof BlogBuildPersonalBlogWithNextjsAndMdxRoute
   '/blog/configure-alacritty-from-scratch': typeof BlogConfigureAlacrittyFromScratchRoute
   '/blog/lattice-backend-ddd-refactor': typeof BlogLatticeBackendDddRefactorRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
+  '/blog/liquid-image-webgl-preview': typeof BlogLiquidImageWebglPreviewRoute
+  '/blog/pixel-fusion-portfolio-redesign': typeof BlogPixelFusionPortfolioRedesignRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/sitemap.xml'
     | '/blog/build-personal-blog-with-nextjs-and-mdx'
     | '/blog/configure-alacritty-from-scratch'
     | '/blog/lattice-backend-ddd-refactor'
-    | '/sitemap/xml'
+    | '/blog/liquid-image-webgl-preview'
+    | '/blog/pixel-fusion-portfolio-redesign'
     | '/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/sitemap.xml'
     | '/blog/build-personal-blog-with-nextjs-and-mdx'
     | '/blog/configure-alacritty-from-scratch'
     | '/blog/lattice-backend-ddd-refactor'
-    | '/sitemap/xml'
+    | '/blog/liquid-image-webgl-preview'
+    | '/blog/pixel-fusion-portfolio-redesign'
     | '/blog'
   id:
     | '__root__'
     | '/'
+    | '/sitemap.xml'
     | '/blog/build-personal-blog-with-nextjs-and-mdx'
     | '/blog/configure-alacritty-from-scratch'
     | '/blog/lattice-backend-ddd-refactor'
-    | '/sitemap/xml'
+    | '/blog/liquid-image-webgl-preview'
+    | '/blog/pixel-fusion-portfolio-redesign'
     | '/blog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   BlogBuildPersonalBlogWithNextjsAndMdxRoute: typeof BlogBuildPersonalBlogWithNextjsAndMdxRoute
   BlogConfigureAlacrittyFromScratchRoute: typeof BlogConfigureAlacrittyFromScratchRoute
   BlogLatticeBackendDddRefactorRoute: typeof BlogLatticeBackendDddRefactorRoute
-  SitemapXmlRoute: typeof SitemapXmlRoute
+  BlogLiquidImageWebglPreviewRoute: typeof BlogLiquidImageWebglPreviewRoute
+  BlogPixelFusionPortfolioRedesignRoute: typeof BlogPixelFusionPortfolioRedesignRoute
   BlogIndexRoute: typeof BlogIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -127,11 +162,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sitemap/xml': {
-      id: '/sitemap/xml'
-      path: '/sitemap/xml'
-      fullPath: '/sitemap/xml'
-      preLoaderRoute: typeof SitemapXmlRouteImport
+    '/blog/pixel-fusion-portfolio-redesign': {
+      id: '/blog/pixel-fusion-portfolio-redesign'
+      path: '/blog/pixel-fusion-portfolio-redesign'
+      fullPath: '/blog/pixel-fusion-portfolio-redesign'
+      preLoaderRoute: typeof BlogPixelFusionPortfolioRedesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/liquid-image-webgl-preview': {
+      id: '/blog/liquid-image-webgl-preview'
+      path: '/blog/liquid-image-webgl-preview'
+      fullPath: '/blog/liquid-image-webgl-preview'
+      preLoaderRoute: typeof BlogLiquidImageWebglPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/lattice-backend-ddd-refactor': {
@@ -160,12 +202,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   BlogBuildPersonalBlogWithNextjsAndMdxRoute:
     BlogBuildPersonalBlogWithNextjsAndMdxRoute,
   BlogConfigureAlacrittyFromScratchRoute:
     BlogConfigureAlacrittyFromScratchRoute,
   BlogLatticeBackendDddRefactorRoute: BlogLatticeBackendDddRefactorRoute,
-  SitemapXmlRoute: SitemapXmlRoute,
+  BlogLiquidImageWebglPreviewRoute: BlogLiquidImageWebglPreviewRoute,
+  BlogPixelFusionPortfolioRedesignRoute: BlogPixelFusionPortfolioRedesignRoute,
   BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport

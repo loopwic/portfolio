@@ -104,7 +104,7 @@ function BlogPage() {
                 <span className="h-1.5 w-1.5 bg-foreground" />
                 <span className="h-1.5 w-1.5 bg-foreground opacity-50" />
               </div>
-              <span className="font-mono text-[0.65rem] font-black text-muted-foreground uppercase tracking-[0.25em]">
+              <span className="font-mono text-2xs font-black text-muted-foreground uppercase tracking-[0.25em]">
                 Archive / {BLOG_POSTS.length} Logs
               </span>
             </div>
@@ -113,7 +113,7 @@ function BlogPage() {
             </p>
           </div>
 
-          <h1 className="header-element text-left font-display text-[clamp(4rem,11vw,9rem)] font-black uppercase leading-[0.78] tracking-tight lg:text-right">
+          <h1 className="header-element text-left font-display text-hero-blog font-black uppercase leading-[0.78] tracking-tight lg:text-right">
             Signal <span className="text-muted-foreground">Trace</span>
           </h1>
         </header>
@@ -132,11 +132,11 @@ function BlogPage() {
                 </div>
 
                 <div className="reveal-content">
-                  <p className="font-mono font-black text-[0.65rem] text-foreground/50 uppercase tracking-[0.2em] mb-4">
+                  <p className="font-mono font-black text-2xs text-foreground/50 uppercase tracking-[0.2em] mb-4">
                     {toDisplayDate(post.date)}{" "}
                     <span className="mx-2 opacity-30">/</span> {post.tags[0]}
                   </p>
-                  <h2 className="post-title font-display text-[clamp(2rem,4vw,3.5rem)] font-black leading-[1.1] uppercase tracking-tight">
+                  <h2 className="post-title font-display text-title-blog font-black leading-[1.1] uppercase tracking-tight">
                     {post.title}
                   </h2>
                   <p className="mt-5 max-w-3xl text-foreground/60 leading-relaxed text-lg">
@@ -146,7 +146,7 @@ function BlogPage() {
                   <div className="mt-8 flex flex-wrap gap-2">
                     {post.tags.map((tag) => (
                       <span
-                        className="text-[0.62rem] font-mono font-bold uppercase tracking-[0.15em] text-foreground/50 bg-foreground/5 px-2 py-1"
+                        className="text-3xs font-mono font-bold uppercase tracking-[0.15em] text-foreground/50 bg-foreground/5 px-2 py-1"
                         key={`${post.slug}-${tag}`}
                       >
                         {tag}

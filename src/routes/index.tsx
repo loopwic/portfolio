@@ -50,7 +50,7 @@ const PRINCIPLES = [
 const TECH_LOGOS = [
   {
     label: "React",
-    src: "https://cdn.simpleicons.org/react?viewbox=auto",
+    src: "/svgs/tech/react.svg",
     size: "w-[clamp(2.4rem,4.6vw,4rem)]",
     x: "left-[27%]",
     y: "top-[48%]",
@@ -58,7 +58,7 @@ const TECH_LOGOS = [
   },
   {
     label: "TypeScript",
-    src: "https://cdn.simpleicons.org/typescript?viewbox=auto",
+    src: "/svgs/tech/typescript.svg",
     size: "w-[clamp(2.2rem,4.1vw,3.5rem)]",
     x: "left-[38%]",
     y: "top-[35%]",
@@ -66,7 +66,7 @@ const TECH_LOGOS = [
   },
   {
     label: "JavaScript",
-    src: "https://cdn.simpleicons.org/javascript?viewbox=auto",
+    src: "/svgs/tech/javascript.svg",
     size: "w-[clamp(2.2rem,4.1vw,3.5rem)]",
     x: "left-[50%]",
     y: "top-[52%]",
@@ -74,7 +74,7 @@ const TECH_LOGOS = [
   },
   {
     label: "GSAP",
-    src: "https://cdn.simpleicons.org/gsap?viewbox=auto",
+    src: "/svgs/tech/gsap.svg",
     size: "w-[clamp(2.7rem,5vw,4.3rem)]",
     x: "left-[68%]",
     y: "top-[43%]",
@@ -82,7 +82,7 @@ const TECH_LOGOS = [
   },
   {
     label: "Three.js",
-    src: "https://cdn.simpleicons.org/threedotjs/049EF4?viewbox=auto",
+    src: "/svgs/tech/threedotjs.svg",
     size: "w-[clamp(2.3rem,4.3vw,3.7rem)]",
     x: "left-[33%]",
     y: "top-[62%]",
@@ -90,7 +90,7 @@ const TECH_LOGOS = [
   },
   {
     label: "Docker",
-    src: "https://cdn.simpleicons.org/docker?viewbox=auto",
+    src: "/svgs/tech/docker.svg",
     size: "w-[clamp(2.4rem,4.6vw,3.9rem)]",
     x: "left-[61%]",
     y: "top-[65%]",
@@ -98,7 +98,7 @@ const TECH_LOGOS = [
   },
   {
     label: "Rust",
-    src: "https://cdn.simpleicons.org/rust/B7410E?viewbox=auto",
+    src: "/svgs/tech/rust.svg",
     size: "w-[clamp(2.1rem,3.8vw,3.3rem)]",
     x: "left-[50%]",
     y: "top-[30%]",
@@ -106,7 +106,7 @@ const TECH_LOGOS = [
   },
   {
     label: "Go",
-    src: "https://cdn.simpleicons.org/go?viewbox=auto",
+    src: "/svgs/tech/go.svg",
     size: "w-[clamp(2.3rem,4.3vw,3.7rem)]",
     x: "left-[44%]",
     y: "top-[69%]",
@@ -114,7 +114,7 @@ const TECH_LOGOS = [
   },
   {
     label: "Node.js",
-    src: "https://cdn.simpleicons.org/nodedotjs?viewbox=auto",
+    src: "/svgs/tech/nodedotjs.svg",
     size: "w-[clamp(2.3rem,4.1vw,3.6rem)]",
     x: "left-[73%]",
     y: "top-[56%]",
@@ -122,7 +122,7 @@ const TECH_LOGOS = [
   },
   {
     label: "Hono",
-    src: "https://cdn.simpleicons.org/hono/E36002?viewbox=auto",
+    src: "/svgs/tech/hono.svg",
     size: "w-[clamp(2.1rem,3.9vw,3.4rem)]",
     x: "left-[57%]",
     y: "top-[36%]",
@@ -130,7 +130,7 @@ const TECH_LOGOS = [
   },
   {
     label: "Expo",
-    src: "https://cdn.simpleicons.org/expo/635BFF?viewbox=auto",
+    src: "/svgs/tech/expo.svg",
     size: "w-[clamp(2rem,3.7vw,3.2rem)]",
     x: "left-[52%]",
     y: "top-[75%]",
@@ -485,16 +485,18 @@ function useCubeTitleMask(
   cubeRef: RefObject<HTMLElement | null>
 ) {
   useEffect(() => {
-    let frame = 0;
+    const title = titleRef.current;
+    const cube = cubeRef.current;
+
+    if (!(title && cube)) {
+      return;
+    }
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
     const syncMask = () => {
-      const cube = cubeRef.current;
-      const title = titleRef.current;
-
-      if (!(cube && title)) {
-        return;
-      }
-
       const cubeRect = cube.getBoundingClientRect();
       const titleRect = title.getBoundingClientRect();
       const centerX = cubeRect.left + cubeRect.width / 2 - titleRect.left;
@@ -508,19 +510,49 @@ function useCubeTitleMask(
       title.style.setProperty("--hero-mask-ry", `${radiusY}px`);
     };
 
+    syncMask();
+
+    if (reduceMotion) {
+      return;
+    }
+
+    let frame = 0;
+
     const tick = () => {
       syncMask();
       frame = window.requestAnimationFrame(tick);
     };
 
-    tick();
-    window.addEventListener("resize", syncMask);
-    window.addEventListener("scroll", syncMask, { passive: true });
+    const start = () => {
+      if (frame !== 0) {
+        return;
+      }
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    const stop = () => {
+      if (frame === 0) {
+        return;
+      }
+      window.cancelAnimationFrame(frame);
+      frame = 0;
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          start();
+        } else {
+          stop();
+        }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(title);
 
     return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("resize", syncMask);
-      window.removeEventListener("scroll", syncMask);
+      observer.disconnect();
+      stop();
     };
   }, [cubeRef, titleRef]);
 }
@@ -540,7 +572,7 @@ function HeroHeadline({
   return (
     <h1
       className={cn(
-        "font-display text-[clamp(4rem,14.2vw,13rem)] font-black uppercase leading-[0.86] tracking-tight",
+        "font-display text-hero font-black uppercase leading-[0.86] tracking-tight",
         className
       )}
       {...props}
@@ -566,7 +598,7 @@ function AboutSection() {
       <div className="absolute bottom-0 left-0 w-full h-[1px] bg-foreground/10" />
 
       {/* Visual Conflict: Massive Background Typography */}
-      <div className="pointer-events-none absolute -left-10 top-20 z-0 select-none text-[clamp(10rem,30vw,25rem)] font-display font-black leading-none text-foreground/[0.03] uppercase whitespace-nowrap">
+      <div className="pointer-events-none absolute -left-10 top-20 z-0 select-none text-watermark font-display font-black leading-none text-foreground/[0.03] uppercase whitespace-nowrap">
         Protocol
       </div>
 
@@ -575,7 +607,7 @@ function AboutSection() {
 
         <div className="relative mt-12 min-h-[68vh] overflow-hidden border border-foreground/10">
           <div className="protocol-copy grid h-full min-h-[68vh] gap-10 p-6 md:p-10 lg:grid-cols-[0.86fr_1fr] lg:items-center">
-            <h2 className="scroll-fade font-display text-[clamp(3.5rem,8vw,7rem)] font-black uppercase leading-[0.8] tracking-tight">
+            <h2 className="scroll-fade font-display text-section font-black uppercase leading-[0.8] tracking-tight">
               Structure <br />
               <span className="opacity-30">First.</span>
               <br />
@@ -601,7 +633,7 @@ function AboutSection() {
       <div className="mx-auto max-w-[1240px] relative z-10">
         <div className="mt-10 grid overflow-hidden border border-foreground/20 lg:grid-cols-[0.36fr_1fr]">
           <div className="scroll-fade border-foreground/20 border-b p-6 md:p-8 lg:border-r lg:border-b-0">
-            <p className="font-mono text-[0.65rem] font-black uppercase tracking-[0.28em] text-foreground/45">
+            <p className="font-mono text-2xs font-black uppercase tracking-[0.28em] text-foreground/45">
               Protocol Index
             </p>
             <div className="mt-8 grid gap-5">
@@ -610,10 +642,10 @@ function AboutSection() {
                   className="grid grid-cols-[4.5rem_1fr] items-baseline gap-4 border-foreground/10 border-b pb-5 last:border-b-0 last:pb-0"
                   key={label}
                 >
-                  <p className="font-mono text-[0.62rem] font-black uppercase tracking-[0.2em] text-foreground/35">
+                  <p className="font-mono text-3xs font-black uppercase tracking-[0.2em] text-foreground/35">
                     {label}
                   </p>
-                  <p className="font-display text-[clamp(1.15rem,2vw,1.55rem)] font-black uppercase leading-tight tracking-widest">
+                  <p className="font-display text-lede font-black uppercase leading-tight tracking-widest">
                     {copy}
                   </p>
                 </div>
@@ -623,7 +655,7 @@ function AboutSection() {
 
           <div className="grid">
             <div className="scroll-fade flex items-center justify-between border-foreground/10 border-b px-6 py-4 md:px-8">
-              <p className="font-mono text-[0.65rem] font-black uppercase tracking-[0.28em] text-foreground/45">
+              <p className="font-mono text-2xs font-black uppercase tracking-[0.28em] text-foreground/45">
                 History Log
               </p>
               <span className="h-2 w-2 bg-foreground" />
@@ -633,22 +665,34 @@ function AboutSection() {
                 className="scroll-fade group grid gap-4 border-foreground/10 border-b px-6 py-5 last:border-b-0 md:grid-cols-[0.2fr_1fr] md:px-8"
                 key={work.company}
               >
-                <p className="pt-1 font-mono text-[0.7rem] font-black text-foreground/50 uppercase tracking-widest">
+                <p className="pt-1 font-mono text-2xs font-black text-foreground/50 uppercase tracking-widest">
                   {work.period}
                 </p>
                 <div>
-                  <h3 className="flex flex-col gap-2 font-black text-[clamp(1.05rem,1.85vw,1.45rem)] uppercase tracking-widest md:flex-row md:items-center md:gap-4">
+                  <h3 className="flex flex-col gap-2 font-black text-meta-lg uppercase tracking-widest md:flex-row md:items-center md:gap-4">
                     {work.company}
                     <span className="hidden md:inline-block text-foreground/20">
                       /
                     </span>
-                    <span className="font-mono text-[0.65rem] tracking-[0.2em] text-background bg-foreground px-3 py-1">
+                    <span className="font-mono text-2xs tracking-[0.2em] text-background bg-foreground px-3 py-1">
                       {work.role}
                     </span>
                   </h3>
                   <p className="mt-3 max-w-2xl text-base font-medium leading-relaxed text-foreground/60">
                     {work.description}
                   </p>
+                  {work.stack ? (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {work.stack.map((item) => (
+                        <span
+                          className="border border-foreground/18 px-3 py-1.5 font-mono text-3xs font-black uppercase tracking-[0.18em] text-foreground/55"
+                          key={item}
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               </article>
             ))}
@@ -675,8 +719,10 @@ function TechLogo({ logo }: { logo: (typeof TECH_LOGOS)[number] }) {
         <img
           alt=""
           className="tech-logo-img h-full w-full object-contain opacity-95 dark:opacity-100"
+          decoding="async"
           draggable={false}
           height={160}
+          loading="lazy"
           src={logo.src}
           width={160}
         />
@@ -696,7 +742,7 @@ function ProjectsSection() {
 
         <div className="mt-16 grid gap-12 lg:grid-cols-[0.36fr_1fr]">
           <div className="scroll-fade lg:sticky lg:top-28 lg:self-start">
-            <h2 className="font-display text-[clamp(3.2rem,8vw,7.5rem)] font-black uppercase leading-[0.82] tracking-tight">
+            <h2 className="font-display text-section-wide font-black uppercase leading-[0.82] tracking-tight">
               Signal
               <br />
               <span className="text-foreground/28">Noise</span>
@@ -715,11 +761,11 @@ function ProjectsSection() {
               >
                 <div className="flex min-h-64 min-w-0 flex-col justify-between gap-8">
                   <div className="min-w-0">
-                    <div className="mb-5 flex items-center justify-between gap-4 font-mono text-[0.65rem] font-black uppercase tracking-[0.24em] text-foreground/45">
+                    <div className="mb-5 flex items-center justify-between gap-4 font-mono text-2xs font-black uppercase tracking-[0.24em] text-foreground/45">
                       <span>{String(index + 1).padStart(2, "0")}</span>
                       <span>{project.status}</span>
                     </div>
-                    <h3 className="max-w-full overflow-hidden text-wrap break-words font-display text-[clamp(2.2rem,4.4vw,4.2rem)] font-black uppercase leading-[0.9] tracking-tight">
+                    <h3 className="max-w-full overflow-hidden text-wrap break-words font-display text-title font-black uppercase leading-[0.9] tracking-tight">
                       {project.name}
                     </h3>
                     <p className="mt-5 text-base font-semibold leading-relaxed text-foreground/62 md:text-lg">
@@ -730,7 +776,7 @@ function ProjectsSection() {
                   <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag) => (
                       <span
-                        className="border border-foreground/18 px-3 py-1.5 font-mono text-[0.62rem] font-black uppercase tracking-[0.18em] text-foreground/55 transition-colors group-hover:border-foreground/35 group-hover:text-foreground"
+                        className="border border-foreground/18 px-3 py-1.5 font-mono text-3xs font-black uppercase tracking-[0.18em] text-foreground/55 transition-colors group-hover:border-foreground/35 group-hover:text-foreground"
                         key={tag}
                       >
                         {tag}
@@ -746,14 +792,17 @@ function ProjectsSection() {
                   {"preview" in project ? (
                     <Suspense fallback={<PixelGrid />}>
                       <LiquidImage
+                        alt={project.previewAlt}
                         className="project-img absolute inset-0 h-full w-full"
+                        height={project.previewHeight}
                         src={project.preview}
+                        width={project.previewWidth}
                       />
                     </Suspense>
                   ) : (
                     <PixelGrid />
                   )}
-                  <div className="absolute top-0 right-0 bg-background/85 px-3 py-2 font-mono text-[0.58rem] font-black uppercase tracking-[0.2em] text-foreground/55">
+                  <div className="absolute top-0 right-0 bg-background/85 px-3 py-2 font-mono text-3xs font-black uppercase tracking-[0.2em] text-foreground/55">
                     {project.subtitle}
                   </div>
                   <div className="absolute bottom-0 left-0 h-6 w-6 border-foreground border-b-2 border-l-2" />
@@ -780,7 +829,7 @@ function WritingSection() {
         <SectionHeader index="03" title="Log" />
 
         <div className="mt-20 grid gap-16 lg:grid-cols-[0.8fr_1.2fr]">
-          <h2 className="scroll-fade font-display text-[clamp(3rem,7vw,7rem)] font-black uppercase leading-[0.9]">
+          <h2 className="scroll-fade font-display text-section-tight font-black uppercase leading-[0.9]">
             Field <br />
             <span className="text-foreground/30">Notes.</span>
           </h2>
@@ -798,7 +847,7 @@ function WritingSection() {
                   <p className="font-mono text-xs text-foreground/40 uppercase tracking-widest mb-4">
                     {post.date}
                   </p>
-                  <h3 className="font-display text-[clamp(1.8rem,3.5vw,3rem)] font-black uppercase leading-[1.1] tracking-tight group-hover:translate-x-2 transition-transform duration-300">
+                  <h3 className="font-display text-subtitle font-black uppercase leading-[1.1] tracking-tight group-hover:translate-x-2 transition-transform duration-300">
                     {post.title}
                   </h3>
                 </div>
@@ -829,19 +878,19 @@ function CTASection() {
         <SectionHeader index="04" inverse title="Ping" />
         <div className="mt-20 grid gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
           <div className="scroll-fade grid justify-items-start">
-            <h2 className="font-display text-[clamp(4.5rem,10vw,11rem)] font-black uppercase leading-[0.8] tracking-tighter text-background">
+            <h2 className="font-display text-hero-cta font-black uppercase leading-[0.8] tracking-tighter text-background">
               Send <br />
               Ideas.
             </h2>
             <PixelSmiley />
           </div>
           <div className="scroll-fade flex flex-col items-start justify-center lg:border-background/25 lg:border-l-4 lg:pl-16">
-            <p className="mb-14 max-w-[42rem] text-[clamp(1.15rem,1.7vw,1.45rem)] font-bold uppercase leading-relaxed tracking-widest text-background/72">
+            <p className="mb-14 max-w-[42rem] text-lede-tight font-bold uppercase leading-relaxed tracking-widest text-background/72">
               Ready to build interactive systems or solidify a visual concept
               into code? Let's connect.
             </p>
             <a
-              className="inline-block max-w-full break-all border-background/32 border-b-4 pb-2 text-left font-black font-display text-[clamp(2.25rem,3.35vw,4.1rem)] leading-[0.92] transition-colors hover:border-background lg:whitespace-nowrap"
+              className="inline-block max-w-full break-all border-background/32 border-b-4 pb-2 text-left font-black font-display text-title-narrow leading-[0.92] transition-colors hover:border-background lg:whitespace-nowrap"
               data-magnetic
               href={`mailto:${SITE.email}`}
             >

@@ -6,6 +6,10 @@ export const SITE = {
   description:
     "我主要做前端和交互实现，习惯先把状态和结构拆清楚，再做动效。这样页面既有表现力，也能长期维护。",
   email: "me@loopwic.com",
+  url: "https://loopwic.com",
+  ogImage: "/og-default.jpg",
+  locale: "zh_CN",
+  twitter: "@loopwic",
 } as const;
 
 export const NAV_ITEMS = [
@@ -48,12 +52,14 @@ export const PROFILE = {
       role: "前端工程师",
       period: "2024.10 - 2025.07",
       description: "负责核心业务页面维护和新功能交付，保障线上稳定。",
+      stack: ["React", "TypeScript", "Next.js", "Tailwind CSS"],
     },
     {
       company: "MOONDROP Tech Co. Ltd.",
       role: "前端工程师",
       period: "2025.08 - 至今",
       description: "参与 AI 产品线前端架构和 CI/CD 流程优化。",
+      stack: ["React", "TypeScript", "Expo", "GitHub Actions", "Docker"],
     },
   ],
 } as const;
@@ -67,8 +73,10 @@ export const PROJECTS = [
     subtitle: "Productionized full-stack monitoring toolkit",
     tags: ["Mod + Backend + Desktop", "Ops-ready", "Live iteration"],
     focus: "规则可维护性、事件链路完整性、桌面运维体验打磨。",
-    preview: "/images/lattice.png",
+    preview: "/images/lattice.webp",
     previewAlt: "Lattice desktop window",
+    previewWidth: 2400,
+    previewHeight: 1520,
   },
   {
     name: "LicMusic",

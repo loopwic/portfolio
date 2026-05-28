@@ -18,14 +18,14 @@ export function CodeBlock({ children, raw, language }: CodeBlockProps) {
             <span className="h-2 w-2 rounded-full bg-foreground/20" />
             <span className="h-2 w-2 rounded-full bg-foreground/10" />
           </div>
-          <span className="font-medium font-mono text-[0.65rem] text-foreground/40 tracking-[0.1em]">
+          <span className="font-medium font-mono text-2xs text-foreground/40 tracking-[0.1em]">
             {language || "code"}
           </span>
         </figcaption>
         {raw && <CopyButton value={raw} />}
       </div>
       <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-foreground/20 hover:scrollbar-thumb-foreground/40 scrollbar-thumb-rounded-full overflow-x-auto px-5 py-5">
-        <pre className="m-0 min-w-full bg-transparent p-0 font-mono text-[0.82rem] text-foreground/70 leading-[1.8]">
+        <pre className="m-0 min-w-full bg-transparent p-0 font-mono text-code text-foreground/70 leading-[1.8]">
           {children}
         </pre>
       </div>

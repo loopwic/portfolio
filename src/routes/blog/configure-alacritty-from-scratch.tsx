@@ -1,31 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BlogPostLayout } from "@/components/blog-post-layout";
 import Post from "@/content/blog/configure-alacritty-from-scratch.mdx";
+import { buildSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/blog/configure-alacritty-from-scratch")({
-  head: () => ({
-    meta: [
-      {
-        title: "从零开始配置 Alacritty",
-      },
-      {
-        name: "description",
-        content: "在 macOS 上配置 Alacritty。",
-      },
-      {
-        name: "keywords",
-        content: "alacritty, terminal, configuration",
-      },
-      {
-        name: "author",
-        content: "Loopwic",
-      },
-      {
-        property: "og:title",
-        content: "从零开始配置 Alacritty",
-      },
-    ],
-  }),
+  head: () => {
+    const seo = buildSeo({
+      title: "从零开始配置 Alacritty",
+      description:
+        "从字体、主题到快捷键，记录我如何把日常开发入口做得顺手、克制、可复用。",
+      path: "/blog/configure-alacritty-from-scratch",
+      type: "article",
+      publishedTime: "2025-09-29",
+      keywords: "alacritty, terminal, configuration",
+    });
+    return { meta: seo.meta, links: seo.links };
+  },
   component: ConfigureAlacrittyPost,
 });
 

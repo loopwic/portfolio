@@ -22,7 +22,7 @@ function PixelLogo() {
   return (
     <div className="group inline-flex items-center gap-2">
       <span className="h-2 w-2 bg-current transition-transform group-hover:translate-x-0.5" />
-      <span className="font-display text-[1.05rem] font-black uppercase leading-none tracking-[0.12em]">
+      <span className="font-display text-brand font-black uppercase leading-none tracking-[0.12em]">
         Loopwic
       </span>
     </div>
@@ -96,7 +96,7 @@ export function SiteNav() {
             {HOME_SECTIONS.map((sectionId, index) => (
               <button
                 className={cn(
-                  "relative py-1 font-black font-mono text-[0.65rem] uppercase tracking-[0.25em] transition-all hover:opacity-100 outline-none",
+                  "relative py-1 font-black font-mono text-2xs uppercase tracking-[0.25em] transition-all hover:opacity-100 outline-none",
                   pathname === "/" && index === currentSectionIndex
                     ? "opacity-100 before:absolute before:left-0 before:-bottom-1 before:h-0.5 before:w-full before:bg-foreground"
                     : "opacity-45 hover:before:absolute hover:before:left-0 hover:before:-bottom-1 hover:before:h-px hover:before:w-full hover:before:bg-foreground/40"
@@ -113,7 +113,7 @@ export function SiteNav() {
 
             <Link
               className={cn(
-                "relative py-1 font-black font-mono text-[0.65rem] uppercase tracking-[0.25em] transition-all hover:opacity-100 outline-none",
+                "relative py-1 font-black font-mono text-2xs uppercase tracking-[0.25em] transition-all hover:opacity-100 outline-none",
                 pathname.startsWith("/blog")
                   ? "opacity-100 before:absolute before:left-0 before:-bottom-1 before:h-0.5 before:w-full before:bg-foreground"
                   : "opacity-45 hover:before:absolute hover:before:left-0 hover:before:-bottom-1 hover:before:h-px hover:before:w-full hover:before:bg-foreground/40"
@@ -150,7 +150,7 @@ export function SiteNav() {
 
         <div className="flex items-center gap-4">
           <Link
-            className="font-black font-mono text-[0.68rem] uppercase tracking-[0.2em] opacity-60"
+            className="font-black font-mono text-2xs uppercase tracking-[0.2em] opacity-60"
             to="/blog"
           >
             Blog

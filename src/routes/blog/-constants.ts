@@ -1,5 +1,23 @@
 export const BLOG_POSTS = [
   {
+    title: "液态图片预览：让项目图在 hover 时变成可触碰的表面",
+    slug: "liquid-image-webgl-preview",
+    to: "/blog/liquid-image-webgl-preview",
+    date: "2026-05-28",
+    summary:
+      "拆解项目列表上的 LiquidImage 组件：DOM 兜底 + WebGL 叠层、UV cover、ripple、RGB shift、grain、DPR 与卸载释放，以及 hover 的插值取舍。",
+    tags: ["WebGL", "Shader", "GLSL", "Interaction"],
+  },
+  {
+    title: "像素融合风格的个人站重构：从视觉系统到滚动叙事",
+    slug: "pixel-fusion-portfolio-redesign",
+    to: "/blog/pixel-fusion-portfolio-redesign",
+    date: "2026-04-30",
+    summary:
+      "一次完整的个人站技术重构记录：像素边界、Three.js shader cube、标题 mask、GSAP pinned section 和 WebGL 图片预览如何组合成稳定的视觉系统。",
+    tags: ["Design System", "Shader", "GSAP", "WebGL"],
+  },
+  {
     title: "把终端调成工作台",
     slug: "configure-alacritty-from-scratch",
     to: "/blog/configure-alacritty-from-scratch",

@@ -7,6 +7,7 @@ import { gsap } from "gsap";
 import { ArrowLeft } from "lucide-react";
 import { type ReactNode, useRef } from "react";
 import { Animation, Root } from "@/components/scrollytelling";
+import { articleJsonLd } from "@/lib/seo";
 import { useMDXComponents } from "@/mdx-components";
 import { BLOG_POSTS } from "@/routes/blog/-constants";
 import { TableOfContents } from "./table-of-contents";
@@ -38,12 +39,30 @@ export function BlogPostLayout({ children }: BlogPostLayoutProps) {
     { scope: container }
   );
 
+  const articleLd = post
+    ? JSON.stringify(
+        articleJsonLd({
+          title: post.title,
+          description: post.summary,
+          path: post.to,
+          publishedTime: post.date,
+        })
+      )
+    : null;
+
   return (
     <Root end="bottom bottom" scrub start="top top">
       <div
         className="min-h-screen bg-background pt-32 pb-24 text-foreground selection:bg-foreground/20 selection:text-foreground relative overflow-hidden"
         ref={container}
       >
+        {articleLd ? (
+          <script
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD payload is derived from typed post metadata
+            dangerouslySetInnerHTML={{ __html: articleLd }}
+            type="application/ld+json"
+          />
+        ) : null}
         <Animation tween={{ end: 100, start: 0, to: { scaleX: 1 } }}>
           <div className="fixed top-0 left-0 z-50 h-[1.5px] w-full origin-left scale-x-0 bg-foreground mix-blend-difference" />
         </Animation>
@@ -73,24 +92,24 @@ export function BlogPostLayout({ children }: BlogPostLayoutProps) {
 
               <div className="mt-16 hidden border-t border-foreground/10 pt-8 lg:block relative">
                 <div className="absolute -top-px right-0 w-1 h-1 bg-foreground/20" />
-                <p className="font-mono text-[0.65rem] text-foreground/40 uppercase tracking-[0.2em]">
+                <p className="font-mono text-2xs text-foreground/40 uppercase tracking-[0.2em]">
                   Log Type
                 </p>
-                <p className="mt-3 font-mono text-[0.75rem] text-foreground/70 uppercase tracking-[0.16em] border-l border-foreground/20 pl-3">
+                <p className="mt-3 font-mono text-xs text-foreground/70 uppercase tracking-[0.16em] border-l border-foreground/20 pl-3">
                   Field Note
                 </p>
                 {post ? (
                   <>
-                    <p className="mt-12 font-mono text-[0.65rem] text-foreground/40 uppercase tracking-[0.2em]">
+                    <p className="mt-12 font-mono text-2xs text-foreground/40 uppercase tracking-[0.2em]">
                       Logged At
                     </p>
-                    <p className="mt-3 font-mono text-[0.8rem] text-foreground/80">
+                    <p className="mt-3 font-mono text-tiny text-foreground/80">
                       {post.date}
                     </p>
                     <div className="mt-10 flex flex-wrap gap-2">
                       {post.tags.map((tag) => (
                         <span
-                          className="border border-foreground/10 bg-foreground/[0.02] px-2.5 py-1 font-mono text-[0.6rem] text-foreground/60 uppercase tracking-[0.16em] cursor-default"
+                          className="border border-foreground/10 bg-foreground/[0.02] px-2.5 py-1 font-mono text-3xs text-foreground/60 uppercase tracking-[0.16em] cursor-default"
                           key={tag}
                         >
                           {tag}
@@ -107,7 +126,7 @@ export function BlogPostLayout({ children }: BlogPostLayoutProps) {
                 <div className="absolute -top-px -right-px w-1.5 h-1.5 bg-foreground/20" />
                 <div className="flex items-center gap-3 mb-6">
                   <span className="w-1 h-1 bg-foreground/40 block" />
-                  <p className="font-mono text-[0.65rem] text-foreground/50 uppercase tracking-[0.2em]">
+                  <p className="font-mono text-2xs text-foreground/50 uppercase tracking-[0.2em]">
                     {post ? `${post.date} / ${post.tags[0]}` : "Field Note"}
                   </p>
                 </div>
@@ -125,7 +144,7 @@ export function BlogPostLayout({ children }: BlogPostLayoutProps) {
               </article>
 
               <div className="post-element mt-24 border-t border-foreground/10 pt-8 flex items-center justify-between">
-                <p className="font-mono text-[0.65rem] text-foreground/30 uppercase tracking-[0.2em]">
+                <p className="font-mono text-2xs text-foreground/30 uppercase tracking-[0.2em]">
                   [ End of Note ]
                 </p>
                 <div className="flex gap-1 opacity-20">
@@ -144,11 +163,11 @@ export function BlogPostLayout({ children }: BlogPostLayoutProps) {
                     <span className="h-1 w-1 bg-foreground/40" />
                     <span className="h-1 w-1 bg-foreground/20" />
                   </div>
-                  <span className="font-mono text-[0.65rem] text-foreground/40 uppercase tracking-[0.2em]">
+                  <span className="font-mono text-2xs text-foreground/40 uppercase tracking-[0.2em]">
                     Index
                   </span>
                 </div>
-                <div className="font-mono text-[0.8rem] text-foreground/50 leading-[2.2]">
+                <div className="font-mono text-tiny text-foreground/50 leading-[2.2]">
                   <TableOfContents />
                 </div>
               </div>

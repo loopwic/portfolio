@@ -153,7 +153,7 @@ const components: MDXComponents = {
       return (
         <code
           className={cn(
-            "relative break-words border border-foreground/15 bg-surface px-[0.35rem] py-[0.14rem] font-mono text-[0.8rem] text-foreground outline-none",
+            "relative break-words border border-foreground/15 bg-surface px-[0.35rem] py-[0.14rem] font-mono text-tiny text-foreground outline-none",
             className
           )}
           {...props}

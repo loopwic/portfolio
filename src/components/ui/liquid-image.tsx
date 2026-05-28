@@ -6,6 +6,8 @@ interface LiquidImageProps {
   src: string;
   alt?: string;
   className?: string;
+  width?: number;
+  height?: number;
 }
 
 const VERTEX_SHADER = `
@@ -83,7 +85,13 @@ const FRAGMENT_SHADER = `
   }
 `;
 
-export function LiquidImage({ src, alt = "", className }: LiquidImageProps) {
+export function LiquidImage({
+  src,
+  alt = "",
+  className,
+  width,
+  height,
+}: LiquidImageProps) {
   const frameRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointerRef = useRef({ x: 0.5, y: 0.5 });
@@ -241,7 +249,15 @@ export function LiquidImage({ src, alt = "", className }: LiquidImageProps) {
       onPointerMove={handlePointerMove}
       ref={frameRef}
     >
-      <img alt={alt} draggable={false} src={src} />
+      <img
+        alt={alt}
+        decoding="async"
+        draggable={false}
+        height={height}
+        loading="lazy"
+        src={src}
+        width={width}
+      />
       <canvas className="liquid-image-canvas" ref={canvasRef} />
     </div>
   );

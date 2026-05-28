@@ -8,7 +8,7 @@ import { lazy, type ReactNode, Suspense } from "react";
 import { SiteNav } from "@/components/nav/site-nav";
 import ScrollProvider from "@/components/providers/scroll-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { SITE } from "@/lib/site-data";
+import { buildSeo, personJsonLd } from "@/lib/seo";
 import appCss from "@/styles.css?url";
 
 const CustomCursor = lazy(() =>
@@ -17,32 +17,36 @@ const CustomCursor = lazy(() =>
   }))
 );
 
+const PERSON_LD = JSON.stringify(personJsonLd());
+
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: `${SITE.name} — ${SITE.subtitle}` },
-      { name: "description", content: SITE.description },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico" },
-      {
-        rel: "preconnect",
-        href: "https://fonts.googleapis.com",
-      },
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
-      },
-    ],
-  }),
+  head: () => {
+    const seo = buildSeo();
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { name: "theme-color", content: "#0a0a0a" },
+        ...seo.meta,
+      ],
+      links: [
+        { rel: "stylesheet", href: appCss },
+        { rel: "icon", href: "/favicon.ico" },
+        ...seo.links,
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        {
+          rel: "preconnect",
+          href: "https://fonts.gstatic.com",
+          crossOrigin: "anonymous",
+        },
+        { rel: "preconnect", href: "https://cdn.loopwic.com" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap",
+        },
+      ],
+    };
+  },
   shellComponent: RootDocument,
   component: RootLayout,
 });
@@ -70,9 +74,14 @@ function RootLayout() {
 
 function RootDocument({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="zh-CN" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD payload is static and built from typed config
+          dangerouslySetInnerHTML={{ __html: PERSON_LD }}
+          type="application/ld+json"
+        />
       </head>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         {children}

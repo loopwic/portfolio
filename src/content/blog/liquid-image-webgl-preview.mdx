@@ -1,0 +1,195 @@
+import { Author } from "../../components/author";
+
+# 液态图片预览：让项目图在 hover 时变成可触碰的表面
+
+<Author />
+
+项目列表的封面图是个老问题。静态截图很安全，但页面其它部分都在动，截图反而显得突兀；做成视频太重，加载和电量都不友好；用 CSS hover 缩放又像随便糊的卡片。我想要的是介于"图片"和"屏幕"之间的状态——光标接近时它有反馈，离开后又安静下来，让人愿意停留半秒。
+
+最后落地的是一个 WebGL 组件 `LiquidImage`：底下还是浏览器原生 `<img>` 兜底，上面叠一层 canvas 跑片段着色器。光标进入时着色器从 0 渐变到 1，UV 像素栅格、波纹、RGB 偏移和颗粒同时出现；光标离开时反向插值回去。整段交互大概 30 行 JS 加 60 行 shader，但里面有几个不显眼的取舍值得拆开讲。
+
+## 为什么不是 CSS 或者 canvas 2D
+
+CSS 能做缩放、模糊、`backdrop-filter`，但做不了像素级 UV 扰动。Filter 链一长，GPU 上也并不比 shader 便宜，而且在不同浏览器上表现不一致。
+
+canvas 2D 能逐像素操作，但每帧 `getImageData` / `putImageData` 在 CPU 走，分辨率稍微大一点就掉帧，更别说还要叠加波纹和噪点。
+
+WebGL 是这类效果的天然位置：上传纹理一次，之后每帧都是 GPU 上的并行计算，分辨率提到 devicePixelRatio = 2 也基本不卡。
+
+## 总体结构
+
+组件返回的 DOM 结构非常薄：
+
+```tsx
+<div ref={frameRef} onPointerMove={...} onPointerEnter={...} onPointerLeave={...}>
+  <img alt={alt} draggable={false} src={src} />
+  <canvas ref={canvasRef} />
+</div>
+```
+
+下层 `<img>` 不只是占位，它承担两件事：一是 WebGL 不可用时的回退，二是给搜索引擎和无障碍工具一个真正可读的图片元素。canvas 通过 CSS `position: absolute` 盖在它上面，透明区域让原图穿透。
+
+着色器材质本身用一对全屏三角形渲染：
+
+```ts
+const buffer = createBuffer(
+  gl,
+  new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1])
+);
+```
+
+两个三角形覆盖整个裁剪空间，片段着色器在每个像素上独立计算。这种 "fullscreen quad" 是后处理 shader 的标准写法，因为它把所有逻辑收敛到片段着色器里，顶点着色器只需要把 `aPosition` 重映射到 UV。
+
+## 让 UV 自己处理 cover
+
+第一个不显然的问题是图片宽高比和容器宽高比不一定一致。如果直接 `texture2D(uTexture, vUv)`，图片会被拉伸。
+
+CSS `object-fit: cover` 在 DOM 里能解决，但在 shader 里要自己算：
+
+```glsl
+vec2 coverUv(vec2 uv) {
+  float frameAspect = uResolution.x / uResolution.y;
+  float imageAspect = uImageResolution.x / uImageResolution.y;
+  vec2 result = uv;
+
+  if (frameAspect > imageAspect) {
+    float scale = imageAspect / frameAspect;
+    result.y = (uv.y - 0.5) * scale + 0.5;
+  } else {
+    float scale = frameAspect / imageAspect;
+    result.x = (uv.x - 0.5) * scale + 0.5;
+  }
+
+  return result;
+}
+```
+
+逻辑是以 (0.5, 0.5) 为中心对 UV 做缩放——容器更宽时压缩 y 轴让图片溢出上下，更窄时压缩 x 轴让图片溢出左右。这一步必须在所有扰动之前完成，否则扰动会基于错误的图片采样位置。
+
+## hover 状态用插值，不要直接切换
+
+最容易写错的是 hover 的开关。如果让 `uHover` 在 0 和 1 之间硬切，shader 里所有依赖它的效果都会瞬间出现或消失，像贴纸啪一下贴上去。
+
+正确的做法是用一个目标值 + 实际值的插值，每帧逼近：
+
+```ts
+const hoverTargetRef = useRef(0);
+let hover = 0;
+
+// in render loop
+hover += (hoverTargetRef.current - hover) * 0.08;
+```
+
+`onPointerEnter` 把 target 设为 1，`onPointerLeave` 设回 0。`hover` 自己每帧朝目标移动 8% 的距离，形成一个简单的指数趋近。这个数比手写的 easing 曲线还好用，因为它不需要时间起点，只关心当前和目标的差。
+
+shader 里很多效果都依赖这个 `uHover` 做权重：
+
+```glsl
+uv = mix(uv, pixelUv, 0.12 + hover * 0.16);
+float ripple = sin(distanceToMouse * 28.0 - uTime * 5.4) * 0.032 * hover;
+```
+
+平时（hover = 0）会有 0.12 的微弱像素栅格，但没有波纹；光标进入后像素栅格变深，波纹从 0 长出来。让"静止"和"激活"是同一条数学曲线上的两个端点，过渡天然连续。
+
+## ripple：从光标位置向外的环形扰动
+
+波纹是这个组件最被注意到的部分，但实现只有一行：
+
+```glsl
+vec2 toMouse = uv - uMouse;
+float distanceToMouse = length(toMouse);
+float ripple = sin(distanceToMouse * 28.0 - uTime * 5.4) * 0.032 * hover;
+vec2 pull = normalize(toMouse + vec2(0.001)) * ripple;
+```
+
+`sin(distance * 频率 - time * 速度)` 是 GLSL 里制造同心圆波纹的标准写法。频率决定环的密度，速度决定波纹向外推进的快慢。两者相减是因为我们要的是"从中心向外扩散"，而不是"从外向中心收缩"。
+
+`pull` 是沿光标方向的位移量。把它从 UV 里减去，相当于在波峰位置把像素向光标方向轻微拉近，在波谷位置反向，形成水面被点了一下的效果。
+
+`normalize(toMouse + vec2(0.001))` 里的 `0.001` 是个细节——光标正好在像素中心时 `toMouse` 是零向量，`normalize` 会得到 NaN，给一个微小偏移可以避免渲染瑕疵。
+
+## RGB shift 和 grain：把它做成屏幕
+
+到这里已经有像素栅格和波纹了，但画面还是太"干净"，看不出是被一个 shader 驱动的表面。两个小步骤会把它推向"屏幕"的观感。
+
+RGB shift 利用三次采样分别取 R、G、B 通道，制造色像差：
+
+```glsl
+float rgbShift = 0.012 * hover + 0.002;
+vec4 texR = texture2D(uTexture, distortedUv + vec2(rgbShift, 0.0));
+vec4 texG = texture2D(uTexture, distortedUv);
+vec4 texB = texture2D(uTexture, distortedUv - vec2(rgbShift, 0.0));
+vec3 shifted = vec3(texR.r, texG.g, texB.b);
+```
+
+平时只有 0.002 的极弱偏移，刚够让边缘看起来不那么完美；hover 时偏移放大十倍，让画面像旧 CRT 那样轻微出错。
+
+grain 用 hash 函数生成伪随机噪点：
+
+```glsl
+float random(vec2 value) {
+  return fract(sin(dot(value, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+float grain = random(floor(gl_FragCoord.xy * 0.72) + uTime) * 0.035;
+color += grain;
+```
+
+`floor(gl_FragCoord.xy * 0.72)` 把屏幕分成块，每帧内的同一块拿到同样的随机值，所以 grain 看起来是颗粒而不是连续抖动。`+ uTime` 让颗粒每帧都换位置，避免它被识别成静态贴图。
+
+## DPR 与 resize：避免一帧一帧地变模糊
+
+WebGL canvas 在响应式布局里最常踩的坑是 canvas 内部分辨率没跟 CSS 尺寸同步，导致放大后糊掉。
+
+```ts
+const resize = () => {
+  const rect = frame.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const width = Math.max(1, Math.floor(rect.width * dpr));
+  const height = Math.max(1, Math.floor(rect.height * dpr));
+
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  gl.viewport(0, 0, width, height);
+};
+```
+
+每帧渲染前调用 `resize`，只在尺寸真正变化时改 `canvas.width / height`——因为给这两个属性赋值会清空 GL 状态，频繁改会引入闪烁。
+
+DPR 上限钉在 2 是个性能/清晰度的折中。Retina 5K 显示器的 DPR 可能到 3 甚至 4，按照真实 DPR 渲染会让片段着色器每帧多跑 50%-100% 的像素，几乎没人能看出区别。
+
+## 卸载时认真释放 GL 资源
+
+组件卸载或图片切换时必须释放 buffer、texture、program。开发过程中频繁切换路由很容易看到这一步带来的效果：
+
+```ts
+return () => {
+  disposed = true;
+  window.cancelAnimationFrame(frameId);
+  gl.deleteBuffer(buffer);
+  gl.deleteTexture(texture);
+  gl.deleteProgram(program);
+};
+```
+
+`disposed` 标志位用于 `image.onload`——纹理可能在组件已经卸载后才完成解码，这时不能再 `texImage2D`，否则会写入一个已被 delete 的 texture，控制台会出 warning，严重时会让后续 GL 调用全部失败。
+
+## 取舍
+
+`LiquidImage` 在桌面浏览器上很顺，但有几个边界需要说清楚：
+
+- 移动端没有 hover。`onPointerEnter` 在触摸场景下也会触发，但意义有限。当前实现保留了"激活态"，相当于触摸即激活，松开后回落，对移动端而言可以接受，但 ripple 的视觉重点是光标位置追踪，触屏体验不会一样精细。
+- WebGL 不可用时直接显示底下的 `<img>`。`getContext("webgl")` 返回 null 时整个 effect 提前 return，原图自然兜底。
+- 多个实例叠加时每个都跑独立 RAF 和独立 program。如果某天列表里同时出现 10 张图，会需要一个共享上下文方案，但目前的项目数不到 5 张，没必要先做。
+- 没有响应 `prefers-reduced-motion`。这是个真实缺口——下一版会让 reduce-motion 的用户拿到一个静态版本，UV 不扰动、grain 关掉、ripple 只在指针点击时短暂出现。
+
+## 总结
+
+这个组件的写法不复杂，但它体现了一个我反复确认的取向：**交互动效要有一个静止的语言版本**。
+
+像素栅格、RGB shift、grain 在 hover = 0 时仍然以微小的强度存在，所以图片即便没有人摸它，也已经是这个 shader 的一部分。光标进入只是把同一组参数推到激活端点，而不是激活一个原本不存在的效果。
+
+这样得到的好处是：动效不会让人意外，静止画面也不会显得寡淡。整个组件用 30 行 JS 和 60 行 GLSL 完成，剩下的复杂度交给了对 0 → 1 这条曲线的设计。
