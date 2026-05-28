@@ -1,3 +1,30 @@
+# [1.8.0](https://github.com/loopwic/portfolio/compare/v1.6.0...v1.8.0) (2026-05-28)
+
+
+### Bug Fixes
+
+* use bun for deployment builds ([11fb6e4](https://github.com/loopwic/portfolio/commit/11fb6e4ec99d9b348da71d95baf186b1cc42a109))
+
+
+### Features
+
+* **home:** tighten motion pacing and add two narrative beats ([6c09082](https://github.com/loopwic/portfolio/commit/6c09082))
+* seo infra, perf fixes, design tokens, and new blog post ([a6c33ed](https://github.com/loopwic/portfolio/commit/a6c33edf79e8b2a309c6755dcbbd6f444cec83a4))
+* **ui:** redesign pixel fusion portfolio ([75fcbe5](https://github.com/loopwic/portfolio/commit/75fcbe5b413c63857e6f1897d91597a55aa372ab))
+* update to v2 ([03331f4](https://github.com/loopwic/portfolio/commit/03331f49c08e32a5916260e829ef934e690f9167))
+
+
+### Performance Improvements
+
+* **cursor:** event delegation, quickTo, touch/reduced-motion gating ([bec17da](https://github.com/loopwic/portfolio/commit/bec17da61e31cbc984c7761c77c8404f8dc22ea9))
+* **home:** replace three.js cube with hand-written WebGL ([e401118](https://github.com/loopwic/portfolio/commit/e4011185ec8cf442edcaa5bbc4e9bc1d5d4b5ccb))
+
+
+### Note
+
+Version `1.7.0` was skipped: a stale `v1.7.0` tag from an abandoned branch (commit `402a3c7`, not in main's history) blocked the CI tagging step. To avoid moving or deleting the orphan tag, this release is published as `1.8.0` directly.
+
+
 # [1.6.0](https://github.com/loopwic/portfolio/compare/v1.5.0...v1.6.0) (2026-03-06)
 
 
