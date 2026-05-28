@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/loopwic/portfolio/compare/v1.8.0...v1.9.0) (2026-05-28)
+
+
+### Features
+
+* **ui:** add nav slide indicator, writing hover affordance, theme wipe ([c7b2cc2](https://github.com/loopwic/portfolio/commit/c7b2cc2d998463e813f0f922335065f12bb7dbd4))
+
 # [1.8.0](https://github.com/loopwic/portfolio/compare/v1.6.0...v1.8.0) (2026-05-28)
 
 
