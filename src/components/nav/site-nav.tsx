@@ -3,10 +3,20 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useRef, useState } from "react";
+import {
+  type MouseEvent as ReactMouseEvent,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { useScrollContext } from "@/contexts/scroll-context";
 import { HOME_SECTIONS } from "@/lib/site-data";
 import { cn } from "@/lib/utils";
+
+const THEME_WIPE_DURATION_MS = 320;
+const NAV_INDICATOR_TRANSITION_MS = 280;
+const BLOG_NAV_INDEX = HOME_SECTIONS.length;
 
 const SCROLL_HIDE_THRESHOLD = 80;
 
@@ -38,10 +48,65 @@ export function SiteNav() {
   const [isMounted, setIsMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const itemsContainerRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Array<HTMLElement | null>>([]);
+  const [indicator, setIndicator] = useState({
+    left: 0,
+    width: 0,
+    visible: false,
+  });
+
+  let activeIndex = -1;
+  if (pathname.startsWith("/blog")) {
+    activeIndex = BLOG_NAV_INDEX;
+  } else if (pathname === "/") {
+    activeIndex = currentSectionIndex;
+  }
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useLayoutEffect(() => {
+    const container = itemsContainerRef.current;
+    const item = itemRefs.current[activeIndex];
+    if (!(container && item) || activeIndex < 0) {
+      setIndicator((prev) => ({ ...prev, visible: false }));
+      return;
+    }
+    const containerRect = container.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+    setIndicator({
+      left: itemRect.left - containerRect.left,
+      width: itemRect.width,
+      visible: true,
+    });
+  }, [activeIndex]);
+
+  useEffect(() => {
+    if (typeof ResizeObserver === "undefined") {
+      return;
+    }
+    const container = itemsContainerRef.current;
+    if (!container) {
+      return;
+    }
+    const observer = new ResizeObserver(() => {
+      const item = itemRefs.current[activeIndex];
+      if (!item) {
+        return;
+      }
+      const containerRect = container.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      setIndicator({
+        left: itemRect.left - containerRect.left,
+        width: itemRect.width,
+        visible: true,
+      });
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [activeIndex]);
 
   useEffect(() => {
     const updateVisibility = () => {
@@ -71,8 +136,48 @@ export function SiteNav() {
     scrollToSection(sectionId);
   };
 
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  const toggleTheme = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
+    const doc = document as Document & {
+      startViewTransition?: (cb: () => void) => {
+        ready: Promise<void>;
+      };
+    };
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!doc.startViewTransition || reduceMotion) {
+      setTheme(nextTheme);
+      return;
+    }
+
+    const x = event.clientX;
+    const y = event.clientY;
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    const transition = doc.startViewTransition(() => {
+      setTheme(nextTheme);
+    });
+
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0 at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration: THEME_WIPE_DURATION_MS,
+          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+          pseudoElement: "::view-transition-new(root)",
+        }
+      );
+    });
   };
 
   return (
@@ -93,35 +198,57 @@ export function SiteNav() {
               <PixelLogo />
             </button>
 
-            {HOME_SECTIONS.map((sectionId, index) => (
-              <button
-                className={cn(
-                  "relative py-1 font-black font-mono text-2xs uppercase tracking-[0.25em] transition-all hover:opacity-100 outline-none",
-                  pathname === "/" && index === currentSectionIndex
-                    ? "opacity-100 before:absolute before:left-0 before:-bottom-1 before:h-0.5 before:w-full before:bg-foreground"
-                    : "opacity-45 hover:before:absolute hover:before:left-0 hover:before:-bottom-1 hover:before:h-px hover:before:w-full hover:before:bg-foreground/40"
-                )}
-                key={sectionId}
-                onClick={() => handleSectionClick(sectionId)}
-                type="button"
-              >
-                {sectionLabels[sectionId]}
-              </button>
-            ))}
-
-            <span className="mx-2 h-3 w-px bg-foreground/15" />
-
-            <Link
-              className={cn(
-                "relative py-1 font-black font-mono text-2xs uppercase tracking-[0.25em] transition-all hover:opacity-100 outline-none",
-                pathname.startsWith("/blog")
-                  ? "opacity-100 before:absolute before:left-0 before:-bottom-1 before:h-0.5 before:w-full before:bg-foreground"
-                  : "opacity-45 hover:before:absolute hover:before:left-0 hover:before:-bottom-1 hover:before:h-px hover:before:w-full hover:before:bg-foreground/40"
-              )}
-              to="/blog"
+            <div
+              className="relative flex items-center gap-6"
+              ref={itemsContainerRef}
             >
-              Blog
-            </Link>
+              {HOME_SECTIONS.map((sectionId, index) => (
+                <button
+                  className={cn(
+                    "relative py-1 font-black font-mono text-2xs uppercase tracking-[0.25em] outline-none transition-opacity duration-200",
+                    pathname === "/" && index === currentSectionIndex
+                      ? "opacity-100"
+                      : "opacity-45 hover:opacity-100"
+                  )}
+                  key={sectionId}
+                  onClick={() => handleSectionClick(sectionId)}
+                  ref={(el) => {
+                    itemRefs.current[index] = el;
+                  }}
+                  type="button"
+                >
+                  {sectionLabels[sectionId]}
+                </button>
+              ))}
+
+              <span className="mx-2 h-3 w-px bg-foreground/15" />
+
+              <Link
+                className={cn(
+                  "relative py-1 font-black font-mono text-2xs uppercase tracking-[0.25em] outline-none transition-opacity duration-200",
+                  pathname.startsWith("/blog")
+                    ? "opacity-100"
+                    : "opacity-45 hover:opacity-100"
+                )}
+                ref={(el) => {
+                  itemRefs.current[BLOG_NAV_INDEX] = el;
+                }}
+                to="/blog"
+              >
+                Blog
+              </Link>
+
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-1 h-0.5 bg-foreground"
+                style={{
+                  left: `${indicator.left}px`,
+                  width: `${indicator.width}px`,
+                  opacity: indicator.visible ? 1 : 0,
+                  transition: `left ${NAV_INDICATOR_TRANSITION_MS}ms cubic-bezier(0.16, 1, 0.3, 1), width ${NAV_INDICATOR_TRANSITION_MS}ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease-out`,
+                }}
+              />
+            </div>
           </nav>
 
           <button
