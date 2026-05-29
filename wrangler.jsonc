@@ -3,8 +3,8 @@
   "name": "portfolio",
   "compatibility_date": "2025-09-27",
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
   "main": "@tanstack/react-start/server-entry",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
 }

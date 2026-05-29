@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { CSS_EASE_BRUTAL, DURATION_SNAP, KINETIC } from "@/lib/motion-tokens";
 
 const RANDOM_CENTER_OFFSET = 0.5;
@@ -11,21 +12,54 @@ const RANDOM_SINE_OFFSET = 78.233;
 const RANDOM_SINE_MULTIPLIER = 43_758.5453;
 const ROUNDING_PRECISION = 1000;
 
-type KineticTextProps = {
+const roundValue = (value: number) =>
+  Math.round(value * ROUNDING_PRECISION) / ROUNDING_PRECISION;
+
+const seededRandom = (seed: number) => {
+  const raw =
+    Math.sin(seed * RANDOM_SINE_SCALE + RANDOM_SINE_OFFSET) *
+    RANDOM_SINE_MULTIPLIER;
+
+  return raw - Math.floor(raw);
+};
+
+const getSeededRange = (
+  seed: number,
+  index: number,
+  salt: number,
+  range: number
+) =>
+  roundValue(
+    (seededRandom(seed + index * HASH_MULTIPLIER + salt) -
+      RANDOM_CENTER_OFFSET) *
+      range
+  );
+
+const hashText = (value: string) => {
+  let hash = 0;
+
+  for (const char of value) {
+    hash = (hash * HASH_MULTIPLIER + (char.codePointAt(0) ?? 0)) % HASH_MODULO;
+  }
+
+  return hash;
+};
+
+interface KineticTextProps {
   text: string;
   mode?: "scatter" | "typewriter" | "cipher";
   className?: string;
   as?: "h1" | "h2" | "span" | "p";
   triggerOnView?: boolean;
-};
+}
 
-export function KineticText({
+export const KineticText = ({
   text,
   mode = "scatter",
   className = "",
   as: Tag = "span",
   triggerOnView = true,
-}: KineticTextProps) {
+}: KineticTextProps) => {
   const ref = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(!triggerOnView);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -66,8 +100,7 @@ export function KineticText({
     let iteration = 0;
     const interval = setInterval(() => {
       setCipherText(
-        text
-          .split("")
+        [...text]
           .map((char, i) => {
             if (char === " ") {
               return " ";
@@ -102,7 +135,7 @@ export function KineticText({
   }
 
   if (mode === "scatter") {
-    const letters = text.split("");
+    const letters = [...text];
     const seed = hashText(text);
 
     return (
@@ -124,15 +157,14 @@ export function KineticText({
                   }
             }
           >
-            {char === " " ? "\u00A0" : char}
+            {char === " " ? " " : char}
           </span>
         ))}
       </Tag>
     );
   }
 
-  // typewriter
-  const letters = text.split("");
+  const letters = [...text];
   return (
     <Tag className={className} ref={ref as never}>
       {letters.map((char, i) => (
@@ -149,44 +181,9 @@ export function KineticText({
                 }
           }
         >
-          {char === " " ? "\u00A0" : char}
+          {char === " " ? " " : char}
         </span>
       ))}
     </Tag>
   );
-}
-
-function hashText(value: string) {
-  let hash = 0;
-
-  for (const char of value) {
-    hash = (hash * HASH_MULTIPLIER + char.charCodeAt(0)) % HASH_MODULO;
-  }
-
-  return hash;
-}
-
-function seededRandom(seed: number) {
-  const raw =
-    Math.sin(seed * RANDOM_SINE_SCALE + RANDOM_SINE_OFFSET) *
-    RANDOM_SINE_MULTIPLIER;
-
-  return raw - Math.floor(raw);
-}
-
-function getSeededRange(
-  seed: number,
-  index: number,
-  salt: number,
-  range: number
-) {
-  return roundValue(
-    (seededRandom(seed + index * HASH_MULTIPLIER + salt) -
-      RANDOM_CENTER_OFFSET) *
-      range
-  );
-}
-
-function roundValue(value: number) {
-  return Math.round(value * ROUNDING_PRECISION) / ROUNDING_PRECISION;
-}
+};

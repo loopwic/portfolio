@@ -1,15 +1,16 @@
 import type { HTMLAttributes } from "react";
+
 import { cn } from "@/lib/utils";
 
 type HeroHeadlineProps = HTMLAttributes<HTMLHeadingElement> & {
   animated?: boolean;
 };
 
-export function HeroHeadline({
+export const HeroHeadline = ({
   animated = true,
   className,
   ...props
-}: HeroHeadlineProps) {
+}: HeroHeadlineProps) => {
   const lineClassName = animated
     ? "intro-line inline-block origin-bottom-left"
     : "inline-block origin-bottom-left";
@@ -34,4 +35,4 @@ export function HeroHeadline({
       </span>
     </h1>
   );
-}
+};

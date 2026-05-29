@@ -5,22 +5,25 @@ import { MDXProvider } from "@mdx-js/react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { gsap } from "gsap";
 import { ArrowLeft } from "lucide-react";
-import { type ReactNode, useRef } from "react";
+import { useRef } from "react";
+import type { ReactNode } from "react";
+
 import { Animation, Root } from "@/components/scrollytelling";
 import { GSAP_EASE_POWER2 } from "@/lib/motion-tokens";
 import { articleJsonLd } from "@/lib/seo";
 import { useMDXComponents } from "@/mdx-components";
 import { BLOG_POSTS } from "@/routes/blog/-constants";
+
 import { TableOfContents } from "./table-of-contents";
 
-const TRAILING_SLASH_PATTERN = /\/$/;
+const TRAILING_SLASH_PATTERN = /\/$/u;
 const END_DOTS = ["end-dot-a", "end-dot-b", "end-dot-c", "end-dot-d"];
 
-type BlogPostLayoutProps = {
+interface BlogPostLayoutProps {
   children: ReactNode;
-};
+}
 
-export function BlogPostLayout({ children }: BlogPostLayoutProps) {
+export const BlogPostLayout = ({ children }: BlogPostLayoutProps) => {
   const container = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const pathname = location.pathname.replace(TRAILING_SLASH_PATTERN, "");
@@ -29,12 +32,12 @@ export function BlogPostLayout({ children }: BlogPostLayoutProps) {
   useGSAP(
     () => {
       gsap.from(".post-element", {
-        y: 20,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.1,
-        ease: GSAP_EASE_POWER2,
         clearProps: "all",
+        duration: 1,
+        ease: GSAP_EASE_POWER2,
+        opacity: 0,
+        stagger: 0.1,
+        y: 20,
       });
     },
     { scope: container }
@@ -43,10 +46,10 @@ export function BlogPostLayout({ children }: BlogPostLayoutProps) {
   const articleLd = post
     ? JSON.stringify(
         articleJsonLd({
-          title: post.title,
           description: post.summary,
           path: post.to,
           publishedTime: post.date,
+          title: post.title,
         })
       )
     : null;
@@ -178,4 +181,4 @@ export function BlogPostLayout({ children }: BlogPostLayoutProps) {
       </div>
     </Root>
   );
-}
+};

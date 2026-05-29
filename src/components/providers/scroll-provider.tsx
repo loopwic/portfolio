@@ -1,7 +1,9 @@
 "use client";
 
 import { useLocation } from "@tanstack/react-router";
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import type { ReactNode } from "react";
+
 import { ScrollProvider as ScrollProviderContext } from "@/contexts/scroll-context";
 import { HOME_SECTIONS } from "@/lib/site-data";
 
@@ -17,13 +19,15 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
     }
 
     const updateCurrentSection = () => {
-      const sections = HOME_SECTIONS.map((id) => document.getElementById(id));
+      const sections = HOME_SECTIONS.map((id) =>
+        document.querySelector(`#${id}`)
+      );
       const viewportMiddle = window.scrollY + window.innerHeight / 2;
 
       let closestIndex = 0;
       let closestDistance = Number.POSITIVE_INFINITY;
 
-      for (let i = 0; i < sections.length; i++) {
+      for (let i = 0; i < sections.length; i += 1) {
         const el = sections[i];
         if (!el) {
           continue;
@@ -50,7 +54,7 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
   }, [isHomePage]);
 
   const scrollToSection = useCallback((id: string) => {
-    const el = document.getElementById(id);
+    const el = document.querySelector(`#${id}`);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }

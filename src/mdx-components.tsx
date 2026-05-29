@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { MDXComponents } from "mdx/types";
 import React, { useRef } from "react";
+
 import { CodeBlock } from "@/components/code-block";
 import {
   GSAP_EASE,
@@ -64,9 +65,9 @@ const AnimatedImage = ({
           duration: 1.5,
           ease: GSAP_EASE,
           scrollTrigger: {
-            trigger: containerRef.current,
             start: "top 80%",
             toggleActions: "play none none none",
+            trigger: containerRef.current,
           },
         }
       );
@@ -74,17 +75,17 @@ const AnimatedImage = ({
       // Subtle parallax effect on the image
       gsap.fromTo(
         imgRef.current,
-        { y: -20, scale: 1.05 },
+        { scale: 1.05, y: -20 },
         {
-          y: 20,
-          scale: 1,
           ease: GSAP_EASE_NONE,
+          scale: 1,
           scrollTrigger: {
-            trigger: containerRef.current,
-            start: "top bottom",
             end: "bottom top",
             scrub: true,
+            start: "top bottom",
+            trigger: containerRef.current,
           },
+          y: 20,
         }
       );
     },
@@ -120,15 +121,15 @@ const AnimatedBlockquote = (props: React.ComponentProps<"blockquote">) => {
       }
 
       gsap.from(quoteRef.current, {
-        x: -20,
-        opacity: 0,
         duration: 1,
         ease: GSAP_EASE_POWER3,
+        opacity: 0,
         scrollTrigger: {
-          trigger: quoteRef.current,
           start: "top 85%",
           toggleActions: "play none none none",
+          trigger: quoteRef.current,
         },
+        x: -20,
       });
     },
     { scope: quoteRef }
@@ -138,7 +139,6 @@ const AnimatedBlockquote = (props: React.ComponentProps<"blockquote">) => {
 };
 
 const components: MDXComponents = {
-  img: AnimatedImage,
   blockquote: AnimatedBlockquote,
   code: ({
     className,
@@ -158,7 +158,7 @@ const components: MDXComponents = {
       return (
         <code
           className={cn(
-            "relative break-words border border-foreground/15 bg-surface px-[0.35rem] py-[0.14rem] font-mono text-tiny text-foreground outline-none",
+            "relative wrap-break-word border border-foreground/15 bg-surface px-[0.35rem] py-[0.14rem] font-mono text-tiny text-foreground outline-none",
             className
           )}
           {...props}
@@ -168,6 +168,7 @@ const components: MDXComponents = {
 
     return <code className={cn("font-mono", className)} {...props} />;
   },
+  img: AnimatedImage,
   pre: (props) => {
     // rehype-pretty-code adds data-language attribute to pre element
     const language = props["data-language"] || "text";
@@ -185,6 +186,4 @@ const components: MDXComponents = {
   },
 };
 
-export function useMDXComponents(): MDXComponents {
-  return components;
-}
+export const useMDXComponents = (): MDXComponents => components;

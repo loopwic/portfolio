@@ -2,23 +2,19 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useRef } from "react";
+
 import { AboutSection } from "@/components/home/about-section";
 import { CTASection } from "@/components/home/cta-section";
 import { HeroSection } from "@/components/home/hero-section";
 import { ProjectsSection } from "@/components/home/projects-section";
 import { WritingSection } from "@/components/home/writing-section";
 
-const HomeAnimations = lazy(() =>
-  import("@/components/home/home-animations").then((module) => ({
-    default: module.HomeAnimations,
-  }))
-);
-
-export const Route = createFileRoute("/")({
-  component: HomePage,
+const HomeAnimations = lazy(async () => {
+  const mod = await import("@/components/home/home-animations");
+  return { default: mod.HomeAnimations };
 });
 
-function HomePage() {
+const HomePage = () => {
   const rootRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -36,4 +32,8 @@ function HomePage() {
       </Suspense>
     </div>
   );
-}
+};
+
+export const Route = createFileRoute("/")({
+  component: HomePage,
+});

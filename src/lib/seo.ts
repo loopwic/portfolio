@@ -7,13 +7,13 @@ type MetaTag =
   | { charSet: string }
   | { httpEquiv: string; content: string };
 
-type LinkTag = {
+interface LinkTag {
   rel: string;
   href: string;
   crossOrigin?: "" | "anonymous" | "use-credentials";
   type?: string;
   as?: string;
-};
+}
 
 interface SeoInput {
   title?: string;
@@ -31,7 +31,7 @@ interface SeoOutput {
   links: LinkTag[];
 }
 
-function absoluteUrl(path?: string) {
+const absoluteUrl = (path?: string) => {
   if (!path) {
     return SITE.url;
   }
@@ -39,9 +39,9 @@ function absoluteUrl(path?: string) {
     return path;
   }
   return `${SITE.url}${path.startsWith("/") ? path : `/${path}`}`;
-}
+};
 
-export function buildSeo(input: SeoInput = {}): SeoOutput {
+export const buildSeo = (input: SeoInput = {}): SeoOutput => {
   const title = input.title ?? `${SITE.name} — ${SITE.subtitle}`;
   const description = input.description ?? SITE.description;
   const canonical = absoluteUrl(input.path);
@@ -50,74 +50,70 @@ export function buildSeo(input: SeoInput = {}): SeoOutput {
 
   const meta: MetaTag[] = [
     { title },
-    { name: "description", content: description },
-    { name: "author", content: input.author ?? SITE.name },
-    { property: "og:type", content: type },
-    { property: "og:site_name", content: SITE.name },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-    { property: "og:url", content: canonical },
-    { property: "og:image", content: image },
-    { property: "og:locale", content: SITE.locale },
-    { name: "twitter:card", content: "summary_large_image" },
-    { name: "twitter:site", content: SITE.twitter },
-    { name: "twitter:title", content: title },
-    { name: "twitter:description", content: description },
-    { name: "twitter:image", content: image },
+    { content: description, name: "description" },
+    { content: input.author ?? SITE.name, name: "author" },
+    { content: type, property: "og:type" },
+    { content: SITE.name, property: "og:site_name" },
+    { content: title, property: "og:title" },
+    { content: description, property: "og:description" },
+    { content: canonical, property: "og:url" },
+    { content: image, property: "og:image" },
+    { content: SITE.locale, property: "og:locale" },
+    { content: "summary_large_image", name: "twitter:card" },
+    { content: SITE.twitter, name: "twitter:site" },
+    { content: title, name: "twitter:title" },
+    { content: description, name: "twitter:description" },
+    { content: image, name: "twitter:image" },
   ];
 
   if (input.keywords) {
-    meta.push({ name: "keywords", content: input.keywords });
+    meta.push({ content: input.keywords, name: "keywords" });
   }
 
   if (type === "article" && input.publishedTime) {
     meta.push({
-      property: "article:published_time",
       content: input.publishedTime,
+      property: "article:published_time",
     });
     meta.push({
-      property: "article:author",
       content: input.author ?? SITE.name,
+      property: "article:author",
     });
   }
 
-  const links: LinkTag[] = [{ rel: "canonical", href: canonical }];
+  const links: LinkTag[] = [{ href: canonical, rel: "canonical" }];
 
-  return { meta, links };
-}
+  return { links, meta };
+};
 
-export function personJsonLd() {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: SITE.name,
-    url: SITE.url,
-    jobTitle: SITE.subtitle,
-    description: SITE.description,
-    email: `mailto:${SITE.email}`,
-    sameAs: ["https://github.com/loopwic", "https://x.com/loopwic"],
-  };
-}
+export const personJsonLd = () => ({
+  "@context": "https://schema.org",
+  "@type": "Person",
+  description: SITE.description,
+  email: `mailto:${SITE.email}`,
+  jobTitle: SITE.subtitle,
+  name: SITE.name,
+  sameAs: ["https://github.com/loopwic", "https://x.com/loopwic"],
+  url: SITE.url,
+});
 
-export function articleJsonLd(input: {
+export const articleJsonLd = (input: {
   title: string;
   description: string;
   path: string;
   publishedTime: string;
   image?: string;
-}) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: input.title,
-    description: input.description,
-    image: absoluteUrl(input.image ?? SITE.ogImage),
-    datePublished: input.publishedTime,
-    author: {
-      "@type": "Person",
-      name: SITE.name,
-      url: SITE.url,
-    },
-    mainEntityOfPage: absoluteUrl(input.path),
-  };
-}
+}) => ({
+  "@context": "https://schema.org",
+  "@type": "Article",
+  author: {
+    "@type": "Person",
+    name: SITE.name,
+    url: SITE.url,
+  },
+  datePublished: input.publishedTime,
+  description: input.description,
+  headline: input.title,
+  image: absoluteUrl(input.image ?? SITE.ogImage),
+  mainEntityOfPage: absoluteUrl(input.path),
+});

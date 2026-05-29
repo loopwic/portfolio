@@ -3,13 +3,9 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import {
-  type MouseEvent as ReactMouseEvent,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
+
 import { useScrollContext } from "@/contexts/scroll-context";
 import {
   CSS_EASE_BRUTAL,
@@ -25,27 +21,25 @@ const BLOG_NAV_INDEX = HOME_SECTIONS.length;
 const SCROLL_HIDE_THRESHOLD = 80;
 
 const sectionLabels: Partial<Record<(typeof HOME_SECTIONS)[number], string>> = {
-  hero: "Home",
   about: "Protocol",
+  cta: "Ping",
+  hero: "Home",
   projects: "Output",
   writing: "Log",
-  cta: "Ping",
 };
 
-function PixelLogo() {
-  return (
-    <div className="group inline-flex items-center gap-2">
-      <span className="h-2 w-2 bg-current transition-transform group-hover:translate-x-0.5" />
-      <span className="font-display text-brand font-black uppercase leading-none tracking-[0.12em]">
-        Loopwic
-      </span>
-    </div>
-  );
-}
+const PixelLogo = () => (
+  <div className="group inline-flex items-center gap-2">
+    <span className="h-2 w-2 bg-current transition-transform group-hover:translate-x-0.5" />
+    <span className="font-display text-brand font-black uppercase leading-none tracking-[0.12em]">
+      Loopwic
+    </span>
+  </div>
+);
 
-export function SiteNav() {
+export const SiteNav = () => {
   const location = useLocation();
-  const pathname = location.pathname;
+  const { pathname } = location;
   const navigate = useNavigate();
   const { currentSectionIndex, scrollToSection } = useScrollContext();
   const { resolvedTheme, setTheme } = useTheme();
@@ -53,11 +47,11 @@ export function SiteNav() {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
   const itemsContainerRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<Array<HTMLElement | null>>([]);
+  const itemRefs = useRef<(HTMLElement | null)[]>([]);
   const [indicator, setIndicator] = useState({
     left: 0,
-    width: 0,
     visible: false,
+    width: 0,
   });
 
   let activeIndex = -1;
@@ -82,8 +76,8 @@ export function SiteNav() {
     const itemRect = item.getBoundingClientRect();
     setIndicator({
       left: itemRect.left - containerRect.left,
-      width: itemRect.width,
       visible: true,
+      width: itemRect.width,
     });
   }, [activeIndex]);
 
@@ -104,8 +98,8 @@ export function SiteNav() {
       const itemRect = item.getBoundingClientRect();
       setIndicator({
         left: itemRect.left - containerRect.left,
-        width: itemRect.width,
         visible: true,
+        width: itemRect.width,
       });
     });
     observer.observe(container);
@@ -134,13 +128,13 @@ export function SiteNav() {
 
   const handleSectionClick = (sectionId: string) => {
     if (pathname !== "/") {
-      navigate({ to: "/", hash: sectionId });
+      navigate({ hash: sectionId, to: "/" });
       return;
     }
     scrollToSection(sectionId);
   };
 
-  const toggleTheme = (event: ReactMouseEvent<HTMLButtonElement>) => {
+  const toggleTheme = async (event: ReactMouseEvent<HTMLButtonElement>) => {
     const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
     const doc = document as Document & {
       startViewTransition?: (cb: () => void) => {
@@ -167,21 +161,20 @@ export function SiteNav() {
       setTheme(nextTheme);
     });
 
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0 at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`,
-          ],
-        },
-        {
-          duration: MS_THEME_WIPE,
-          easing: CSS_EASE_OUT_CUBIC,
-          pseudoElement: "::view-transition-new(root)",
-        }
-      );
-    });
+    await transition.ready;
+    document.documentElement.animate(
+      {
+        clipPath: [
+          `circle(0 at ${x}px ${y}px)`,
+          `circle(${endRadius}px at ${x}px ${y}px)`,
+        ],
+      },
+      {
+        duration: MS_THEME_WIPE,
+        easing: CSS_EASE_OUT_CUBIC,
+        pseudoElement: "::view-transition-new(root)",
+      }
+    );
   };
 
   return (
@@ -247,9 +240,9 @@ export function SiteNav() {
                 className="pointer-events-none absolute -bottom-1 h-0.5 bg-foreground"
                 style={{
                   left: `${indicator.left}px`,
-                  width: `${indicator.width}px`,
                   opacity: indicator.visible ? 1 : 0,
                   transition: `left ${MS_NAV_INDICATOR}ms ${CSS_EASE_BRUTAL}, width ${MS_NAV_INDICATOR}ms ${CSS_EASE_BRUTAL}, opacity 180ms ease-out`,
+                  width: `${indicator.width}px`,
                 }}
               />
             </div>
@@ -302,4 +295,4 @@ export function SiteNav() {
       </header>
     </>
   );
-}
+};

@@ -1,22 +1,24 @@
 "use client";
 
 import React from "react";
+
 import { cn } from "@/lib/utils";
+
 import { Button } from "./ui/button";
 
 const COPY_TIMEOUT = 2000;
 const STATUS_LABELS = {
-  idle: "复制",
   copied: "已复制",
   error: "复制失败",
+  idle: "复制",
 } as const;
 
-type CopyButtonProps = {
+interface CopyButtonProps {
   value: string;
   variant?: "default" | "inverted";
-};
+}
 
-export function CopyButton({ value, variant = "default" }: CopyButtonProps) {
+export const CopyButton = ({ value, variant = "default" }: CopyButtonProps) => {
   const [status, setStatus] =
     React.useState<keyof typeof STATUS_LABELS>("idle");
   const timeoutRef = React.useRef<number | null>(null);
@@ -32,13 +34,14 @@ export function CopyButton({ value, variant = "default" }: CopyButtonProps) {
     }, COPY_TIMEOUT);
   }, []);
 
-  React.useEffect(() => {
-    return () => {
+  React.useEffect(
+    () => () => {
       if (timeoutRef.current !== null) {
         window.clearTimeout(timeoutRef.current);
       }
-    };
-  }, []);
+    },
+    []
+  );
 
   const handleCopy = React.useCallback(async () => {
     try {
@@ -77,4 +80,4 @@ export function CopyButton({ value, variant = "default" }: CopyButtonProps) {
       {STATUS_LABELS[status]}
     </Button>
   );
-}
+};

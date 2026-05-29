@@ -3,7 +3,9 @@
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { type RefObject, useEffect } from "react";
+import { useEffect } from "react";
+import type { RefObject } from "react";
+
 import {
   DURATION_REDUCED,
   GSAP_BACK_HEADER,
@@ -19,11 +21,11 @@ import {
   STAGGER_TIGHT,
 } from "@/lib/motion-tokens";
 
-export function HomeAnimations({
+export const HomeAnimations = ({
   scope,
 }: {
   scope: RefObject<HTMLElement | null>;
-}) {
+}) => {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger, useGSAP);
   }, []);
@@ -34,27 +36,27 @@ export function HomeAnimations({
         "(prefers-reduced-motion: reduce)"
       ).matches;
 
-      gsap.set(".intro-line", { yPercent: 110, opacity: 0, skewY: 8 });
-      gsap.set(".fade-in", { y: 16, opacity: 0 });
+      gsap.set(".intro-line", { opacity: 0, skewY: 8, yPercent: 110 });
+      gsap.set(".fade-in", { opacity: 0, y: 16 });
 
       const intro = gsap.timeline({
         defaults: { ease: GSAP_EASE },
       });
       intro
         .to(".intro-line", {
-          yPercent: 0,
+          duration: reduceMotion ? DURATION_REDUCED : 0.85,
           opacity: 1,
           skewY: 0,
-          duration: reduceMotion ? DURATION_REDUCED : 0.85,
           stagger: STAGGER_INTRO,
+          yPercent: 0,
         })
         .to(
           ".fade-in",
           {
-            y: 0,
-            opacity: 1,
             duration: reduceMotion ? DURATION_REDUCED : 0.45,
+            opacity: 1,
             stagger: STAGGER_BASE,
+            y: 0,
           },
           "-=0.55"
         );
@@ -84,45 +86,45 @@ export function HomeAnimations({
 
       const protocolTimeline = gsap.timeline({
         scrollTrigger: {
-          trigger: ".protocol-pin",
-          start: "top top",
           end: "+=1700",
           pin: true,
           scrub: 0.8,
+          start: "top top",
+          trigger: ".protocol-pin",
         },
       });
 
       protocolTimeline
         .to(".protocol-copy", {
-          opacity: 0.24,
-          scale: 0.96,
           duration: 0.8,
           ease: GSAP_EASE_NONE,
+          opacity: 0.24,
+          scale: 0.96,
         })
         .to(
           ".tech-sticker",
           {
+            duration: 0.95,
+            ease: GSAP_BACK_SOFT,
             filter: "blur(0px) saturate(1)",
             opacity: 1,
             rotateX: 0,
             rotateY: 0,
             rotateZ: 0,
             scale: 1,
+            stagger: { each: STAGGER_STICKER, from: "center" },
             y: 0,
             z: 0,
-            stagger: { each: STAGGER_STICKER, from: "center" },
-            duration: 0.95,
-            ease: GSAP_BACK_SOFT,
           },
           0.15
         )
         .to(
           ".sticker-field",
           {
-            rotate: 1.5,
-            scale: 1.02,
             duration: 1.4,
             ease: GSAP_EASE_NONE,
+            rotate: 1.5,
+            scale: 1.02,
           },
           0.25
         );
@@ -133,23 +135,23 @@ export function HomeAnimations({
         const header = section.querySelector<HTMLElement>(
           ".scroll-fade.section-header"
         );
-        const fades = Array.from(
-          section.querySelectorAll<HTMLElement>(".scroll-fade")
-        ).filter((el) => el !== header);
+        const fades = [
+          ...section.querySelectorAll<HTMLElement>(".scroll-fade"),
+        ].filter((el) => el !== header);
 
         const tl = gsap.timeline({
           scrollTrigger: {
-            trigger: section,
             start: "top 80%",
             toggleActions: "play none none reverse",
+            trigger: section,
           },
         });
 
         if (header) {
           tl.fromTo(
             header,
-            { x: -24, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.42, ease: GSAP_BACK_HEADER }
+            { opacity: 0, x: -24 },
+            { duration: 0.42, ease: GSAP_BACK_HEADER, opacity: 1, x: 0 }
           );
           const numberEl = header.querySelector(".section-header-number");
           const ruleEl = header.querySelector(".section-header-rule");
@@ -158,16 +160,16 @@ export function HomeAnimations({
             tl.fromTo(
               numberEl,
               { scale: 0.6 },
-              { scale: 1, duration: 0.32, ease: GSAP_BACK_NUMBER },
+              { duration: 0.32, ease: GSAP_BACK_NUMBER, scale: 1 },
               "<"
             );
             tl.fromTo(
               ruleEl,
               { scaleX: 0 },
               {
-                scaleX: 1,
                 duration: 0.32,
                 ease: GSAP_EASE,
+                scaleX: 1,
                 transformOrigin: "left center",
               },
               "<+=0.1"
@@ -175,7 +177,7 @@ export function HomeAnimations({
             tl.fromTo(
               titleEl,
               { opacity: 0 },
-              { opacity: 1, duration: 0.24, ease: GSAP_EASE_POWER2 },
+              { duration: 0.24, ease: GSAP_EASE_POWER2, opacity: 1 },
               "<+=0.05"
             );
           }
@@ -184,13 +186,13 @@ export function HomeAnimations({
         if (fades.length > 0) {
           tl.fromTo(
             fades,
-            { y: 28, opacity: 0 },
+            { opacity: 0, y: 28 },
             {
-              y: 0,
-              opacity: 1,
               duration: 0.65,
-              stagger: STAGGER_TIGHT,
               ease: GSAP_EASE,
+              opacity: 1,
+              stagger: STAGGER_TIGHT,
+              y: 0,
             },
             header ? "-=0.2" : 0
           );
@@ -201,18 +203,18 @@ export function HomeAnimations({
         const projectImage = item.querySelector(".project-img");
         const pixelDecs = item.querySelectorAll(".pixel-dec");
         const tl = gsap.timeline({
-          paused: true,
           defaults: { ease: GSAP_EASE_POWER3 },
+          paused: true,
         });
 
         if (projectImage) {
-          tl.to(projectImage, { scale: 1.05, duration: 0.8 });
+          tl.to(projectImage, { duration: 0.8, scale: 1.05 });
         }
 
         if (pixelDecs.length > 0) {
           tl.to(
             pixelDecs,
-            { opacity: 1, y: -4, stagger: STAGGER_TIGHT, duration: 0.4 },
+            { duration: 0.4, opacity: 1, stagger: STAGGER_TIGHT, y: -4 },
             0
           );
         }
@@ -244,22 +246,22 @@ export function HomeAnimations({
           Math.max(0, track.scrollWidth - window.innerWidth);
 
         gsap.to(track, {
-          x: () => -getDistance(),
           ease: "none",
           scrollTrigger: {
-            trigger: pinSection,
-            start: "top top",
-            end: () => `+=${getDistance()}`,
-            pin: true,
             anticipatePin: 1,
-            scrub: 0.8,
+            end: () => `+=${getDistance()}`,
             invalidateOnRefresh: true,
             onUpdate: (self: ScrollTrigger) => {
               if (progress) {
                 gsap.set(progress, { scaleX: self.progress });
               }
             },
+            pin: true,
+            scrub: 0.8,
+            start: "top top",
+            trigger: pinSection,
           },
+          x: () => -getDistance(),
         });
 
         return () => {
@@ -267,23 +269,23 @@ export function HomeAnimations({
         };
       });
 
-      const magneticCleanups: Array<() => void> = [];
+      const magneticCleanups: (() => void)[] = [];
       for (const target of gsap.utils.toArray<HTMLElement>("[data-magnetic]")) {
         const onMove = (event: MouseEvent) => {
           const rect = target.getBoundingClientRect();
           gsap.to(target, {
-            x: (event.clientX - rect.left - rect.width / 2) * 0.1,
-            y: (event.clientY - rect.top - rect.height / 2) * 0.1,
             duration: 0.4,
             ease: GSAP_EASE_POWER2,
+            x: (event.clientX - rect.left - rect.width / 2) * 0.1,
+            y: (event.clientY - rect.top - rect.height / 2) * 0.1,
           });
         };
         const onLeave = () => {
           gsap.to(target, {
-            x: 0,
-            y: 0,
             duration: 0.32,
             ease: GSAP_EASE_POWER3,
+            x: 0,
+            y: 0,
           });
         };
         target.addEventListener("mousemove", onMove);
@@ -305,4 +307,4 @@ export function HomeAnimations({
   );
 
   return null;
-}
+};

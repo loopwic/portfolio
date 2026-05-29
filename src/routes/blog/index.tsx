@@ -6,25 +6,17 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Plus } from "lucide-react";
 import { useRef } from "react";
+
 import { GSAP_EASE_POWER2, GSAP_EASE_POWER3 } from "@/lib/motion-tokens";
+
 import { BLOG_POSTS } from "./-constants";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
 
-export const Route = createFileRoute("/blog/")({
-  head: () => ({
-    meta: [
-      { title: "Loopwic Archive - Pixel Fusion" },
-      { name: "description", content: "Loopwic 的技术文章与前端实践记录。" },
-    ],
-  }),
-  component: BlogPage,
-});
-
 const toDisplayDate = (value: string) => {
-  const [year, month, day] = value.split("-").map((item) => Number(item));
+  const [year, month, day] = value.split("-").map(Number);
   const date = new Date(year, (month ?? 1) - 1, day ?? 1);
 
   return new Intl.DateTimeFormat("en-US", {
@@ -34,45 +26,45 @@ const toDisplayDate = (value: string) => {
   }).format(date);
 };
 
-function BlogPage() {
+const BlogPage = () => {
   const container = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
       gsap.from(".header-element", {
-        y: 24,
-        opacity: 0,
-        stagger: 0.1,
         duration: 1,
         ease: GSAP_EASE_POWER3,
+        opacity: 0,
+        stagger: 0.1,
+        y: 24,
       });
 
       for (const item of gsap.utils.toArray<HTMLElement>(".blog-post-item")) {
         const _revealContent = item.querySelector(".reveal-content");
 
         ScrollTrigger.create({
-          trigger: item,
-          start: "top 85%",
           onEnter: () => {
             gsap.to(item, {
-              opacity: 1,
-              y: 0,
               duration: 0.8,
               ease: GSAP_EASE_POWER3,
+              opacity: 1,
+              y: 0,
             });
           },
+          start: "top 85%",
+          trigger: item,
         });
 
         // Hover Effect
         const tl = gsap.timeline({ paused: true });
         tl.to(item.querySelector(".pixel-indicator"), {
-          scale: 1.5,
-          rotation: 90,
           duration: 0.4,
           ease: "back.out(1.7)",
+          rotation: 90,
+          scale: 1.5,
         }).to(
           item.querySelector(".post-title"),
-          { x: 12, duration: 0.3, ease: GSAP_EASE_POWER2 },
+          { duration: 0.3, ease: GSAP_EASE_POWER2, x: 12 },
           0
         );
 
@@ -167,4 +159,14 @@ function BlogPage() {
       </div>
     </div>
   );
-}
+};
+
+export const Route = createFileRoute("/blog/")({
+  component: BlogPage,
+  head: () => ({
+    meta: [
+      { title: "Loopwic Archive - Pixel Fusion" },
+      { content: "Loopwic 的技术文章与前端实践记录。", name: "description" },
+    ],
+  }),
+});

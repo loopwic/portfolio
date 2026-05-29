@@ -1,15 +1,17 @@
 "use client";
 
 import { lazy, Suspense, useRef } from "react";
+
 import { KineticText } from "@/components/home/kinetic-text";
 import { HOME_SECTIONS } from "@/lib/site-data";
+
 import { STYLE_MARKS } from "./constants";
 import { HeroHeadline } from "./hero-headline";
 import { useCubeTitleMask } from "./use-cube-title-mask";
 
 const HeroTitleObject = lazy(() => import("./hero-title-object"));
 
-export function HeroSection() {
+export const HeroSection = () => {
   const cubeRef = useRef<HTMLDivElement>(null);
   const titleMaskRef = useRef<HTMLDivElement>(null);
 
@@ -60,4 +62,4 @@ export function HeroSection() {
       </div>
     </section>
   );
-}
+};

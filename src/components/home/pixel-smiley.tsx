@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+
 import {
   PIXEL_SMILEY_CANVAS_SIZE,
   PIXEL_SMILEY_GRID,
@@ -10,7 +11,7 @@ import {
   SMILEY_MOUTH_CELLS,
 } from "./constants";
 
-export function PixelSmiley() {
+export const PixelSmiley = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -157,6 +158,7 @@ export function PixelSmiley() {
         />
       </svg>
       <canvas
+        aria-hidden="true"
         className="absolute inset-0 block h-full w-full [image-rendering:pixelated]"
         height={PIXEL_SMILEY_CANVAS_SIZE}
         ref={canvasRef}
@@ -164,4 +166,4 @@ export function PixelSmiley() {
       />
     </div>
   );
-}
+};

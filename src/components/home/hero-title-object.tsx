@@ -1,6 +1,7 @@
 "use client";
 
-import { type RefObject, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+import type { RefObject } from "react";
 
 const SOLID_SEGMENTS = 36;
 const WIRE_SEGMENTS = 8;
@@ -102,11 +103,307 @@ const WIRE_FRAGMENT_SHADER = `
   }
 `;
 
-type HeroTitleObjectProps = {
+interface HeroTitleObjectProps {
   objectRef?: RefObject<HTMLDivElement | null>;
+}
+
+interface CubeGeometry {
+  positions: Float32Array;
+  normals: Float32Array;
+  indices: Uint16Array;
+}
+
+interface FaceSpec {
+  nx: number;
+  ny: number;
+  nz: number;
+  axisU: number;
+  axisV: number;
+  flipU: number;
+}
+
+const CUBE_FACES: FaceSpec[] = [
+  // +X
+  { axisU: 2, axisV: 1, flipU: -1, nx: 1, ny: 0, nz: 0 },
+  // -X
+  { axisU: 2, axisV: 1, flipU: 1, nx: -1, ny: 0, nz: 0 },
+  // +Y
+  { axisU: 0, axisV: 2, flipU: 1, nx: 0, ny: 1, nz: 0 },
+  // -Y
+  { axisU: 0, axisV: 2, flipU: -1, nx: 0, ny: -1, nz: 0 },
+  // +Z
+  { axisU: 0, axisV: 1, flipU: 1, nx: 0, ny: 0, nz: 1 },
+  // -Z
+  { axisU: 0, axisV: 1, flipU: -1, nx: 0, ny: 0, nz: -1 },
+];
+
+const buildCubeGeometry = (
+  halfSize: number,
+  segments: number
+): CubeGeometry => {
+  const positions: number[] = [];
+  const normals: number[] = [];
+  const indices: number[] = [];
+  const point: [number, number, number] = [0, 0, 0];
+
+  for (const face of CUBE_FACES) {
+    const base = positions.length / 3;
+    for (let j = 0; j <= segments; j += 1) {
+      const v = (j / segments) * 2 - 1;
+      for (let i = 0; i <= segments; i += 1) {
+        const u = ((i / segments) * 2 - 1) * face.flipU;
+        point[0] = face.nx * halfSize;
+        point[1] = face.ny * halfSize;
+        point[2] = face.nz * halfSize;
+        point[face.axisU] += u * halfSize;
+        point[face.axisV] += v * halfSize;
+        positions.push(point[0], point[1], point[2]);
+        normals.push(face.nx, face.ny, face.nz);
+      }
+    }
+
+    for (let j = 0; j < segments; j += 1) {
+      for (let i = 0; i < segments; i += 1) {
+        const a = base + j * (segments + 1) + i;
+        const b = a + 1;
+        const c = a + (segments + 1);
+        const d = c + 1;
+        indices.push(a, c, b, b, c, d);
+      }
+    }
+  }
+
+  return {
+    indices: new Uint16Array(indices),
+    normals: new Float32Array(normals),
+    positions: new Float32Array(positions),
+  };
 };
 
-export default function HeroTitleObject({ objectRef }: HeroTitleObjectProps) {
+const trianglesToEdges = (indices: Uint16Array): Uint16Array => {
+  const edges = new Uint16Array(indices.length * 2);
+  for (let i = 0; i < indices.length; i += 3) {
+    const a = indices[i];
+    const b = indices[i + 1];
+    const c = indices[i + 2];
+    const o = i * 2;
+    edges[o] = a;
+    edges[o + 1] = b;
+    edges[o + 2] = b;
+    edges[o + 3] = c;
+    edges[o + 4] = c;
+    edges[o + 5] = a;
+  }
+  return edges;
+};
+
+const createShader = (
+  gl: WebGLRenderingContext,
+  type: number,
+  source: string
+) => {
+  const shader = gl.createShader(type);
+  if (!shader) {
+    throw new Error("Unable to create shader.");
+  }
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    const log = gl.getShaderInfoLog(shader) ?? "Unknown shader error.";
+    gl.deleteShader(shader);
+    throw new Error(log);
+  }
+  return shader;
+};
+
+const createProgram = (
+  gl: WebGLRenderingContext,
+  vertexSource: string,
+  fragmentSource: string
+) => {
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+  const program = gl.createProgram();
+  if (!program) {
+    throw new Error("Unable to create program.");
+  }
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  gl.deleteShader(vertexShader);
+  gl.deleteShader(fragmentShader);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    const log = gl.getProgramInfoLog(program) ?? "Unknown program error.";
+    gl.deleteProgram(program);
+    throw new Error(log);
+  }
+  return program;
+};
+
+const createBuffer = (
+  gl: WebGLRenderingContext,
+  target: number,
+  data: Float32Array
+) => {
+  const buffer = gl.createBuffer();
+  if (!buffer) {
+    throw new Error("Unable to create WebGL buffer.");
+  }
+  gl.bindBuffer(target, buffer);
+  gl.bufferData(target, data, gl.STATIC_DRAW);
+  return buffer;
+};
+
+const createIndexBuffer = (gl: WebGLRenderingContext, data: Uint16Array) => {
+  const buffer = gl.createBuffer();
+  if (!buffer) {
+    throw new Error("Unable to create WebGL index buffer.");
+  }
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.STATIC_DRAW);
+  return buffer;
+};
+
+const bindAttribute = (
+  gl: WebGLRenderingContext,
+  buffer: WebGLBuffer,
+  location: number,
+  size: number
+) => {
+  if (location < 0) {
+    return;
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.enableVertexAttribArray(location);
+  gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
+};
+
+const identity = (out: Float32Array) => {
+  out.fill(0);
+  out[0] = 1;
+  out[5] = 1;
+  out[10] = 1;
+  out[15] = 1;
+};
+
+const copyMatrix = (out: Float32Array, source: Float32Array) => {
+  for (let i = 0; i < 16; i += 1) {
+    out[i] = source[i];
+  }
+};
+
+const multiply = (out: Float32Array, a: Float32Array, b: Float32Array) => {
+  const [
+    a00,
+    a01,
+    a02,
+    a03,
+    a10,
+    a11,
+    a12,
+    a13,
+    a20,
+    a21,
+    a22,
+    a23,
+    a30,
+    a31,
+    a32,
+    a33,
+  ] = a;
+
+  for (let i = 0; i < 4; i += 1) {
+    const b0 = b[i * 4];
+    const b1 = b[i * 4 + 1];
+    const b2 = b[i * 4 + 2];
+    const b3 = b[i * 4 + 3];
+    out[i * 4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    out[i * 4 + 1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    out[i * 4 + 2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    out[i * 4 + 3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+  }
+};
+
+const rotationXYZ = (out: Float32Array, rx: number, ry: number, rz: number) => {
+  const cx = Math.cos(rx);
+  const sx = Math.sin(rx);
+  const cy = Math.cos(ry);
+  const sy = Math.sin(ry);
+  const cz = Math.cos(rz);
+  const sz = Math.sin(rz);
+
+  // Combined Z * Y * X (matches Three.js default Euler order XYZ applied in that order)
+  out[0] = cy * cz;
+  out[1] = cy * sz;
+  out[2] = -sy;
+  out[3] = 0;
+  out[4] = sx * sy * cz - cx * sz;
+  out[5] = sx * sy * sz + cx * cz;
+  out[6] = sx * cy;
+  out[7] = 0;
+  out[8] = cx * sy * cz + sx * sz;
+  out[9] = cx * sy * sz - sx * cz;
+  out[10] = cx * cy;
+  out[11] = 0;
+  out[12] = 0;
+  out[13] = 0;
+  out[14] = 0;
+  out[15] = 1;
+};
+
+const scaleInPlace = (out: Float32Array, scale: number) => {
+  for (let i = 0; i < 12; i += 1) {
+    out[i] *= scale;
+  }
+};
+
+const setPerspective = (
+  out: Float32Array,
+  params: { fovY: number; aspect: number; near: number; far: number }
+) => {
+  const { fovY, aspect, near, far } = params;
+  const f = 1 / Math.tan(fovY / 2);
+  out.fill(0);
+  out[0] = f / aspect;
+  out[5] = f;
+  out[10] = (far + near) / (near - far);
+  out[11] = -1;
+  out[14] = (2 * far * near) / (near - far);
+};
+
+const normalMatrixFromModelView = (
+  out: Float32Array,
+  modelView: Float32Array
+) => {
+  // Inverse-transpose of the upper-left 3x3 of modelView.
+  const [a00, a01, a02, , a10, a11, a12, , a20, a21, a22] = modelView;
+
+  const b01 = a22 * a11 - a12 * a21;
+  const b11 = -a22 * a10 + a12 * a20;
+  const b21 = a21 * a10 - a11 * a20;
+
+  let det = a00 * b01 + a01 * b11 + a02 * b21;
+  if (det === 0) {
+    out.fill(0);
+    out[0] = 1;
+    out[4] = 1;
+    out[8] = 1;
+    return;
+  }
+  det = 1 / det;
+
+  out[0] = b01 * det;
+  out[1] = (-a22 * a01 + a02 * a21) * det;
+  out[2] = (a12 * a01 - a02 * a11) * det;
+  out[3] = b11 * det;
+  out[4] = (a22 * a00 - a02 * a20) * det;
+  out[5] = (-a12 * a00 + a02 * a10) * det;
+  out[6] = b21 * det;
+  out[7] = (-a21 * a00 + a01 * a20) * det;
+  out[8] = (a11 * a00 - a01 * a10) * det;
+};
+
+const HeroTitleObject = ({ objectRef }: HeroTitleObjectProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -164,20 +461,20 @@ export default function HeroTitleObject({ objectRef }: HeroTitleObjectProps) {
     const wireIndexCount = wireIndices.length;
 
     const solidLocations = {
-      aPosition: gl.getAttribLocation(solidProgram, "aPosition"),
       aNormal: gl.getAttribLocation(solidProgram, "aNormal"),
-      uProjection: gl.getUniformLocation(solidProgram, "uProjection"),
+      aPosition: gl.getAttribLocation(solidProgram, "aPosition"),
       uModelView: gl.getUniformLocation(solidProgram, "uModelView"),
       uNormalMatrix: gl.getUniformLocation(solidProgram, "uNormalMatrix"),
-      uTime: gl.getUniformLocation(solidProgram, "uTime"),
+      uProjection: gl.getUniformLocation(solidProgram, "uProjection"),
       uScroll: gl.getUniformLocation(solidProgram, "uScroll"),
+      uTime: gl.getUniformLocation(solidProgram, "uTime"),
     };
 
     const wireLocations = {
       aPosition: gl.getAttribLocation(wireProgram, "aPosition"),
-      uProjection: gl.getUniformLocation(wireProgram, "uProjection"),
-      uModelView: gl.getUniformLocation(wireProgram, "uModelView"),
       uColor: gl.getUniformLocation(wireProgram, "uColor"),
+      uModelView: gl.getUniformLocation(wireProgram, "uModelView"),
+      uProjection: gl.getUniformLocation(wireProgram, "uProjection"),
     };
 
     const projection = new Float32Array(16);
@@ -225,10 +522,10 @@ export default function HeroTitleObject({ objectRef }: HeroTitleObjectProps) {
 
       const aspect = rect.height === 0 ? 1 : rect.width / rect.height;
       setPerspective(projection, {
-        fovY: (FOV_DEG * Math.PI) / 180,
         aspect,
-        near: 0.1,
         far: 100,
+        fovY: (FOV_DEG * Math.PI) / 180,
+        near: 0.1,
       });
       gl.viewport(0, 0, width, height);
     };
@@ -357,293 +654,13 @@ export default function HeroTitleObject({ objectRef }: HeroTitleObjectProps) {
       className="hero-title-object pointer-events-none absolute top-1/2 left-1/2 z-0 h-[clamp(13rem,31vw,27rem)] w-[clamp(13rem,31vw,27rem)] -translate-x-1/2 -translate-y-1/2 opacity-100 md:left-[62%]"
       ref={objectRef}
     >
-      <canvas className="hero-shader-canvas" ref={canvasRef} />
+      <canvas
+        aria-hidden="true"
+        className="hero-shader-canvas"
+        ref={canvasRef}
+      />
     </div>
   );
-}
-
-type CubeGeometry = {
-  positions: Float32Array;
-  normals: Float32Array;
-  indices: Uint16Array;
 };
 
-type FaceSpec = {
-  nx: number;
-  ny: number;
-  nz: number;
-  axisU: number;
-  axisV: number;
-  flipU: number;
-};
-
-const CUBE_FACES: FaceSpec[] = [
-  { nx: 1, ny: 0, nz: 0, axisU: 2, axisV: 1, flipU: -1 }, // +X
-  { nx: -1, ny: 0, nz: 0, axisU: 2, axisV: 1, flipU: 1 }, // -X
-  { nx: 0, ny: 1, nz: 0, axisU: 0, axisV: 2, flipU: 1 }, // +Y
-  { nx: 0, ny: -1, nz: 0, axisU: 0, axisV: 2, flipU: -1 }, // -Y
-  { nx: 0, ny: 0, nz: 1, axisU: 0, axisV: 1, flipU: 1 }, // +Z
-  { nx: 0, ny: 0, nz: -1, axisU: 0, axisV: 1, flipU: -1 }, // -Z
-];
-
-function buildCubeGeometry(halfSize: number, segments: number): CubeGeometry {
-  const positions: number[] = [];
-  const normals: number[] = [];
-  const indices: number[] = [];
-  const point: [number, number, number] = [0, 0, 0];
-
-  for (const face of CUBE_FACES) {
-    const base = positions.length / 3;
-    for (let j = 0; j <= segments; j++) {
-      const v = (j / segments) * 2 - 1;
-      for (let i = 0; i <= segments; i++) {
-        const u = ((i / segments) * 2 - 1) * face.flipU;
-        point[0] = face.nx * halfSize;
-        point[1] = face.ny * halfSize;
-        point[2] = face.nz * halfSize;
-        point[face.axisU] += u * halfSize;
-        point[face.axisV] += v * halfSize;
-        positions.push(point[0], point[1], point[2]);
-        normals.push(face.nx, face.ny, face.nz);
-      }
-    }
-
-    for (let j = 0; j < segments; j++) {
-      for (let i = 0; i < segments; i++) {
-        const a = base + j * (segments + 1) + i;
-        const b = a + 1;
-        const c = a + (segments + 1);
-        const d = c + 1;
-        indices.push(a, c, b, b, c, d);
-      }
-    }
-  }
-
-  return {
-    positions: new Float32Array(positions),
-    normals: new Float32Array(normals),
-    indices: new Uint16Array(indices),
-  };
-}
-
-function trianglesToEdges(indices: Uint16Array): Uint16Array {
-  const edges = new Uint16Array(indices.length * 2);
-  for (let i = 0; i < indices.length; i += 3) {
-    const a = indices[i];
-    const b = indices[i + 1];
-    const c = indices[i + 2];
-    const o = i * 2;
-    edges[o] = a;
-    edges[o + 1] = b;
-    edges[o + 2] = b;
-    edges[o + 3] = c;
-    edges[o + 4] = c;
-    edges[o + 5] = a;
-  }
-  return edges;
-}
-
-function createShader(gl: WebGLRenderingContext, type: number, source: string) {
-  const shader = gl.createShader(type);
-  if (!shader) {
-    throw new Error("Unable to create shader.");
-  }
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const log = gl.getShaderInfoLog(shader) ?? "Unknown shader error.";
-    gl.deleteShader(shader);
-    throw new Error(log);
-  }
-  return shader;
-}
-
-function createProgram(
-  gl: WebGLRenderingContext,
-  vertexSource: string,
-  fragmentSource: string
-) {
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
-  const program = gl.createProgram();
-  if (!program) {
-    throw new Error("Unable to create program.");
-  }
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
-  gl.deleteShader(vertexShader);
-  gl.deleteShader(fragmentShader);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const log = gl.getProgramInfoLog(program) ?? "Unknown program error.";
-    gl.deleteProgram(program);
-    throw new Error(log);
-  }
-  return program;
-}
-
-function createBuffer(
-  gl: WebGLRenderingContext,
-  target: number,
-  data: Float32Array
-) {
-  const buffer = gl.createBuffer();
-  if (!buffer) {
-    throw new Error("Unable to create WebGL buffer.");
-  }
-  gl.bindBuffer(target, buffer);
-  gl.bufferData(target, data, gl.STATIC_DRAW);
-  return buffer;
-}
-
-function createIndexBuffer(gl: WebGLRenderingContext, data: Uint16Array) {
-  const buffer = gl.createBuffer();
-  if (!buffer) {
-    throw new Error("Unable to create WebGL index buffer.");
-  }
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.STATIC_DRAW);
-  return buffer;
-}
-
-function bindAttribute(
-  gl: WebGLRenderingContext,
-  buffer: WebGLBuffer,
-  location: number,
-  size: number
-) {
-  if (location < 0) {
-    return;
-  }
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.enableVertexAttribArray(location);
-  gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
-}
-
-function identity(out: Float32Array) {
-  out.fill(0);
-  out[0] = 1;
-  out[5] = 1;
-  out[10] = 1;
-  out[15] = 1;
-}
-
-function copyMatrix(out: Float32Array, source: Float32Array) {
-  for (let i = 0; i < 16; i++) {
-    out[i] = source[i];
-  }
-}
-
-function multiply(out: Float32Array, a: Float32Array, b: Float32Array) {
-  const a00 = a[0];
-  const a01 = a[1];
-  const a02 = a[2];
-  const a03 = a[3];
-  const a10 = a[4];
-  const a11 = a[5];
-  const a12 = a[6];
-  const a13 = a[7];
-  const a20 = a[8];
-  const a21 = a[9];
-  const a22 = a[10];
-  const a23 = a[11];
-  const a30 = a[12];
-  const a31 = a[13];
-  const a32 = a[14];
-  const a33 = a[15];
-
-  for (let i = 0; i < 4; i++) {
-    const b0 = b[i * 4];
-    const b1 = b[i * 4 + 1];
-    const b2 = b[i * 4 + 2];
-    const b3 = b[i * 4 + 3];
-    out[i * 4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-    out[i * 4 + 1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-    out[i * 4 + 2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-    out[i * 4 + 3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-  }
-}
-
-function rotationXYZ(out: Float32Array, rx: number, ry: number, rz: number) {
-  const cx = Math.cos(rx);
-  const sx = Math.sin(rx);
-  const cy = Math.cos(ry);
-  const sy = Math.sin(ry);
-  const cz = Math.cos(rz);
-  const sz = Math.sin(rz);
-
-  // Combined Z * Y * X (matches Three.js default Euler order XYZ applied in that order)
-  out[0] = cy * cz;
-  out[1] = cy * sz;
-  out[2] = -sy;
-  out[3] = 0;
-  out[4] = sx * sy * cz - cx * sz;
-  out[5] = sx * sy * sz + cx * cz;
-  out[6] = sx * cy;
-  out[7] = 0;
-  out[8] = cx * sy * cz + sx * sz;
-  out[9] = cx * sy * sz - sx * cz;
-  out[10] = cx * cy;
-  out[11] = 0;
-  out[12] = 0;
-  out[13] = 0;
-  out[14] = 0;
-  out[15] = 1;
-}
-
-function scaleInPlace(out: Float32Array, scale: number) {
-  for (let i = 0; i < 12; i++) {
-    out[i] *= scale;
-  }
-}
-
-function setPerspective(
-  out: Float32Array,
-  params: { fovY: number; aspect: number; near: number; far: number }
-) {
-  const { fovY, aspect, near, far } = params;
-  const f = 1 / Math.tan(fovY / 2);
-  out.fill(0);
-  out[0] = f / aspect;
-  out[5] = f;
-  out[10] = (far + near) / (near - far);
-  out[11] = -1;
-  out[14] = (2 * far * near) / (near - far);
-}
-
-function normalMatrixFromModelView(out: Float32Array, modelView: Float32Array) {
-  // Inverse-transpose of the upper-left 3x3 of modelView.
-  const a00 = modelView[0];
-  const a01 = modelView[1];
-  const a02 = modelView[2];
-  const a10 = modelView[4];
-  const a11 = modelView[5];
-  const a12 = modelView[6];
-  const a20 = modelView[8];
-  const a21 = modelView[9];
-  const a22 = modelView[10];
-
-  const b01 = a22 * a11 - a12 * a21;
-  const b11 = -a22 * a10 + a12 * a20;
-  const b21 = a21 * a10 - a11 * a20;
-
-  let det = a00 * b01 + a01 * b11 + a02 * b21;
-  if (det === 0) {
-    out.fill(0);
-    out[0] = 1;
-    out[4] = 1;
-    out[8] = 1;
-    return;
-  }
-  det = 1 / det;
-
-  out[0] = b01 * det;
-  out[1] = (-a22 * a01 + a02 * a21) * det;
-  out[2] = (a12 * a01 - a02 * a11) * det;
-  out[3] = b11 * det;
-  out[4] = (a22 * a00 - a02 * a20) * det;
-  out[5] = (-a12 * a00 + a02 * a10) * det;
-  out[6] = b21 * det;
-  out[7] = (-a21 * a00 + a01 * a20) * det;
-  out[8] = (a11 * a00 - a01 * a10) * det;
-}
+export default HeroTitleObject;

@@ -1,11 +1,12 @@
 "use client";
 
-import { createContext, type ReactNode, useContext } from "react";
+import { createContext, useContext } from "react";
+import type { ReactNode } from "react";
 
-type ScrollContextType = {
+interface ScrollContextType {
   currentSectionIndex: number;
   scrollToSection: (id: string) => void;
-};
+}
 
 const ScrollContext = createContext<ScrollContextType | null>(null);
 
@@ -23,8 +24,4 @@ export const ScrollProvider = ({
 }: {
   children: ReactNode;
   value: NonNullable<ScrollContextType>;
-}) => {
-  return (
-    <ScrollContext.Provider value={value}>{children}</ScrollContext.Provider>
-  );
-};
+}) => <ScrollContext.Provider value={value}>{children}</ScrollContext.Provider>;

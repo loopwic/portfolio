@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-type Heading = {
+interface Heading {
   id: string;
   text: string;
   level: number;
-};
+}
 
 const NAVBAR_HEIGHT = 72;
 const PARENT_PADDING_TOP = 18;
@@ -28,18 +28,18 @@ const calculateIndent = (level: number, minLevel: number): string => {
   return indentMap[relativeLevel as keyof typeof indentMap] || "ml-16";
 };
 
-export function TableOfContents() {
+export const TableOfContents = () => {
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState<string>("");
 
   useEffect(() => {
     const headingElements = document.querySelectorAll("h2, h3, h4, h5, h6");
-    const headingList: Heading[] = Array.from(headingElements)
+    const headingList: Heading[] = [...headingElements]
       .filter((heading) => heading.id && heading.textContent?.trim())
       .map((heading) => ({
         id: heading.id,
-        text: heading.textContent?.trim() || "",
         level: Number.parseInt(heading.tagName.charAt(1), 10),
+        text: heading.textContent?.trim() || "",
       }));
 
     setHeadings(headingList);
@@ -49,7 +49,7 @@ export function TableOfContents() {
       readingPosition: number,
       viewportTop: number
     ) => {
-      const element = document.getElementById(heading.id);
+      const element = document.querySelector<HTMLElement>(`#${heading.id}`);
       if (!element) {
         return null;
       }
@@ -60,13 +60,13 @@ export function TableOfContents() {
 
       return {
         ...heading,
+        distanceFromReading: Math.abs(elementTop - readingPosition),
         element,
-        elementTop,
         elementBottom,
-        isPassed: elementTop < readingPosition,
+        elementTop,
         isInReadingZone:
           elementTop <= readingPosition && elementBottom >= viewportTop,
-        distanceFromReading: Math.abs(elementTop - readingPosition),
+        isPassed: elementTop < readingPosition,
       };
     };
 
@@ -76,11 +76,13 @@ export function TableOfContents() {
       const inReadingZone = headingInfos.filter((h) => h.isInReadingZone);
 
       if (inReadingZone.length > 0) {
-        return inReadingZone.reduce((closest, current) =>
-          current.distanceFromReading < closest.distanceFromReading
-            ? current
-            : closest
-        );
+        let [closest] = inReadingZone;
+        for (const current of inReadingZone) {
+          if (current.distanceFromReading < closest.distanceFromReading) {
+            closest = current;
+          }
+        }
+        return closest;
       }
 
       const passedHeadings = headingInfos.filter((h) => h.isPassed);
@@ -100,7 +102,7 @@ export function TableOfContents() {
       const headingInfos = headingList
         .map((heading) => getHeadingInfo(heading, readingPosition, viewportTop))
         .filter((item): item is NonNullable<typeof item> => item !== null)
-        .sort((a, b) => a.elementTop - b.elementTop);
+        .toSorted((a, b) => a.elementTop - b.elementTop);
 
       if (headingInfos.length === 0) {
         return;
@@ -134,12 +136,12 @@ export function TableOfContents() {
   }, []);
 
   const scrollToHeading = (id: string) => {
-    const element = document.getElementById(id);
+    const element = document.querySelector(`#${id}`);
     if (element) {
       const elementPosition = element.offsetTop;
       const offsetPosition = elementPosition - TOTAL_OFFSET - SCROLL_SPACING;
 
-      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+      window.scrollTo({ behavior: "smooth", top: offsetPosition });
       setActiveId(id);
     }
   };
@@ -174,4 +176,4 @@ export function TableOfContents() {
       </ul>
     </nav>
   );
-}
+};

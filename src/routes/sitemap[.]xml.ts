@@ -1,17 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
+
 import { SITE } from "@/lib/site-data";
+
 import { BLOG_POSTS } from "./blog/-constants";
 
-type SitemapRoute = {
+interface SitemapRoute {
   path: string;
   changefreq: "yearly" | "monthly" | "weekly" | "daily";
   priority: string;
   lastmod?: string;
-};
+}
 
 const STATIC_ROUTES: SitemapRoute[] = [
-  { path: "", changefreq: "monthly", priority: "1.0" },
-  { path: "/blog", changefreq: "weekly", priority: "0.8" },
+  { changefreq: "monthly", path: "", priority: "1.0" },
+  { changefreq: "weekly", path: "/blog", priority: "0.8" },
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({
@@ -20,10 +22,10 @@ export const Route = createFileRoute("/sitemap.xml")({
       GET: () => {
         const fallback = new Date().toISOString();
         const blogRoutes: SitemapRoute[] = BLOG_POSTS.map((post) => ({
-          path: post.to,
           changefreq: "yearly",
-          priority: "0.7",
           lastmod: new Date(post.date).toISOString(),
+          path: post.to,
+          priority: "0.7",
         }));
 
         const urls = [...STATIC_ROUTES, ...blogRoutes]
@@ -44,8 +46,8 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         return new Response(body, {
           headers: {
-            "Content-Type": "application/xml; charset=utf-8",
             "Cache-Control": "public, max-age=300",
+            "Content-Type": "application/xml; charset=utf-8",
           },
         });
       },

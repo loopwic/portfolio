@@ -1,9 +1,10 @@
-import { type RefObject, useEffect } from "react";
+import { useEffect } from "react";
+import type { RefObject } from "react";
 
-export function useCubeTitleMask(
+export const useCubeTitleMask = (
   titleRef: RefObject<HTMLElement | null>,
   cubeRef: RefObject<HTMLElement | null>
-) {
+) => {
   useEffect(() => {
     const title = titleRef.current;
     const cube = cubeRef.current;
@@ -75,4 +76,4 @@ export function useCubeTitleMask(
       stop();
     };
   }, [cubeRef, titleRef]);
-}
+};
