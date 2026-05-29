@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/loopwic/portfolio/compare/v1.9.0...v1.10.0) (2026-05-29)
+
+
+### Features
+
+* **home:** horizontal scrollytelling writing section ([ca0c2a7](https://github.com/loopwic/portfolio/commit/ca0c2a72a89d5bcaae1ae8e05e130605cd92e6d7))
+
 # [1.9.0](https://github.com/loopwic/portfolio/compare/v1.8.0...v1.9.0) (2026-05-28)
 
 
