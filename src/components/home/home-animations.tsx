@@ -221,6 +221,52 @@ export function HomeAnimations({
         item.addEventListener("mouseleave", () => tl.reverse());
       }
 
+      // Writing section: pin on desktop and drive the card track horizontally
+      // with the vertical scroll. matchMedia keeps it desktop-only and reverts
+      // cleanly on resize; on smaller screens the track is a native swipe rail.
+      const writingMedia = gsap.matchMedia();
+      writingMedia.add("(min-width: 1024px)", () => {
+        const track =
+          scope.current?.querySelector<HTMLElement>(".writing-track");
+        const pinSection =
+          scope.current?.querySelector<HTMLElement>(".writing-pin");
+        const progress =
+          scope.current?.querySelector<HTMLElement>(".writing-progress");
+        const rail = scope.current?.querySelector<HTMLElement>(".writing-rail");
+        if (!(track && pinSection)) {
+          return;
+        }
+
+        // While GSAP drives the track, the rail must not also scroll natively.
+        rail?.classList.add("writing-rail--pinned");
+
+        const getDistance = () =>
+          Math.max(0, track.scrollWidth - window.innerWidth);
+
+        gsap.to(track, {
+          x: () => -getDistance(),
+          ease: "none",
+          scrollTrigger: {
+            trigger: pinSection,
+            start: "top top",
+            end: () => `+=${getDistance()}`,
+            pin: true,
+            anticipatePin: 1,
+            scrub: 0.8,
+            invalidateOnRefresh: true,
+            onUpdate: (self: ScrollTrigger) => {
+              if (progress) {
+                gsap.set(progress, { scaleX: self.progress });
+              }
+            },
+          },
+        });
+
+        return () => {
+          rail?.classList.remove("writing-rail--pinned");
+        };
+      });
+
       const magneticCleanups: Array<() => void> = [];
       for (const target of gsap.utils.toArray<HTMLElement>("[data-magnetic]")) {
         const onMove = (event: MouseEvent) => {
@@ -249,6 +295,7 @@ export function HomeAnimations({
       }
 
       return () => {
+        writingMedia.revert();
         for (const cleanup of magneticCleanups) {
           cleanup();
         }

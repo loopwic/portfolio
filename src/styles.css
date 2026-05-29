@@ -583,6 +583,26 @@ html {
   .blog-prose .code-panel code[data-theme*=" "] span {
     background-color: transparent;
   }
+
+  /* Writing section — horizontal card rail */
+  .writing-rail {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .writing-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Applied by GSAP only while the section is pinned and driving the track,
+     so native scroll doesn't fight the scroll-linked transform. */
+  .writing-rail--pinned {
+    overflow: visible;
+  }
+
+  .writing-track {
+    will-change: transform;
+  }
 }
 
 /*
