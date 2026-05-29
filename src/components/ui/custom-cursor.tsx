@@ -3,6 +3,13 @@
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { useRef } from "react";
+import {
+  GSAP_EASE_NONE,
+  GSAP_EASE_POWER2,
+  GSAP_EASE_POWER3,
+  GSAP_EASE_POWER3_INOUT,
+  GSAP_EASE_POWER4,
+} from "@/lib/motion-tokens";
 
 const INTERACTABLE_SELECTOR =
   "a, button, input, textarea, [data-interactive], [data-magnetic]";
@@ -17,6 +24,14 @@ export function CustomCursor() {
     const crosshair = crosshairRef.current;
     const corners = cornersRef.current;
     if (!(cursor && crosshair && corners)) {
+      return;
+    }
+
+    // Reduced motion: leave the native cursor in place. The custom cursor is
+    // an entirely decorative, motion-heavy affordance (lerp-follow, corner
+    // morphing, scale pulses), so we don't hijack the pointer at all. The
+    // crosshair/corner elements are hidden via the reduced-motion CSS block.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 
@@ -44,17 +59,17 @@ export function CustomCursor() {
 
     const moveCursorX = gsap.quickTo(cursor, "x", {
       duration: 0.1,
-      ease: "none",
+      ease: GSAP_EASE_NONE,
     });
     const moveCursorY = gsap.quickTo(cursor, "y", {
       duration: 0.1,
-      ease: "none",
+      ease: GSAP_EASE_NONE,
     });
 
     const syncCorners = (
       target: Element,
       duration = 0.18,
-      ease = "power3.out"
+      ease = GSAP_EASE_POWER3
     ) => {
       const rect = target.getBoundingClientRect();
       gsap.to(corners, {
@@ -76,7 +91,7 @@ export function CustomCursor() {
 
       gsap.to(crosshair, {
         duration: 0.14,
-        ease: "power2.out",
+        ease: GSAP_EASE_POWER2,
         opacity: 0,
         scale: 0.58,
         onComplete: () => {
@@ -93,10 +108,10 @@ export function CustomCursor() {
         y: pointer.y - 9,
       });
       gsap.set(cornerPieces, { opacity: 0.35, scale: 0.38 });
-      syncCorners(target, 0.36, "power4.out");
+      syncCorners(target, 0.36, GSAP_EASE_POWER4);
       gsap.to(cornerPieces, {
         duration: 0.3,
-        ease: "power3.out",
+        ease: GSAP_EASE_POWER3,
         opacity: 1,
         scale: 1,
         stagger: 0.025,
@@ -111,7 +126,7 @@ export function CustomCursor() {
 
       gsap.to(corners, {
         duration: 0.22,
-        ease: "power3.inOut",
+        ease: GSAP_EASE_POWER3_INOUT,
         height: 18,
         opacity: 0,
         width: 18,
@@ -125,7 +140,7 @@ export function CustomCursor() {
       });
       gsap.to(cornerPieces, {
         duration: 0.16,
-        ease: "power2.out",
+        ease: GSAP_EASE_POWER2,
         opacity: 0.25,
         scale: 0.42,
       });
@@ -134,7 +149,7 @@ export function CustomCursor() {
       gsap.fromTo(
         crosshair,
         { opacity: 0, scale: 0.5 },
-        { duration: 0.24, ease: "power4.out", opacity: 1, scale: 1 }
+        { duration: 0.24, ease: GSAP_EASE_POWER4, opacity: 1, scale: 1 }
       );
     };
 
@@ -170,7 +185,7 @@ export function CustomCursor() {
       moveCursorX(event.clientX);
       moveCursorY(event.clientY);
       if (activeTarget) {
-        syncCorners(activeTarget, 0.16, "power2.out");
+        syncCorners(activeTarget, 0.16, GSAP_EASE_POWER2);
       }
     };
 
@@ -188,11 +203,11 @@ export function CustomCursor() {
     };
 
     const handleMouseDown = () => {
-      gsap.to(cursor, { scale: 0.8, duration: 0.1, ease: "power2.out" });
+      gsap.to(cursor, { scale: 0.8, duration: 0.1, ease: GSAP_EASE_POWER2 });
     };
 
     const handleMouseUp = () => {
-      gsap.to(cursor, { scale: 1, duration: 0.24, ease: "power4.out" });
+      gsap.to(cursor, { scale: 1, duration: 0.24, ease: GSAP_EASE_POWER4 });
     };
 
     document.addEventListener("mouseover", handleMouseOver);
@@ -220,7 +235,7 @@ export function CustomCursor() {
   return (
     <>
       <div
-        className="pointer-events-none fixed top-0 left-0 z-[10000] hidden h-5 w-5 mix-blend-difference md:block"
+        className="custom-cursor pointer-events-none fixed top-0 left-0 z-[10000] hidden h-5 w-5 mix-blend-difference md:block"
         ref={cursorRef}
         style={{ transformOrigin: "center center" }}
       >
@@ -233,7 +248,7 @@ export function CustomCursor() {
       </div>
 
       <div
-        className="pointer-events-none fixed top-0 left-0 z-[9999] hidden mix-blend-difference md:block"
+        className="custom-cursor pointer-events-none fixed top-0 left-0 z-[9999] hidden mix-blend-difference md:block"
         ref={cornersRef}
       >
         <div

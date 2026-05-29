@@ -1,16 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { CSS_EASE_BRUTAL, DURATION_SNAP, KINETIC } from "@/lib/motion-tokens";
 
-const CIPHER_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&";
-const CIPHER_ITERATIONS = 6;
-const CIPHER_INTERVAL_MS = 50;
 const RANDOM_CENTER_OFFSET = 0.5;
-const SCATTER_X_RANGE = 600;
-const SCATTER_Y_RANGE = 400;
-const SCATTER_ROTATION_RANGE = 90;
-const SCATTER_DELAY_TOTAL_MS = 400;
-const TYPEWRITER_STEP_DELAY_MS = 20;
 const HASH_MULTIPLIER = 31;
 const HASH_MODULO = 100_000;
 const RANDOM_SINE_SCALE = 12.9898;
@@ -35,7 +28,16 @@ export function KineticText({
 }: KineticTextProps) {
   const ref = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(!triggerOnView);
+  const [reduceMotion, setReduceMotion] = useState(false);
   const [cipherText, setCipherText] = useState(mode === "cipher" ? text : "");
+
+  // Read once on mount. SSR-safe default (false); corrected on the client
+  // before any motion runs, so reduced-motion users get the static state.
+  useEffect(() => {
+    setReduceMotion(
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }, []);
 
   useEffect(() => {
     if (!(triggerOnView && ref.current)) {
@@ -57,7 +59,7 @@ export function KineticText({
   }, [triggerOnView]);
 
   useEffect(() => {
-    if (!(mode === "cipher" && isVisible)) {
+    if (!(mode === "cipher" && isVisible) || reduceMotion) {
       return;
     }
 
@@ -73,23 +75,23 @@ export function KineticText({
             if (i < iteration) {
               return text[i];
             }
-            return CIPHER_CHARS[
-              Math.floor(Math.random() * CIPHER_CHARS.length)
+            return KINETIC.cipherChars[
+              Math.floor(Math.random() * KINETIC.cipherChars.length)
             ];
           })
           .join("")
       );
 
-      iteration += text.length / CIPHER_ITERATIONS;
+      iteration += text.length / KINETIC.cipherIterations;
 
       if (iteration >= text.length) {
         setCipherText(text);
         clearInterval(interval);
       }
-    }, CIPHER_INTERVAL_MS);
+    }, KINETIC.cipherIntervalMs);
 
     return () => clearInterval(interval);
-  }, [mode, text, isVisible]);
+  }, [mode, text, isVisible, reduceMotion]);
 
   if (mode === "cipher") {
     return (
@@ -109,14 +111,18 @@ export function KineticText({
           <span
             className="inline-block transition-all duration-600"
             key={`${i}-${char}`}
-            style={{
-              opacity: isVisible ? 1 : 0,
-              transform: isVisible
-                ? "translate(0, 0) rotate(0deg)"
-                : `translate(${getSeededRange(seed, i, 1, SCATTER_X_RANGE)}px, ${getSeededRange(seed, i, 2, SCATTER_Y_RANGE)}px) rotate(${getSeededRange(seed, i, 3, SCATTER_ROTATION_RANGE)}deg)`,
-              transitionDelay: `${roundValue(i * (SCATTER_DELAY_TOTAL_MS / letters.length))}ms`,
-              transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
-            }}
+            style={
+              reduceMotion
+                ? { opacity: 1, transform: "none", transition: "none" }
+                : {
+                    opacity: isVisible ? 1 : 0,
+                    transform: isVisible
+                      ? "translate(0, 0) rotate(0deg)"
+                      : `translate(0px, ${getSeededRange(seed, i, 2, KINETIC.settleYpx)}px) rotate(${getSeededRange(seed, i, 3, KINETIC.settleRotateDeg)}deg)`,
+                    transitionDelay: `${roundValue(i * (KINETIC.scatterDelayTotalMs / letters.length))}ms`,
+                    transitionTimingFunction: CSS_EASE_BRUTAL,
+                  }
+            }
           >
             {char === " " ? "\u00A0" : char}
           </span>
@@ -133,11 +139,15 @@ export function KineticText({
         <span
           className="inline-block"
           key={`${i}-${char}`}
-          style={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? "translateY(0)" : "translateY(8px)",
-            transition: `opacity 0.18s cubic-bezier(0.16,1,0.3,1) ${i * TYPEWRITER_STEP_DELAY_MS}ms, transform 0.18s cubic-bezier(0.16,1,0.3,1) ${i * TYPEWRITER_STEP_DELAY_MS}ms`,
-          }}
+          style={
+            reduceMotion
+              ? { opacity: 1, transform: "none", transition: "none" }
+              : {
+                  opacity: isVisible ? 1 : 0,
+                  transform: isVisible ? "translateY(0)" : "translateY(8px)",
+                  transition: `opacity ${DURATION_SNAP}s ${CSS_EASE_BRUTAL} ${i * KINETIC.typewriterStepMs}ms, transform ${DURATION_SNAP}s ${CSS_EASE_BRUTAL} ${i * KINETIC.typewriterStepMs}ms`,
+                }
+          }
         >
           {char === " " ? "\u00A0" : char}
         </span>

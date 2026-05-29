@@ -141,6 +141,9 @@ export function LiquidImage({
     let hover = 0;
     let textureReady = false;
     const startedAt = performance.now();
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
     image.decoding = "async";
     image.src = src;
@@ -182,7 +185,9 @@ export function LiquidImage({
 
     const render = (now: number) => {
       resize();
-      hover += (hoverTargetRef.current - hover) * 0.08;
+      if (!reduceMotion) {
+        hover += (hoverTargetRef.current - hover) * 0.08;
+      }
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -198,7 +203,7 @@ export function LiquidImage({
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.uniform1i(uniforms.texture, 0);
-      gl.uniform1f(uniforms.time, (now - startedAt) / 1000);
+      gl.uniform1f(uniforms.time, reduceMotion ? 0 : (now - startedAt) / 1000);
       gl.uniform1f(uniforms.hover, hover);
       gl.uniform2f(
         uniforms.imageResolution,
@@ -209,7 +214,9 @@ export function LiquidImage({
       gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-      frameId = window.requestAnimationFrame(render);
+      if (!reduceMotion) {
+        frameId = window.requestAnimationFrame(render);
+      }
     };
 
     frameId = window.requestAnimationFrame(render);

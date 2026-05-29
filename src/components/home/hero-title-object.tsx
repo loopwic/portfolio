@@ -127,6 +127,10 @@ export default function HeroTitleObject({ objectRef }: HeroTitleObjectProps) {
       return;
     }
 
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
     const solid = buildCubeGeometry(CUBE_SIZE / 2, SOLID_SEGMENTS);
     const wire = buildCubeGeometry(CUBE_SIZE / 2, WIRE_SEGMENTS);
     const wireIndices = trianglesToEdges(wire.indices);
@@ -230,12 +234,12 @@ export default function HeroTitleObject({ objectRef }: HeroTitleObjectProps) {
     };
 
     const render = (now: number) => {
-      const elapsed = (now - startedAt) / 1000;
+      const elapsed = reduceMotion ? 0 : (now - startedAt) / 1000;
 
       resize();
 
-      const rotY = elapsed * 0.13 + pointerX * 0.28;
-      const rotX = -0.18 + pointerY * 0.16;
+      const rotY = reduceMotion ? 0 : elapsed * 0.13 + pointerX * 0.28;
+      const rotX = reduceMotion ? -0.18 : -0.18 + pointerY * 0.16;
 
       // group: scale(GROUP_SCALE) * rotateY(rotY) * rotateX(rotX)
       rotationXYZ(groupMatrix, rotX, rotY, 0);
@@ -270,7 +274,7 @@ export default function HeroTitleObject({ objectRef }: HeroTitleObjectProps) {
       gl.uniform1f(solidLocations.uTime, elapsed);
       gl.uniform1f(
         solidLocations.uScroll,
-        window.scrollY / Math.max(window.innerHeight, 1)
+        reduceMotion ? 0 : window.scrollY / Math.max(window.innerHeight, 1)
       );
 
       bindAttribute(gl, solidPositionBuffer, solidLocations.aPosition, 3);
@@ -293,7 +297,9 @@ export default function HeroTitleObject({ objectRef }: HeroTitleObjectProps) {
         canvas.classList.add("is-ready");
       }
 
-      frame = window.requestAnimationFrame(render);
+      if (!reduceMotion) {
+        frame = window.requestAnimationFrame(render);
+      }
     };
 
     const start = () => {

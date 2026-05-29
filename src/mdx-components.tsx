@@ -4,6 +4,11 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { MDXComponents } from "mdx/types";
 import React, { useRef } from "react";
 import { CodeBlock } from "@/components/code-block";
+import {
+  GSAP_EASE,
+  GSAP_EASE_NONE,
+  GSAP_EASE_POWER3,
+} from "@/lib/motion-tokens";
 import { cn } from "@/lib/utils";
 
 if (typeof window !== "undefined") {
@@ -57,7 +62,7 @@ const AnimatedImage = ({
         {
           clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
           duration: 1.5,
-          ease: "expo.out",
+          ease: GSAP_EASE,
           scrollTrigger: {
             trigger: containerRef.current,
             start: "top 80%",
@@ -73,7 +78,7 @@ const AnimatedImage = ({
         {
           y: 20,
           scale: 1,
-          ease: "none",
+          ease: GSAP_EASE_NONE,
           scrollTrigger: {
             trigger: containerRef.current,
             start: "top bottom",
@@ -118,7 +123,7 @@ const AnimatedBlockquote = (props: React.ComponentProps<"blockquote">) => {
         x: -20,
         opacity: 0,
         duration: 1,
-        ease: "power3.out",
+        ease: GSAP_EASE_POWER3,
         scrollTrigger: {
           trigger: quoteRef.current,
           start: "top 85%",

@@ -11,11 +11,15 @@ import {
   useState,
 } from "react";
 import { useScrollContext } from "@/contexts/scroll-context";
+import {
+  CSS_EASE_BRUTAL,
+  CSS_EASE_OUT_CUBIC,
+  MS_NAV_INDICATOR,
+  MS_THEME_WIPE,
+} from "@/lib/motion-tokens";
 import { HOME_SECTIONS } from "@/lib/site-data";
 import { cn } from "@/lib/utils";
 
-const THEME_WIPE_DURATION_MS = 320;
-const NAV_INDICATOR_TRANSITION_MS = 280;
 const BLOG_NAV_INDEX = HOME_SECTIONS.length;
 
 const SCROLL_HIDE_THRESHOLD = 80;
@@ -172,8 +176,8 @@ export function SiteNav() {
           ],
         },
         {
-          duration: THEME_WIPE_DURATION_MS,
-          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+          duration: MS_THEME_WIPE,
+          easing: CSS_EASE_OUT_CUBIC,
           pseudoElement: "::view-transition-new(root)",
         }
       );
@@ -245,7 +249,7 @@ export function SiteNav() {
                   left: `${indicator.left}px`,
                   width: `${indicator.width}px`,
                   opacity: indicator.visible ? 1 : 0,
-                  transition: `left ${NAV_INDICATOR_TRANSITION_MS}ms cubic-bezier(0.16, 1, 0.3, 1), width ${NAV_INDICATOR_TRANSITION_MS}ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease-out`,
+                  transition: `left ${MS_NAV_INDICATOR}ms ${CSS_EASE_BRUTAL}, width ${MS_NAV_INDICATOR}ms ${CSS_EASE_BRUTAL}, opacity 180ms ease-out`,
                 }}
               />
             </div>

@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Plus } from "lucide-react";
 import { useRef } from "react";
+import { GSAP_EASE_POWER2, GSAP_EASE_POWER3 } from "@/lib/motion-tokens";
 import { BLOG_POSTS } from "./-constants";
 
 if (typeof window !== "undefined") {
@@ -43,7 +44,7 @@ function BlogPage() {
         opacity: 0,
         stagger: 0.1,
         duration: 1,
-        ease: "power3.out",
+        ease: GSAP_EASE_POWER3,
       });
 
       for (const item of gsap.utils.toArray<HTMLElement>(".blog-post-item")) {
@@ -57,7 +58,7 @@ function BlogPage() {
               opacity: 1,
               y: 0,
               duration: 0.8,
-              ease: "power3.out",
+              ease: GSAP_EASE_POWER3,
             });
           },
         });
@@ -71,7 +72,7 @@ function BlogPage() {
           ease: "back.out(1.7)",
         }).to(
           item.querySelector(".post-title"),
-          { x: 12, duration: 0.3, ease: "power2.out" },
+          { x: 12, duration: 0.3, ease: GSAP_EASE_POWER2 },
           0
         );
 

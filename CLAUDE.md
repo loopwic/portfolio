@@ -18,7 +18,7 @@ bun run release       # Semantic versioning (CI runs this on push to main)
 
 - **Framework:** TanStack Start (React 19 full-stack framework) with TanStack Router
 - **Styling:** Tailwind CSS v4 with oklch color variables, brutalist design system
-- **Animation:** Motion/React with preset configs in `src/lib/animations.ts`
+- **Animation:** GSAP + ScrollTrigger (via `@gsap/react`'s `useGSAP`); shared motion tokens (easing/durations/stagger/kinetic config) in `src/lib/motion-tokens.ts`
 - **Content:** MDX blog articles with rehype-pretty-code, remark-gfm
 - **Deploy:** Cloudflare Workers via Wrangler
 - **Linting:** Biome (extends ultracite), enforced via lefthook pre-commit/pre-push hooks
@@ -32,9 +32,9 @@ TanStack Router with file-based routing in `src/routes/`. Route tree auto-genera
 
 ### Home Page — Native Scroll, 5 Sections
 
-The home page (`src/routes/index.tsx`) uses native scroll with scroll-linked animations. Five full-height sections: Hero, About, Projects, Writing, CTA. Each section uses `useScroll` from Motion/React for scroll-driven effects (parallax, opacity, scale).
+The home page (`src/routes/index.tsx`) uses native scroll with scroll-linked animations. Five full-height sections: Hero, About, Projects, Writing, CTA. Scroll-driven effects (intro choreography, pinned protocol scrub, section reveals, parallax) are orchestrated with GSAP + ScrollTrigger in `src/components/home/home-animations.tsx`.
 
-Key files: `src/contexts/scroll-context.tsx` (state), `src/components/providers/scroll-provider.tsx` (section tracking via IntersectionObserver-like logic), `src/components/nav/site-nav.tsx` (unified desktop top + mobile bottom nav)
+Key files: `src/components/home/home-animations.tsx` (GSAP scroll orchestration), `src/contexts/scroll-context.tsx` (state), `src/components/providers/scroll-provider.tsx` (section tracking via IntersectionObserver-like logic), `src/components/nav/site-nav.tsx` (unified desktop top + mobile bottom nav)
 
 ### Centralized Data
 
@@ -58,7 +58,7 @@ Key files: `src/contexts/scroll-context.tsx` (state), `src/components/providers/
   - Typography: `--type-hero` through `--type-micro`, `--type-index`
   - Shadows: `--shadow-brutal`, `--shadow-brutal-lg`
   - Fonts: `--font-geist-sans` (IBM Plex), `--font-geist-mono` (JetBrains Mono), `--font-geist-display` (Space Grotesk)
-- Animations in `src/lib/animations.ts`: `EASE_BRUTAL` (expo-out), `REVEAL`, `INTERACTION`, `KINETIC_TEXT`, `SPATIAL`, `NAV`, `BLOG`
+- Motion tokens in `src/lib/motion-tokens.ts`: `EASE_BRUTAL` (expo-out as a control-point array), `CSS_EASE_BRUTAL` (the `cubic-bezier()` string for CSS, mirrored as the `--ease-brutal` custom property), `GSAP_EASE`/`GSAP_BACK_*`/`GSAP_EASE_POWER*` (GSAP ease names), `DURATION_*`, `STAGGER_*`, and `KINETIC` (kinetic-text/cipher config). Framework-agnostic — imported by the GSAP timelines and the CSS-driven components alike
 - Theme uses CSS custom properties with oklch color space, dark/light via next-themes
 - UI primitives in `src/components/ui/` are shadcn/ui — avoid editing directly
 

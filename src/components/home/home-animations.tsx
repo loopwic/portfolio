@@ -4,6 +4,20 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { type RefObject, useEffect } from "react";
+import {
+  DURATION_REDUCED,
+  GSAP_BACK_HEADER,
+  GSAP_BACK_NUMBER,
+  GSAP_BACK_SOFT,
+  GSAP_EASE,
+  GSAP_EASE_NONE,
+  GSAP_EASE_POWER2,
+  GSAP_EASE_POWER3,
+  STAGGER_BASE,
+  STAGGER_INTRO,
+  STAGGER_STICKER,
+  STAGGER_TIGHT,
+} from "@/lib/motion-tokens";
 
 export function HomeAnimations({
   scope,
@@ -24,23 +38,23 @@ export function HomeAnimations({
       gsap.set(".fade-in", { y: 16, opacity: 0 });
 
       const intro = gsap.timeline({
-        defaults: { ease: "expo.out" },
+        defaults: { ease: GSAP_EASE },
       });
       intro
         .to(".intro-line", {
           yPercent: 0,
           opacity: 1,
           skewY: 0,
-          duration: reduceMotion ? 0.2 : 0.85,
-          stagger: 0.08,
+          duration: reduceMotion ? DURATION_REDUCED : 0.85,
+          stagger: STAGGER_INTRO,
         })
         .to(
           ".fade-in",
           {
             y: 0,
             opacity: 1,
-            duration: reduceMotion ? 0.2 : 0.45,
-            stagger: 0.06,
+            duration: reduceMotion ? DURATION_REDUCED : 0.45,
+            stagger: STAGGER_BASE,
           },
           "-=0.55"
         );
@@ -83,7 +97,7 @@ export function HomeAnimations({
           opacity: 0.24,
           scale: 0.96,
           duration: 0.8,
-          ease: "none",
+          ease: GSAP_EASE_NONE,
         })
         .to(
           ".tech-sticker",
@@ -96,9 +110,9 @@ export function HomeAnimations({
             scale: 1,
             y: 0,
             z: 0,
-            stagger: { each: 0.12, from: "center" },
+            stagger: { each: STAGGER_STICKER, from: "center" },
             duration: 0.95,
-            ease: "back.out(1.6)",
+            ease: GSAP_BACK_SOFT,
           },
           0.15
         )
@@ -108,7 +122,7 @@ export function HomeAnimations({
             rotate: 1.5,
             scale: 1.02,
             duration: 1.4,
-            ease: "none",
+            ease: GSAP_EASE_NONE,
           },
           0.25
         );
@@ -135,7 +149,7 @@ export function HomeAnimations({
           tl.fromTo(
             header,
             { x: -24, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.42, ease: "back.out(1.8)" }
+            { x: 0, opacity: 1, duration: 0.42, ease: GSAP_BACK_HEADER }
           );
           const numberEl = header.querySelector(".section-header-number");
           const ruleEl = header.querySelector(".section-header-rule");
@@ -144,7 +158,7 @@ export function HomeAnimations({
             tl.fromTo(
               numberEl,
               { scale: 0.6 },
-              { scale: 1, duration: 0.32, ease: "back.out(2)" },
+              { scale: 1, duration: 0.32, ease: GSAP_BACK_NUMBER },
               "<"
             );
             tl.fromTo(
@@ -153,7 +167,7 @@ export function HomeAnimations({
               {
                 scaleX: 1,
                 duration: 0.32,
-                ease: "expo.out",
+                ease: GSAP_EASE,
                 transformOrigin: "left center",
               },
               "<+=0.1"
@@ -161,7 +175,7 @@ export function HomeAnimations({
             tl.fromTo(
               titleEl,
               { opacity: 0 },
-              { opacity: 1, duration: 0.24, ease: "power2.out" },
+              { opacity: 1, duration: 0.24, ease: GSAP_EASE_POWER2 },
               "<+=0.05"
             );
           }
@@ -175,8 +189,8 @@ export function HomeAnimations({
               y: 0,
               opacity: 1,
               duration: 0.65,
-              stagger: 0.05,
-              ease: "expo.out",
+              stagger: STAGGER_TIGHT,
+              ease: GSAP_EASE,
             },
             header ? "-=0.2" : 0
           );
@@ -188,7 +202,7 @@ export function HomeAnimations({
         const pixelDecs = item.querySelectorAll(".pixel-dec");
         const tl = gsap.timeline({
           paused: true,
-          defaults: { ease: "power3.out" },
+          defaults: { ease: GSAP_EASE_POWER3 },
         });
 
         if (projectImage) {
@@ -198,7 +212,7 @@ export function HomeAnimations({
         if (pixelDecs.length > 0) {
           tl.to(
             pixelDecs,
-            { opacity: 1, y: -4, stagger: 0.05, duration: 0.4 },
+            { opacity: 1, y: -4, stagger: STAGGER_TIGHT, duration: 0.4 },
             0
           );
         }
@@ -215,7 +229,7 @@ export function HomeAnimations({
             x: (event.clientX - rect.left - rect.width / 2) * 0.1,
             y: (event.clientY - rect.top - rect.height / 2) * 0.1,
             duration: 0.4,
-            ease: "power2.out",
+            ease: GSAP_EASE_POWER2,
           });
         };
         const onLeave = () => {
@@ -223,7 +237,7 @@ export function HomeAnimations({
             x: 0,
             y: 0,
             duration: 0.32,
-            ease: "power3.out",
+            ease: GSAP_EASE_POWER3,
           });
         };
         target.addEventListener("mousemove", onMove);

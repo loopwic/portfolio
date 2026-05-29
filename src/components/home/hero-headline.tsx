@@ -14,8 +14,8 @@ export function HeroHeadline({
     ? "intro-line inline-block origin-bottom-left"
     : "inline-block origin-bottom-left";
   const dotClassName = animated
-    ? "fade-in mb-[2vw] h-4 w-4 animate-pulse bg-current md:h-8 md:w-8"
-    : "mb-[2vw] h-4 w-4 animate-pulse bg-current md:h-8 md:w-8";
+    ? "fade-in mb-[2vw] h-4 w-4 bg-current md:h-8 md:w-8"
+    : "mb-[2vw] h-4 w-4 bg-current md:h-8 md:w-8";
 
   return (
     <h1

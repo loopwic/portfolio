@@ -10,6 +10,7 @@
     "includes": [
       "**/*.{js,jsx,ts,tsx,json,jsonc,css,scss,mdx}",
       "!node_modules",
+      "!.claude",
       "!.tanstack",
       "!dist",
       "!build",

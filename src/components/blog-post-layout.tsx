@@ -7,6 +7,7 @@ import { gsap } from "gsap";
 import { ArrowLeft } from "lucide-react";
 import { type ReactNode, useRef } from "react";
 import { Animation, Root } from "@/components/scrollytelling";
+import { GSAP_EASE_POWER2 } from "@/lib/motion-tokens";
 import { articleJsonLd } from "@/lib/seo";
 import { useMDXComponents } from "@/mdx-components";
 import { BLOG_POSTS } from "@/routes/blog/-constants";
@@ -32,7 +33,7 @@ export function BlogPostLayout({ children }: BlogPostLayoutProps) {
         opacity: 0,
         duration: 1,
         stagger: 0.1,
-        ease: "power2.out",
+        ease: GSAP_EASE_POWER2,
         clearProps: "all",
       });
     },

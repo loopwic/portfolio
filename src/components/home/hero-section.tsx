@@ -26,8 +26,8 @@ export function HeroSection() {
       <div className="mx-auto grid min-h-[calc(100vh-10rem)] max-w-[1440px] content-center pointer-events-auto">
         <div className="max-w-6xl relative z-10 text-foreground">
           <KineticText
-            className="fade-in relative z-30 mb-8 block font-mono font-black text-xs uppercase tracking-[0.3em] opacity-70"
-            mode="scatter"
+            className="relative z-30 mb-8 block font-mono font-black text-xs uppercase tracking-[0.3em] opacity-70"
+            mode="typewriter"
             text="> INIT_SEQUENCE"
           />
           <div className="relative z-10" ref={titleMaskRef}>
@@ -38,7 +38,7 @@ export function HeroSection() {
               className="hero-title-reaction pointer-events-none absolute inset-0 z-20"
             />
           </div>
-          <div className="fade-in relative z-30 mt-16 max-w-4xl border-foreground/30 border-l pl-6">
+          <div className="relative z-30 mt-16 max-w-4xl border-foreground/30 border-l pl-6">
             <KineticText
               className="block text-xl md:text-3xl font-black uppercase tracking-widest leading-relaxed opacity-90"
               mode="typewriter"

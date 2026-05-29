@@ -66,6 +66,10 @@
   --font-geist-mono: "JetBrains Mono", "SFMono-Regular", "Menlo", monospace;
   --font-serif: "Playfair Display", "Georgia", "Times New Roman", serif;
 
+  /* Motion — shared easing curves (mirror src/lib/motion-tokens.ts) */
+  --ease-brutal: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-cubic: cubic-bezier(0.4, 0, 0.2, 1);
+
   /* Core palette — Pixel Fusion */
   --background: oklch(0.965 0.012 72);
   --foreground: oklch(0.145 0.018 250);
@@ -353,7 +357,7 @@ html {
   }
 
   .pixel-smiley.is-drawing .pixel-smiley-outline {
-    animation: draw-smiley-outline 1.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: draw-smiley-outline 1.65s var(--ease-brutal) forwards;
   }
 
   .liquid-image {
@@ -578,5 +582,30 @@ html {
   .blog-prose .code-panel code[data-theme*=" "],
   .blog-prose .code-panel code[data-theme*=" "] span {
     background-color: transparent;
+  }
+}
+
+/*
+ * Reduced motion: degrade decorative, CSS-driven motion to a static state.
+ * Left unlayered on purpose so these rules outrank the layered component and
+ * Tailwind utility styles they override. React/GSAP-driven motion is gated in
+ * the components themselves (matchMedia checks); this covers what only CSS can.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .pixel-smiley.is-drawing .pixel-smiley-outline {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .hero-shader-canvas,
+  .liquid-image-canvas,
+  .liquid-image img,
+  .liquid-image::before {
+    transition: none;
+  }
+
+  /* The custom cursor is purely decorative — fall back to the native cursor. */
+  .custom-cursor {
+    display: none;
   }
 }
