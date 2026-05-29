@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 bun run dev           # Start dev server on port 3000
 bun run build         # Production build
-bun run lint          # Biome lint check
-bun run format        # Biome auto-format
+bun run lint          # oxlint check (bun run lint:fix to auto-fix)
+bun run format        # oxfmt write (bun run format:check to verify)
 bun run preview       # Build + local Cloudflare Workers preview
 bun run deploy        # Build + deploy to Cloudflare Workers
 bun run release       # Semantic versioning (CI runs this on push to main)
@@ -21,7 +21,7 @@ bun run release       # Semantic versioning (CI runs this on push to main)
 - **Animation:** GSAP + ScrollTrigger (via `@gsap/react`'s `useGSAP`); shared motion tokens (easing/durations/stagger/kinetic config) in `src/lib/motion-tokens.ts`
 - **Content:** MDX blog articles with rehype-pretty-code, remark-gfm
 - **Deploy:** Cloudflare Workers via Wrangler
-- **Linting:** Biome (extends ultracite), enforced via lefthook pre-commit/pre-push hooks
+- **Linting/format:** oxc toolchain — oxlint + oxfmt, configured via ultracite presets (`oxlint.config.ts` extends `ultracite/oxlint` core+react; `oxfmt.config.ts` spreads `ultracite/oxfmt`). Enforced via lefthook pre-commit (oxfmt on staged) / pre-push (oxlint)
 - **Package manager:** Bun only. Do not use pnpm/npm/yarn commands in this project.
 
 ## Architecture
@@ -70,7 +70,7 @@ Blog articles are MDX files in `src/content/`. Code blocks use dual themes: GitH
 
 - **Commits:** Conventional Commits required (feat:, fix:, chore:, etc.) — enforced by commitlint
 - **Path alias:** `@/*` maps to `src/*`
-- **Biome ignores:** `src/routeTree.gen.ts`, `src/components/ui/`, `.tanstack/`, `dist/`, `build/`
+- **Lint/format ignores** (oxlint + oxfmt `ignorePatterns`): `src/routeTree.gen.ts`, `src/components/ui/`, `src/components/scrollytelling/`, `src/content/`, `.claude/`, `.tanstack/`, `dist/`, `build/`
 - **Agent command rule:** use `bun`, `bunx`, and `bun run <script>` for all dependency, script, lint, format, build, and hook commands.
 
 ## Design Context
