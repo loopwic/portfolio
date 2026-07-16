@@ -56,51 +56,51 @@
   --text-section-wide: clamp(3.2rem, 8vw, 7.5rem);
   --text-section: clamp(3.5rem, 8vw, 7rem);
   --text-hero-blog: clamp(4rem, 11vw, 9rem);
-  --text-hero-cta: clamp(4.5rem, 10vw, 11rem);
-  --text-hero: clamp(4rem, 14.2vw, 13rem);
   --text-watermark: clamp(10rem, 30vw, 25rem);
 }
 
 :root {
-  --font-geist-sans: "IBM Plex Sans", "Helvetica Neue", "Arial", sans-serif;
+  color-scheme: light;
+
+  --font-geist-sans: "IBM Plex Sans", "Noto Sans SC", sans-serif;
   --font-geist-mono: "JetBrains Mono", "SFMono-Regular", "Menlo", monospace;
-  --font-serif: "Playfair Display", "Georgia", "Times New Roman", serif;
+  --font-serif: "IBM Plex Serif", "Noto Serif SC", serif;
 
   /* Motion — shared easing curves (mirror src/lib/motion-tokens.ts) */
   --ease-brutal: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-cubic: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Core palette — Pixel Fusion */
-  --background: oklch(0.965 0.012 72);
-  --foreground: oklch(0.145 0.018 250);
-  --surface: oklch(0.935 0.014 72);
-  --surface-elevated: oklch(0.985 0.008 72);
+  /* Core palette — monochrome editorial neutrals */
+  --background: oklch(0.992 0 0);
+  --foreground: oklch(0.16 0 0);
+  --surface: oklch(0.965 0 0);
+  --surface-elevated: oklch(0.997 0 0);
 
   /* Borders — elegant print lines */
-  --border-hard: oklch(0.15 0.02 250);
-  --border-soft: oklch(0.15 0.02 250 / 15%);
-  --border: oklch(0.15 0.02 250 / 20%);
+  --border-hard: oklch(0.16 0 0);
+  --border-soft: oklch(0.16 0 0 / 14%);
+  --border: oklch(0.16 0 0 / 18%);
 
-  /* Signal colors — shader accents */
-  --signal-a: oklch(0.69 0.18 36);
-  --signal-b: oklch(0.68 0.11 220);
+  /* Legacy signal tokens resolve to ink in the monochrome theme. */
+  --signal-a: oklch(0.16 0 0);
+  --signal-b: oklch(0.16 0 0);
 
   /* Semantic */
-  --primary: oklch(0.15 0.02 250);
-  --primary-foreground: oklch(0.98 0.01 75);
+  --primary: oklch(0.16 0 0);
+  --primary-foreground: oklch(0.982 0 0);
   --secondary: oklch(0.95 0 0);
-  --secondary-foreground: oklch(0.15 0.02 250);
+  --secondary-foreground: oklch(0.16 0 0);
   --muted: oklch(0.92 0 0);
   --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.9 0.035 54);
-  --accent-foreground: oklch(0.15 0.02 250);
-  --destructive: oklch(0.577 0.245 27.325);
-  --input: oklch(0.15 0.02 250 / 15%);
-  --ring: oklch(0.15 0.02 250);
-  --card: oklch(0.98 0.01 75);
-  --card-foreground: oklch(0.15 0.02 250);
-  --popover: oklch(0.98 0.01 75);
-  --popover-foreground: oklch(0.15 0.02 250);
+  --accent: oklch(0.9 0 0);
+  --accent-foreground: oklch(0.16 0 0);
+  --destructive: oklch(0.35 0 0);
+  --input: oklch(0.16 0 0 / 15%);
+  --ring: oklch(0.16 0 0);
+  --card: oklch(0.982 0 0);
+  --card-foreground: oklch(0.16 0 0);
+  --popover: oklch(0.982 0 0);
+  --popover-foreground: oklch(0.16 0 0);
 
   /* Typography scale - fluid for display */
   --type-hero: clamp(5rem, 12vw + 1rem, 15rem);
@@ -108,7 +108,7 @@
   --type-h1: clamp(2.5rem, 5vw + 0.5rem, 5rem);
   --type-h2: clamp(2rem, 3vw + 0.5rem, 3.5rem);
   --type-h3: clamp(1.35rem, 2vw + 0.5rem, 1.75rem);
-  --type-body: 1.125rem;
+  --type-body: 1rem;
   --type-small: 0.9rem;
   --type-micro: 0.75rem;
   --type-index: clamp(6rem, 15vw, 14rem);
@@ -128,37 +128,40 @@
 }
 
 .dark {
-  --background: oklch(0.12 0.014 250);
-  --foreground: oklch(0.94 0.014 72);
-  --surface: oklch(0.16 0.018 250);
-  --surface-elevated: oklch(0.2 0.02 250);
+  color-scheme: dark;
 
-  --border-hard: oklch(0.95 0.01 75);
-  --border-soft: oklch(0.95 0.01 75 / 15%);
-  --border: oklch(0.95 0.01 75 / 20%);
+  --background: oklch(0.135 0 0);
+  --foreground: oklch(0.92 0 0);
+  --surface: oklch(0.18 0 0);
+  --surface-elevated: oklch(0.205 0 0);
 
-  --signal-a: oklch(0.7 0.18 36);
-  --signal-b: oklch(0.72 0.11 220);
+  --border-hard: oklch(0.93 0 0);
+  --border-soft: oklch(0.93 0 0 / 15%);
+  --border: oklch(0.93 0 0 / 20%);
 
-  --primary: oklch(0.95 0.01 75);
-  --primary-foreground: oklch(0.12 0.01 250);
-  --secondary: oklch(0.2 0.01 250);
-  --secondary-foreground: oklch(0.95 0.01 75);
-  --muted: oklch(0.2 0.01 250);
+  --signal-a: oklch(0.93 0 0);
+  --signal-b: oklch(0.93 0 0);
+
+  --primary: oklch(0.93 0 0);
+  --primary-foreground: oklch(0.135 0 0);
+  --secondary: oklch(0.18 0 0);
+  --secondary-foreground: oklch(0.93 0 0);
+  --muted: oklch(0.18 0 0);
   --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.2 0.01 250);
-  --accent-foreground: oklch(0.95 0.01 75);
-  --destructive: oklch(0.704 0.191 22.216);
-  --input: oklch(0.95 0.01 75 / 15%);
-  --ring: oklch(0.95 0.01 75);
-  --card: oklch(0.12 0.01 250);
-  --card-foreground: oklch(0.95 0.01 75);
-  --popover: oklch(0.12 0.01 250);
-  --popover-foreground: oklch(0.95 0.01 75);
+  --accent: oklch(0.18 0 0);
+  --accent-foreground: oklch(0.93 0 0);
+  --destructive: oklch(0.75 0 0);
+  --input: oklch(0.93 0 0 / 15%);
+  --ring: oklch(0.93 0 0);
+  --card: oklch(0.15 0 0);
+  --card-foreground: oklch(0.93 0 0);
+  --popover: oklch(0.15 0 0);
+  --popover-foreground: oklch(0.93 0 0);
 }
 
 body {
   background-color: var(--background);
+  line-height: 1.6;
 }
 
 html {
@@ -196,6 +199,11 @@ html {
   body {
     @apply text-body font-sans antialiased;
     image-rendering: auto;
+  }
+
+  ::selection {
+    color: var(--background);
+    background: var(--foreground);
   }
 
   h1,
@@ -302,40 +310,6 @@ html {
     text-shadow:
       0.035em 0 oklch(from var(--signal-a) l c h / 0.22),
       -0.025em 0 oklch(from var(--signal-b) l c h / 0.18);
-  }
-
-  .hero-title-reaction {
-    color: var(--background);
-    opacity: 1;
-    mix-blend-mode: normal;
-    mask-image: radial-gradient(
-      ellipse var(--hero-mask-rx, 11rem) var(--hero-mask-ry, 14rem) at
-        var(--hero-mask-x, 83%) var(--hero-mask-y, 50%),
-      black 0 52%,
-      transparent 72%
-    );
-    -webkit-mask-image: radial-gradient(
-      ellipse var(--hero-mask-rx, 11rem) var(--hero-mask-ry, 14rem) at
-        var(--hero-mask-x, 83%) var(--hero-mask-y, 50%),
-      black 0 52%,
-      transparent 72%
-    );
-  }
-
-  .hero-title-object {
-    filter: contrast(1.06) saturate(0.92);
-  }
-
-  .hero-shader-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 0.24s ease-out;
-  }
-
-  .hero-shader-canvas.is-ready {
-    opacity: 1;
   }
 
   .tech-logo-img {
@@ -523,21 +497,39 @@ html {
     @apply border-l-2 border-foreground py-3 pl-4 pr-3 font-serif italic text-muted-foreground;
   }
 
-  /* ── Blog prose: Pixel fusion reading surface ── */
+  /* ── Blog prose: restrained editorial reading surface ── */
   .blog-prose {
-    @apply prose prose-neutral max-w-none prose-p:leading-relaxed prose-a:underline prose-a:underline-offset-4 hover:prose-a:text-muted-foreground prose-blockquote:border-l-2 prose-blockquote:border-signal-a prose-blockquote:pl-6 prose-blockquote:font-sans prose-blockquote:text-xl prose-blockquote:font-semibold prose-blockquote:text-foreground prose-li:my-2 prose-code:font-mono prose-code:text-[0.85em] prose-code:before:content-none prose-code:after:content-none dark:prose-invert lg:prose-lg;
+    @apply prose prose-neutral max-w-none prose-p:leading-[1.85] prose-a:underline prose-a:decoration-foreground/24 prose-a:underline-offset-4 hover:prose-a:decoration-foreground/70 prose-blockquote:border-l prose-blockquote:border-foreground/18 prose-blockquote:pl-6 prose-blockquote:font-display prose-blockquote:font-light prose-blockquote:text-foreground/72 prose-li:my-2 prose-code:font-mono prose-code:text-[0.85em] prose-code:before:content-none prose-code:after:content-none dark:prose-invert lg:prose-lg;
   }
 
   .blog-prose :where(p):first-of-type::first-letter {
-    @apply float-left mr-3 font-mono text-dropcap font-bold leading-[0.85] text-signal-a;
+    float: none;
+    margin: 0;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
+  .blog-prose :where(h1) {
+    margin-bottom: 2.5rem;
+    color: var(--foreground);
+    font-family: var(--font-serif);
+    font-size: clamp(2.15rem, 5vw, 3.75rem);
+    font-weight: 300;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
   }
 
   .blog-prose :where(h2) {
-    @apply mt-16 mb-6 border-border-soft border-b pb-4 font-display text-h2 font-black uppercase;
+    @apply mt-16 mb-6 border-border-soft border-b pb-4 font-display text-h2 font-light;
+    letter-spacing: -0.018em;
   }
 
   .blog-prose :where(h3) {
-    @apply mt-10 mb-4 font-mono text-h3 font-bold uppercase tracking-wide;
+    @apply mt-10 mb-4 font-display text-h3 font-normal;
+    letter-spacing: -0.01em;
   }
 
   .blog-prose :where(code):not(:where(pre *)) {
@@ -546,11 +538,7 @@ html {
 
   .blog-prose :where(hr) {
     height: 1px;
-    background: repeating-linear-gradient(
-      90deg,
-      var(--foreground) 0 8px,
-      transparent 8px 14px
-    );
+    background: var(--border-soft);
     width: 100%;
     margin-top: 3rem;
     margin-bottom: 3rem;
@@ -558,11 +546,11 @@ html {
   }
 
   .blog-prose :where(img):not(.author-avatar) {
-    @apply w-full grayscale contrast-125; /* B&W editorial image style */
+    @apply w-full rounded-xl grayscale contrast-110;
   }
 
   .blog-prose :where(table) {
-    @apply block w-full overflow-x-auto border-y border-foreground;
+    @apply block w-full overflow-x-auto border-border-soft border-y;
   }
 
   .blog-prose :where(th) {
@@ -570,7 +558,7 @@ html {
   }
 
   .blog-prose :where(pre) {
-    @apply rounded-none border border-border-soft bg-surface p-4;
+    @apply rounded-xl border border-border-soft bg-surface p-4;
   }
 
   .blog-prose .code-panel :where(pre, code) {
@@ -617,7 +605,6 @@ html {
     stroke-dashoffset: 0;
   }
 
-  .hero-shader-canvas,
   .liquid-image-canvas,
   .liquid-image img,
   .liquid-image::before {

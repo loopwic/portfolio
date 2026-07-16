@@ -1,96 +1,87 @@
-"use client";
-
-import { lazy, Suspense } from "react";
-
 import { HOME_SECTIONS, PROJECTS } from "@/lib/site-data";
-
-import { PixelGrid } from "./pixel-grid";
-import { SectionHeader } from "./section-header";
-
-const LiquidImage = lazy(async () => {
-  const mod = await import("@/components/ui/liquid-image");
-  return { default: mod.LiquidImage };
-});
 
 export const ProjectsSection = () => (
   <section
-    className="scroll-section relative bg-background px-5 py-20 text-foreground md:px-8 md:py-28"
-    id={HOME_SECTIONS[2]}
+    className="flex min-h-svh items-center border-foreground/12 border-t px-5 py-12 md:px-8 md:py-16"
+    data-motion-section=""
+    id={HOME_SECTIONS[1]}
   >
-    <div className="mx-auto max-w-[1240px]">
-      <SectionHeader index="02" title="Output" />
+    <div className="mx-auto w-full max-w-[896px]">
+      <div
+        className="flex items-center gap-3 font-mono text-2xs uppercase tracking-[0.16em] text-foreground/68"
+        data-motion-heading=""
+      >
+        <span>02</span>
+        <span className="h-px w-8 bg-foreground/18" />
+        <h2 className="font-normal">项目</h2>
+      </div>
 
-      <div className="mt-16 grid gap-12 lg:grid-cols-[0.36fr_1fr]">
-        <div className="scroll-fade lg:sticky lg:top-28 lg:self-start">
-          <h2 className="font-display text-section-wide font-black uppercase leading-[0.82] tracking-tight">
-            Signal
-            <br />
-            <span className="text-foreground/28">Noise</span>
-          </h2>
-          <p className="mt-8 max-w-sm font-mono text-xs font-black uppercase leading-loose tracking-[0.18em] text-foreground/45">
-            Selected builds, compressed into proof surfaces. Less poster, more
-            signal.
-          </p>
-        </div>
+      <div
+        className="mt-7 grid gap-px overflow-hidden rounded-[1.35rem] border border-foreground/12 bg-foreground/12 shadow-[0_18px_50px_rgba(0,0,0,0.045)] lg:h-[28rem] lg:grid-cols-[5fr_4fr] lg:grid-rows-[3fr_2fr] dark:shadow-[0_18px_50px_rgba(0,0,0,0.18)]"
+        data-bento-grid=""
+      >
+        {PROJECTS.map((project, index) => {
+          const hasPreview = "preview" in project;
 
-        <div className="grid border-foreground/10 border-t">
-          {PROJECTS.map((project, index) => (
+          return (
             <article
-              className="project-item scroll-fade group grid gap-6 border-foreground/10 border-b py-8 md:grid-cols-[minmax(18rem,24rem)_minmax(0,1fr)] md:items-stretch"
+              className={`group relative flex min-h-[16rem] min-w-0 flex-col overflow-hidden bg-surface/90 backdrop-blur-sm lg:min-h-0 ${index === 0 ? "lg:row-span-2" : ""}`}
+              data-motion-item=""
               key={project.name}
             >
-              <div className="flex min-h-64 min-w-0 flex-col justify-between gap-8">
-                <div className="min-w-0">
-                  <div className="mb-5 flex items-center justify-between gap-4 font-mono text-2xs font-black uppercase tracking-[0.24em] text-foreground/45">
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <span>{project.status}</span>
-                  </div>
-                  <h3 className="max-w-full overflow-hidden text-wrap break-words font-display text-title font-black uppercase leading-[0.9] tracking-tight">
-                    {project.name}
-                  </h3>
-                  <p className="mt-5 text-base font-semibold leading-relaxed text-foreground/62 md:text-lg">
-                    {project.detail}
-                  </p>
+              <div className="relative z-10 flex min-w-0 flex-col p-5 md:p-6">
+                <div className="flex items-center justify-between gap-4 font-mono text-2xs uppercase tracking-[0.16em] text-foreground/70">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <span>{project.status}</span>
                 </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {project.tags.map((tag) => (
-                    <span
-                      className="border border-foreground/18 px-3 py-1.5 font-mono text-3xs font-black uppercase tracking-[0.18em] text-foreground/55 transition-colors group-hover:border-foreground/35 group-hover:text-foreground"
-                      key={tag}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                <h3 className="mt-5 font-display text-[clamp(1.75rem,2.7vw,2.35rem)] font-light leading-none tracking-[-0.015em]">
+                  {project.name}
+                </h3>
+                <p className="mt-3 text-xs leading-relaxed text-foreground/68">
+                  {project.tags.join(" · ")}
+                </p>
               </div>
 
-              <div
-                className="relative aspect-[16/10] w-full min-w-0 overflow-hidden border border-foreground/35 bg-foreground/5 md:min-h-64"
-                data-magnetic
-              >
-                {"preview" in project ? (
-                  <Suspense fallback={<PixelGrid />}>
-                    <LiquidImage
-                      alt={project.previewAlt}
-                      className="project-img absolute inset-0 h-full w-full"
-                      height={project.previewHeight}
-                      src={project.preview}
-                      width={project.previewWidth}
-                    />
-                  </Suspense>
-                ) : (
-                  <PixelGrid />
-                )}
-                <div className="absolute top-0 right-0 bg-background/85 px-3 py-2 font-mono text-3xs font-black uppercase tracking-[0.2em] text-foreground/55">
-                  {project.subtitle}
+              {hasPreview ? (
+                <div className="relative mt-auto aspect-[16/8] min-w-0 overflow-hidden border-foreground/10 border-t bg-surface lg:aspect-auto lg:flex-1">
+                  <img
+                    alt={project.previewAlt}
+                    className="h-full w-full object-cover grayscale transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+                    height={project.previewHeight}
+                    loading="lazy"
+                    src={project.preview}
+                    width={project.previewWidth}
+                  />
                 </div>
-                <div className="absolute bottom-0 left-0 h-6 w-6 border-foreground border-b-2 border-l-2" />
-                <div className="absolute top-0 right-0 h-6 w-6 border-foreground border-t-2 border-r-2" />
-              </div>
+              ) : (
+                <div
+                  aria-hidden="true"
+                  className="absolute -right-24 -bottom-24 size-64 rounded-full bg-foreground/8 blur-3xl"
+                />
+              )}
             </article>
-          ))}
-        </div>
+          );
+        })}
+
+        <a
+          aria-label="在 GitHub 查看更多项目"
+          className="relative flex min-h-[16rem] min-w-0 flex-col overflow-hidden bg-surface/90 p-5 backdrop-blur-sm transition-colors duration-300 hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-foreground focus-visible:outline-offset-[-3px] md:p-6 lg:min-h-0"
+          data-motion-item=""
+          href="https://github.com/loopwic"
+          rel="noreferrer"
+          target="_blank"
+        >
+          <span className="relative z-10 font-mono text-2xs tracking-[0.16em] text-foreground/70">
+            03
+          </span>
+          <span className="relative z-10 mt-auto font-display text-2xl font-light leading-none tracking-[-0.015em]">
+            More
+          </span>
+          <div
+            aria-hidden="true"
+            className="absolute -right-20 -bottom-24 size-52 rounded-full bg-foreground/7 blur-3xl"
+          />
+        </a>
       </div>
     </div>
   </section>

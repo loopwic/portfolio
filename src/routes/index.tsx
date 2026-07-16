@@ -1,38 +1,23 @@
-"use client";
-
 import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense, useRef } from "react";
 
-import { AboutSection } from "@/components/home/about-section";
-import { CTASection } from "@/components/home/cta-section";
-import { HeroSection } from "@/components/home/hero-section";
+import { ExperienceSection } from "@/components/home/experience-section";
+import { HomeTransitions } from "@/components/home/home-transitions";
+import { PageAtmosphere } from "@/components/home/page-atmosphere";
+import { ProfileSection } from "@/components/home/profile-section";
 import { ProjectsSection } from "@/components/home/projects-section";
-import { WritingSection } from "@/components/home/writing-section";
 
-const HomeAnimations = lazy(async () => {
-  const mod = await import("@/components/home/home-animations");
-  return { default: mod.HomeAnimations };
-});
-
-const HomePage = () => {
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  return (
-    <div
-      className="relative text-foreground selection:bg-foreground selection:text-background"
-      ref={rootRef}
-    >
-      <HeroSection />
-      <AboutSection />
-      <ProjectsSection />
-      <WritingSection />
-      <CTASection />
-      <Suspense fallback={null}>
-        <HomeAnimations scope={rootRef} />
-      </Suspense>
+const HomePage = () => (
+  <HomeTransitions>
+    <div className="relative isolate text-foreground selection:bg-foreground selection:text-background">
+      <PageAtmosphere />
+      <div className="relative z-10">
+        <ProfileSection />
+        <ProjectsSection />
+        <ExperienceSection />
+      </div>
     </div>
-  );
-};
+  </HomeTransitions>
+);
 
 export const Route = createFileRoute("/")({
   component: HomePage,

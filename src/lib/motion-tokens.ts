@@ -5,9 +5,9 @@
  * `window` access. Strings / numbers / arrays only, so this can be imported
  * from server or client bundles without pulling a runtime along.
  *
- * The home page animates through three surfaces — GSAP timelines
- * (`home-animations.tsx`, `custom-cursor.tsx`, blog/MDX), inline CSS
- * transitions (`kinetic-text.tsx`, `site-nav.tsx`), and the `styles.css`
+ * Motion runs through three surfaces — GSAP timelines
+ * (`custom-cursor.tsx`, blog/MDX), inline CSS
+ * transitions (`site-nav.tsx`), and the `styles.css`
  * keyframes (which read the `--ease-*` custom properties defined in `:root`).
  * Each surface needs the same curve in its own dialect, so the brutalist
  * "snap into place" easing is expressed three ways below.
@@ -42,9 +42,6 @@ export const GSAP_BACK_NUMBER = "back.out(2)";
 export const DURATION_SNAP = 0.18;
 export const DURATION_FAST = 0.25;
 export const DURATION_SECTION = 0.4;
-export const DURATION_KINETIC = 0.6;
-// entrance duration under reduced motion
-export const DURATION_REDUCED = 0.2;
 
 /* ── Durations (milliseconds) — CSS strings / View Transition API ── */
 export const MS_THEME_WIPE = 320;
@@ -53,26 +50,6 @@ export const MS_NAV_INDICATOR = 280;
 /* ── Stagger presets (seconds) ── */
 // scroll-fade rows, pixel decorations
 export const STAGGER_TIGHT = 0.05;
-// hero fade-in group
 export const STAGGER_BASE = 0.06;
-// hero intro lines
-export const STAGGER_INTRO = 0.08;
 // tech stickers, from center
 export const STAGGER_STICKER = 0.12;
-
-/* ── Kinetic text config (single source for KineticText) ── */
-export const KINETIC = {
-  cipherChars: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&",
-  cipherIntervalMs: 50,
-  cipherIterations: 6,
-  scatterDelayTotalMs: 400,
-  settleDurationMs: 600,
-  settleRotateDeg: 4,
-  /**
-   * Calmed settle for `scatter` mode. The label drops a few px and snaps
-   * straight rather than flying in from across the viewport — "bold, not
-   * loud". Replaces the former ±600px / ±400px / ±90° explosion.
-   */
-  settleYpx: 14,
-  typewriterStepMs: 20,
-} as const;

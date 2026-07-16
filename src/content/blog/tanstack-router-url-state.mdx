@@ -1,0 +1,196 @@
+# 用 TanStack Router 管理筛选和分页 URL
+
+筛选条件全放在 `useState` 里时，刷新会丢，返回键也撤不回上一次筛选。把它们写进 URL 之后，链接可以复制，浏览器历史也能正常工作；接下来要处理的是参数类型、默认值和 loader 重载。
+
+示例是一页产品列表，代码从 route 的 search schema 开始。
+
+## URL 里放什么
+
+我通常看四件事：这个状态是否需要分享、刷新后是否要保留、返回键是否要撤销，以及服务端取数是否依赖它。只要其中一项成立，就值得考虑放进 URL。
+
+`q`、`page`、`sort`、`tags` 应进入 URL；输入框是否聚焦、弹窗是否正在播放动画不应进入 URL。不要把整个组件状态树序列化进去。
+
+最终地址类似：
+
+```text
+/products?q=keyboard&page=2&sort=price&tags=["wireless","mac"]
+```
+
+## search 校验
+
+URL 是外部输入。用户可能手写 `page=-4`，旧书签里可能留着已经删除的 sort，第三方链接也可能传错类型。这些情况在路由入口统一处理，组件就不用各自修正一遍。
+
+```bash
+bun add zod
+```
+
+```tsx
+import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
+
+const searchSchema = z.object({
+  q: z.string().trim().catch(""),
+  page: z.number().int().positive().catch(1),
+  sort: z.enum(["updated", "price", "name"]).catch("updated"),
+  tags: z.array(z.string()).catch([]),
+});
+
+export const Route = createFileRoute("/products")({
+  validateSearch: searchSchema,
+  component: ProductPage,
+});
+```
+
+TanStack Router 会从 schema 推断 `Route.useSearch()` 的类型。加上 `.catch()` 后，错误参数会回落到预设值，别人粘贴一条坏 URL 也不会让整条路由进入错误页。
+
+如果业务要求严格拒绝非法参数，可以去掉 catch 并提供 `errorComponent`。筛选页通常更适合容错，支付或权限回调则可能需要严格失败。
+
+## loaderDeps
+
+`loaderDeps` 把 search 中与数据请求有关的字段显式交给 loader。依赖变化时路由会重载，过期 loader 的 `abortController.signal` 会被取消。
+
+```tsx
+export const Route = createFileRoute("/products")({
+  validateSearch: searchSchema,
+
+  loaderDeps: ({ search }) => ({
+    q: search.q,
+    page: search.page,
+    sort: search.sort,
+    tags: search.tags,
+  }),
+
+  loader: async ({ deps, abortController }) => {
+    const params = new URLSearchParams({
+      q: deps.q,
+      page: String(deps.page),
+      sort: deps.sort,
+    });
+
+    for (const tag of deps.tags) params.append("tags", tag);
+
+    const response = await fetch(`/api/products?${params}`, {
+      signal: abortController.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Products failed: ${response.status}`);
+    }
+
+    return response.json() as Promise<ProductPageResult>;
+  },
+
+  component: ProductPage,
+});
+```
+
+`loaderDeps` 不需要返回完整的 search 对象。比如面板展开状态不影响 API，却会让 loader 多跑一次。把依赖逐个写出来后，缓存键和请求次数也更容易查。
+
+## 组件取值
+
+组件直接读取路由状态和 loader 数据即可。再用 Effect 把 `search.q` 同步到全局 store，会多出一份需要手动保持一致的状态。
+
+```tsx
+function ProductPage() {
+  const search = Route.useSearch();
+  const products = Route.useLoaderData();
+
+  return (
+    <>
+      <FilterBar search={search} />
+      <ProductGrid products={products.items} />
+      <Pagination page={search.page} total={products.total} />
+    </>
+  );
+}
+```
+
+输入框可以暂时保留一份 draft，避免每敲一个字就导航和请求。等 250ms 后再把 draft 写回 URL；其他组件仍然读取 URL 里的查询值。
+
+## replace 与 push
+
+实时输入时用 `replace: true`，避免历史记录出现 `r`、`re`、`rea` 等每一个中间值。切换分页不使用 replace，让返回键能回到上一页。
+
+```tsx
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+
+function FilterBar({ search }: { search: z.infer<typeof searchSchema> }) {
+  const navigate = useNavigate({ from: Route.fullPath });
+  const [draft, setDraft] = useState(search.q);
+
+  useEffect(() => setDraft(search.q), [search.q]);
+
+  useEffect(() => {
+    if (draft === search.q) return;
+
+    const timer = setTimeout(() => {
+      void navigate({
+        replace: true,
+        search: (previous) => ({
+          ...previous,
+          q: draft,
+          page: 1,
+        }),
+      });
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [draft, navigate, search.q]);
+
+  return (
+    <input
+      aria-label="搜索产品"
+      onChange={(event) => setDraft(event.target.value)}
+      value={draft}
+    />
+  );
+}
+
+function NextPage({ disabled }: { disabled: boolean }) {
+  if (disabled) {
+    return <span aria-disabled="true">下一页</span>;
+  }
+
+  return (
+    <Link
+      from={Route.fullPath}
+      search={(previous) => ({
+        ...previous,
+        page: previous.page + 1,
+      })}
+    >
+      下一页
+    </Link>
+  );
+}
+```
+
+修改搜索词或标签时把 page 重置为 1。用户如果停在第 8 页再切筛选，很容易落到空页，看起来像是没有搜索结果。
+
+函数式 `search` 更新里要保留 `...previous`。直接返回 `{ page: 2 }` 会替换其余 search 参数，查询词和标签也会一起消失。
+
+## 默认参数
+
+schema 的默认值让组件始终拿到完整类型，但不代表所有默认值都必须显示在地址栏。可以使用 TanStack Router 的 `stripSearchParams` 中间件去掉默认 page 和 sort，让分享链接更短。
+
+我会等校验、更新和 loader 都跑通后再加这个中间件。调试阶段把默认参数留在地址栏里，反而更容易看出是哪一步把值改掉了。
+
+## 测试
+
+这几个路径比较容易漏：
+
+1. 打开 `/products?page=abc`，页面应回落到第 1 页。
+2. 连续输入搜索词，Network 中旧 loader 应被取消。
+3. 从第 3 页修改标签，页码应回到 1。
+4. 连点两次下一页，再按返回，应该逐页返回。
+5. 复制当前 URL 到无痕窗口，筛选结果应一致。
+6. 删除所有参数后刷新，默认状态应稳定且没有水合差异。
+
+这些用例通过后，分享链接、刷新、SSR、loader 缓存和浏览器历史用的就是同一组参数。以后再加筛选项，也只需要沿着 schema、`loaderDeps` 和导航更新这条线改。
+
+相关文档：
+
+- [TanStack Router Search Params](https://tanstack.com/router/latest/docs/guide/search-params)
+- [TanStack Router Navigation](https://tanstack.com/router/latest/docs/guide/navigation)
+- [TanStack Router loader options](https://tanstack.com/router/latest/docs/api/router/RouteOptionsType)

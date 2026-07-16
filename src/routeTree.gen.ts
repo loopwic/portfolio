@@ -12,11 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
-import { Route as BlogPixelFusionPortfolioRedesignRouteImport } from './routes/blog/pixel-fusion-portfolio-redesign'
-import { Route as BlogLiquidImageWebglPreviewRouteImport } from './routes/blog/liquid-image-webgl-preview'
-import { Route as BlogLatticeBackendDddRefactorRouteImport } from './routes/blog/lattice-backend-ddd-refactor'
-import { Route as BlogConfigureAlacrittyFromScratchRouteImport } from './routes/blog/configure-alacritty-from-scratch'
-import { Route as BlogBuildPersonalBlogWithNextjsAndMdxRouteImport } from './routes/blog/build-personal-blog-with-nextjs-and-mdx'
+import { Route as BlogWebsocketReconnectBackoffRouteImport } from './routes/blog/websocket-reconnect-backoff'
+import { Route as BlogTanstackRouterUrlStateRouteImport } from './routes/blog/tanstack-router-url-state'
+import { Route as BlogReactFetchRaceConditionRouteImport } from './routes/blog/react-fetch-race-condition'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -33,66 +31,48 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
   path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BlogPixelFusionPortfolioRedesignRoute =
-  BlogPixelFusionPortfolioRedesignRouteImport.update({
-    id: '/blog/pixel-fusion-portfolio-redesign',
-    path: '/blog/pixel-fusion-portfolio-redesign',
+const BlogWebsocketReconnectBackoffRoute =
+  BlogWebsocketReconnectBackoffRouteImport.update({
+    id: '/blog/websocket-reconnect-backoff',
+    path: '/blog/websocket-reconnect-backoff',
     getParentRoute: () => rootRouteImport,
   } as any)
-const BlogLiquidImageWebglPreviewRoute =
-  BlogLiquidImageWebglPreviewRouteImport.update({
-    id: '/blog/liquid-image-webgl-preview',
-    path: '/blog/liquid-image-webgl-preview',
+const BlogTanstackRouterUrlStateRoute =
+  BlogTanstackRouterUrlStateRouteImport.update({
+    id: '/blog/tanstack-router-url-state',
+    path: '/blog/tanstack-router-url-state',
     getParentRoute: () => rootRouteImport,
   } as any)
-const BlogLatticeBackendDddRefactorRoute =
-  BlogLatticeBackendDddRefactorRouteImport.update({
-    id: '/blog/lattice-backend-ddd-refactor',
-    path: '/blog/lattice-backend-ddd-refactor',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const BlogConfigureAlacrittyFromScratchRoute =
-  BlogConfigureAlacrittyFromScratchRouteImport.update({
-    id: '/blog/configure-alacritty-from-scratch',
-    path: '/blog/configure-alacritty-from-scratch',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const BlogBuildPersonalBlogWithNextjsAndMdxRoute =
-  BlogBuildPersonalBlogWithNextjsAndMdxRouteImport.update({
-    id: '/blog/build-personal-blog-with-nextjs-and-mdx',
-    path: '/blog/build-personal-blog-with-nextjs-and-mdx',
+const BlogReactFetchRaceConditionRoute =
+  BlogReactFetchRaceConditionRouteImport.update({
+    id: '/blog/react-fetch-race-condition',
+    path: '/blog/react-fetch-race-condition',
     getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/blog/build-personal-blog-with-nextjs-and-mdx': typeof BlogBuildPersonalBlogWithNextjsAndMdxRoute
-  '/blog/configure-alacritty-from-scratch': typeof BlogConfigureAlacrittyFromScratchRoute
-  '/blog/lattice-backend-ddd-refactor': typeof BlogLatticeBackendDddRefactorRoute
-  '/blog/liquid-image-webgl-preview': typeof BlogLiquidImageWebglPreviewRoute
-  '/blog/pixel-fusion-portfolio-redesign': typeof BlogPixelFusionPortfolioRedesignRoute
+  '/blog/react-fetch-race-condition': typeof BlogReactFetchRaceConditionRoute
+  '/blog/tanstack-router-url-state': typeof BlogTanstackRouterUrlStateRoute
+  '/blog/websocket-reconnect-backoff': typeof BlogWebsocketReconnectBackoffRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/blog/build-personal-blog-with-nextjs-and-mdx': typeof BlogBuildPersonalBlogWithNextjsAndMdxRoute
-  '/blog/configure-alacritty-from-scratch': typeof BlogConfigureAlacrittyFromScratchRoute
-  '/blog/lattice-backend-ddd-refactor': typeof BlogLatticeBackendDddRefactorRoute
-  '/blog/liquid-image-webgl-preview': typeof BlogLiquidImageWebglPreviewRoute
-  '/blog/pixel-fusion-portfolio-redesign': typeof BlogPixelFusionPortfolioRedesignRoute
+  '/blog/react-fetch-race-condition': typeof BlogReactFetchRaceConditionRoute
+  '/blog/tanstack-router-url-state': typeof BlogTanstackRouterUrlStateRoute
+  '/blog/websocket-reconnect-backoff': typeof BlogWebsocketReconnectBackoffRoute
   '/blog': typeof BlogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/blog/build-personal-blog-with-nextjs-and-mdx': typeof BlogBuildPersonalBlogWithNextjsAndMdxRoute
-  '/blog/configure-alacritty-from-scratch': typeof BlogConfigureAlacrittyFromScratchRoute
-  '/blog/lattice-backend-ddd-refactor': typeof BlogLatticeBackendDddRefactorRoute
-  '/blog/liquid-image-webgl-preview': typeof BlogLiquidImageWebglPreviewRoute
-  '/blog/pixel-fusion-portfolio-redesign': typeof BlogPixelFusionPortfolioRedesignRoute
+  '/blog/react-fetch-race-condition': typeof BlogReactFetchRaceConditionRoute
+  '/blog/tanstack-router-url-state': typeof BlogTanstackRouterUrlStateRoute
+  '/blog/websocket-reconnect-backoff': typeof BlogWebsocketReconnectBackoffRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRouteTypes {
@@ -100,42 +80,34 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/sitemap.xml'
-    | '/blog/build-personal-blog-with-nextjs-and-mdx'
-    | '/blog/configure-alacritty-from-scratch'
-    | '/blog/lattice-backend-ddd-refactor'
-    | '/blog/liquid-image-webgl-preview'
-    | '/blog/pixel-fusion-portfolio-redesign'
+    | '/blog/react-fetch-race-condition'
+    | '/blog/tanstack-router-url-state'
+    | '/blog/websocket-reconnect-backoff'
     | '/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/sitemap.xml'
-    | '/blog/build-personal-blog-with-nextjs-and-mdx'
-    | '/blog/configure-alacritty-from-scratch'
-    | '/blog/lattice-backend-ddd-refactor'
-    | '/blog/liquid-image-webgl-preview'
-    | '/blog/pixel-fusion-portfolio-redesign'
+    | '/blog/react-fetch-race-condition'
+    | '/blog/tanstack-router-url-state'
+    | '/blog/websocket-reconnect-backoff'
     | '/blog'
   id:
     | '__root__'
     | '/'
     | '/sitemap.xml'
-    | '/blog/build-personal-blog-with-nextjs-and-mdx'
-    | '/blog/configure-alacritty-from-scratch'
-    | '/blog/lattice-backend-ddd-refactor'
-    | '/blog/liquid-image-webgl-preview'
-    | '/blog/pixel-fusion-portfolio-redesign'
+    | '/blog/react-fetch-race-condition'
+    | '/blog/tanstack-router-url-state'
+    | '/blog/websocket-reconnect-backoff'
     | '/blog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  BlogBuildPersonalBlogWithNextjsAndMdxRoute: typeof BlogBuildPersonalBlogWithNextjsAndMdxRoute
-  BlogConfigureAlacrittyFromScratchRoute: typeof BlogConfigureAlacrittyFromScratchRoute
-  BlogLatticeBackendDddRefactorRoute: typeof BlogLatticeBackendDddRefactorRoute
-  BlogLiquidImageWebglPreviewRoute: typeof BlogLiquidImageWebglPreviewRoute
-  BlogPixelFusionPortfolioRedesignRoute: typeof BlogPixelFusionPortfolioRedesignRoute
+  BlogReactFetchRaceConditionRoute: typeof BlogReactFetchRaceConditionRoute
+  BlogTanstackRouterUrlStateRoute: typeof BlogTanstackRouterUrlStateRoute
+  BlogWebsocketReconnectBackoffRoute: typeof BlogWebsocketReconnectBackoffRoute
   BlogIndexRoute: typeof BlogIndexRoute
 }
 
@@ -162,39 +134,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog/pixel-fusion-portfolio-redesign': {
-      id: '/blog/pixel-fusion-portfolio-redesign'
-      path: '/blog/pixel-fusion-portfolio-redesign'
-      fullPath: '/blog/pixel-fusion-portfolio-redesign'
-      preLoaderRoute: typeof BlogPixelFusionPortfolioRedesignRouteImport
+    '/blog/websocket-reconnect-backoff': {
+      id: '/blog/websocket-reconnect-backoff'
+      path: '/blog/websocket-reconnect-backoff'
+      fullPath: '/blog/websocket-reconnect-backoff'
+      preLoaderRoute: typeof BlogWebsocketReconnectBackoffRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog/liquid-image-webgl-preview': {
-      id: '/blog/liquid-image-webgl-preview'
-      path: '/blog/liquid-image-webgl-preview'
-      fullPath: '/blog/liquid-image-webgl-preview'
-      preLoaderRoute: typeof BlogLiquidImageWebglPreviewRouteImport
+    '/blog/tanstack-router-url-state': {
+      id: '/blog/tanstack-router-url-state'
+      path: '/blog/tanstack-router-url-state'
+      fullPath: '/blog/tanstack-router-url-state'
+      preLoaderRoute: typeof BlogTanstackRouterUrlStateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog/lattice-backend-ddd-refactor': {
-      id: '/blog/lattice-backend-ddd-refactor'
-      path: '/blog/lattice-backend-ddd-refactor'
-      fullPath: '/blog/lattice-backend-ddd-refactor'
-      preLoaderRoute: typeof BlogLatticeBackendDddRefactorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog/configure-alacritty-from-scratch': {
-      id: '/blog/configure-alacritty-from-scratch'
-      path: '/blog/configure-alacritty-from-scratch'
-      fullPath: '/blog/configure-alacritty-from-scratch'
-      preLoaderRoute: typeof BlogConfigureAlacrittyFromScratchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog/build-personal-blog-with-nextjs-and-mdx': {
-      id: '/blog/build-personal-blog-with-nextjs-and-mdx'
-      path: '/blog/build-personal-blog-with-nextjs-and-mdx'
-      fullPath: '/blog/build-personal-blog-with-nextjs-and-mdx'
-      preLoaderRoute: typeof BlogBuildPersonalBlogWithNextjsAndMdxRouteImport
+    '/blog/react-fetch-race-condition': {
+      id: '/blog/react-fetch-race-condition'
+      path: '/blog/react-fetch-race-condition'
+      fullPath: '/blog/react-fetch-race-condition'
+      preLoaderRoute: typeof BlogReactFetchRaceConditionRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -203,13 +161,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  BlogBuildPersonalBlogWithNextjsAndMdxRoute:
-    BlogBuildPersonalBlogWithNextjsAndMdxRoute,
-  BlogConfigureAlacrittyFromScratchRoute:
-    BlogConfigureAlacrittyFromScratchRoute,
-  BlogLatticeBackendDddRefactorRoute: BlogLatticeBackendDddRefactorRoute,
-  BlogLiquidImageWebglPreviewRoute: BlogLiquidImageWebglPreviewRoute,
-  BlogPixelFusionPortfolioRedesignRoute: BlogPixelFusionPortfolioRedesignRoute,
+  BlogReactFetchRaceConditionRoute: BlogReactFetchRaceConditionRoute,
+  BlogTanstackRouterUrlStateRoute: BlogTanstackRouterUrlStateRoute,
+  BlogWebsocketReconnectBackoffRoute: BlogWebsocketReconnectBackoffRoute,
   BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport

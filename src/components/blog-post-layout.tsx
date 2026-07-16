@@ -2,12 +2,12 @@
 
 import { useGSAP } from "@gsap/react";
 import { MDXProvider } from "@mdx-js/react";
-import { Link, useLocation } from "@tanstack/react-router";
+import { useLocation } from "@tanstack/react-router";
 import { gsap } from "gsap";
-import { ArrowLeft } from "lucide-react";
 import { useRef } from "react";
 import type { ReactNode } from "react";
 
+import { PageAtmosphere } from "@/components/home/page-atmosphere";
 import { Animation, Root } from "@/components/scrollytelling";
 import { GSAP_EASE_POWER2 } from "@/lib/motion-tokens";
 import { articleJsonLd } from "@/lib/seo";
@@ -17,7 +17,6 @@ import { BLOG_POSTS } from "@/routes/blog/-constants";
 import { TableOfContents } from "./table-of-contents";
 
 const TRAILING_SLASH_PATTERN = /\/$/u;
-const END_DOTS = ["end-dot-a", "end-dot-b", "end-dot-c", "end-dot-d"];
 
 interface BlogPostLayoutProps {
   children: ReactNode;
@@ -31,13 +30,21 @@ export const BlogPostLayout = ({ children }: BlogPostLayoutProps) => {
 
   useGSAP(
     () => {
-      gsap.from(".post-element", {
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+      if (reduceMotion) {
+        return;
+      }
+
+      gsap.from("[data-post-element]", {
         clearProps: "all",
-        duration: 1,
+        duration: 0.85,
         ease: GSAP_EASE_POWER2,
         opacity: 0,
-        stagger: 0.1,
-        y: 20,
+        stagger: 0.08,
+        y: 14,
       });
     },
     { scope: container }
@@ -57,7 +64,7 @@ export const BlogPostLayout = ({ children }: BlogPostLayoutProps) => {
   return (
     <Root end="bottom bottom" scrub start="top top">
       <div
-        className="min-h-screen bg-background pt-32 pb-24 text-foreground selection:bg-foreground/20 selection:text-foreground relative overflow-hidden"
+        className="relative isolate min-h-svh overflow-hidden bg-background px-5 py-24 text-foreground selection:bg-foreground selection:text-background md:px-8 md:py-28"
         ref={container}
       >
         {articleLd ? (
@@ -67,111 +74,48 @@ export const BlogPostLayout = ({ children }: BlogPostLayoutProps) => {
             type="application/ld+json"
           />
         ) : null}
+
         <Animation tween={{ end: 100, start: 0, to: { scaleX: 1 } }}>
-          <div className="fixed top-0 left-0 z-50 h-[1.5px] w-full origin-left scale-x-0 bg-foreground mix-blend-difference" />
+          <div className="fixed top-0 left-0 z-[60] h-px w-full origin-left scale-x-0 bg-foreground/70" />
         </Animation>
 
-        {/* Background Pixel Grid */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.02]"
-          style={{
-            backgroundImage:
-              "radial-gradient(currentColor 1px, transparent 1px)",
-            backgroundSize: "16px 16px",
-          }}
-        />
+        <PageAtmosphere />
 
-        <div className="mx-auto max-w-[1360px] px-5 lg:px-8 relative z-10">
-          <div className="grid gap-16 lg:grid-cols-[12rem_minmax(0,760px)] xl:grid-cols-[12rem_minmax(0,760px)_18rem] xl:gap-20">
-            <aside className="post-element lg:sticky lg:top-32">
-              <Link
-                className="group inline-flex items-center gap-3 font-mono font-medium text-xs text-foreground/50 uppercase tracking-widest transition-colors hover:text-foreground"
-                to="/blog"
-              >
-                <span className="grid h-7 w-7 place-items-center border border-foreground/10 transition-all group-hover:border-foreground/30 group-hover:bg-foreground/5 group-hover:-translate-x-1">
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                </span>
-                Back
-              </Link>
+        <div className="relative z-10 mx-auto w-full max-w-[1040px]">
+          <header
+            className="flex flex-wrap items-center gap-x-3 gap-y-2 border-foreground/12 border-b pb-6 font-mono text-2xs uppercase tracking-[0.14em] text-foreground/52"
+            data-post-element=""
+          >
+            <span>Blog</span>
+            <span aria-hidden="true" className="h-px w-6 bg-foreground/18" />
+            {post ? <time dateTime={post.date}>{post.date}</time> : null}
+            {post ? (
+              <span className="ml-auto text-foreground/40">{post.tags[0]}</span>
+            ) : null}
+          </header>
 
-              <div className="mt-16 hidden border-t border-foreground/10 pt-8 lg:block relative">
-                <div className="absolute -top-px right-0 w-1 h-1 bg-foreground/20" />
-                <p className="font-mono text-2xs text-foreground/40 uppercase tracking-[0.2em]">
-                  Log Type
-                </p>
-                <p className="mt-3 font-mono text-xs text-foreground/70 uppercase tracking-[0.16em] border-l border-foreground/20 pl-3">
-                  Field Note
-                </p>
-                {post ? (
-                  <>
-                    <p className="mt-12 font-mono text-2xs text-foreground/40 uppercase tracking-[0.2em]">
-                      Logged At
-                    </p>
-                    <p className="mt-3 font-mono text-tiny text-foreground/80">
-                      {post.date}
-                    </p>
-                    <div className="mt-10 flex flex-wrap gap-2">
-                      {post.tags.map((tag) => (
-                        <span
-                          className="border border-foreground/10 bg-foreground/[0.02] px-2.5 py-1 font-mono text-3xs text-foreground/60 uppercase tracking-[0.16em] cursor-default"
-                          key={tag}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </>
-                ) : null}
-              </div>
-            </aside>
-
-            <main className="min-w-0">
-              <div className="post-element border-t border-foreground/20 pt-8 relative">
-                <div className="absolute -top-px -right-px w-1.5 h-1.5 bg-foreground/20" />
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="w-1 h-1 bg-foreground/40 block" />
-                  <p className="font-mono text-2xs text-foreground/50 uppercase tracking-[0.2em]">
-                    {post ? `${post.date} / ${post.tags[0]}` : "Field Note"}
-                  </p>
-                </div>
-                {post ? (
-                  <p className="max-w-2xl text-foreground/70 text-lg leading-relaxed border-l border-foreground/10 pl-6 font-serif">
-                    {post.summary}
-                  </p>
-                ) : null}
-              </div>
-
-              <article className="post-element blog-prose mt-16 max-w-none prose-headings:font-display prose-headings:tracking-tight prose-headings:font-medium prose-a:border-b prose-a:border-foreground/30 hover:prose-a:border-foreground prose-a:no-underline transition-colors">
+          <div className="mt-10 grid gap-16 xl:grid-cols-[minmax(0,760px)_12rem] xl:gap-20">
+            <main
+              className="mx-auto w-full min-w-0 max-w-[760px] xl:mx-0"
+              data-post-element=""
+            >
+              <article className="blog-prose max-w-none">
                 <MDXProvider components={useMDXComponents()}>
                   {children}
                 </MDXProvider>
               </article>
 
-              <div className="post-element mt-24 border-t border-foreground/10 pt-8 flex items-center justify-between">
-                <p className="font-mono text-2xs text-foreground/30 uppercase tracking-[0.2em]">
-                  [ End of Note ]
-                </p>
-                <div className="flex gap-1 opacity-20">
-                  {END_DOTS.map((dot) => (
-                    <span className="w-1 h-1 bg-foreground" key={dot} />
-                  ))}
-                </div>
-              </div>
+              <footer className="mt-20 border-foreground/12 border-t pt-6 font-mono text-2xs uppercase tracking-[0.14em] text-foreground/35">
+                End / {post?.date.slice(0, 4) ?? "Loopwic"}
+              </footer>
             </main>
 
-            <aside className="hidden xl:block">
-              <div className="post-element sticky top-32 border-t border-foreground/10 pt-8 relative">
-                <div className="absolute -top-px left-0 w-1.5 h-1.5 bg-foreground/10" />
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="flex gap-0.5">
-                    <span className="h-1 w-1 bg-foreground/40" />
-                    <span className="h-1 w-1 bg-foreground/20" />
-                  </div>
-                  <span className="font-mono text-2xs text-foreground/40 uppercase tracking-[0.2em]">
-                    Index
-                  </span>
-                </div>
-                <div className="font-mono text-tiny text-foreground/50 leading-[2.2]">
+            <aside className="hidden xl:block" data-post-element="">
+              <div className="sticky top-28 border-foreground/12 border-t pt-5">
+                <p className="mb-4 font-mono text-2xs uppercase tracking-[0.14em] text-foreground/40">
+                  Index
+                </p>
+                <div className="text-xs leading-relaxed text-foreground/48">
                   <TableOfContents />
                 </div>
               </div>

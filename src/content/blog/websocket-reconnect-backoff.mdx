@@ -1,0 +1,285 @@
+# 浏览器 WebSocket 断线重连怎么写
+
+WebSocket 在本地开发时通常很安静，上线后才会碰到电脑睡眠、Wi-Fi 切换、服务发布和代理空闲超时。断线后立刻 `connect()` 看似有效，但一批客户端同时回来时，恢复中的服务会再吃一轮高峰。
+
+示例把这些情况收进一个 `ReliableSocket`。组件只负责启动、停止，以及接收消息和连接状态。
+
+## 连接状态
+
+连接至少有五个状态：`idle`、`connecting`、`open`、`waiting`、`stopped`。`waiting` 表示正在退避，`stopped` 表示用户明确关闭，两者不能混在一起。
+
+还要区分三类关闭：
+
+- `1000`：正常关闭，默认不重连。
+- `4001`：示例中的鉴权失败，刷新 token 前不要重连。
+- 其它异常关闭：进入退避队列。
+
+业务关闭码要由服务端和客户端一起约定。比如鉴权失败需要先刷新凭证，继续按网络错误重试只会得到同样的关闭结果。
+
+## 重连间隔
+
+固定写 `setTimeout(connect, 1000)` 会让同一批断线客户端在一秒后同时回来。RFC 6455 明确建议第一次重连随机延迟，后续使用逐渐增长的退避。
+
+这里用 full jitter：先算出本次等待时间的上限，再从 `0..cap` 里随机取一个值。上限封顶 30 秒；连接成功后，attempt 重新从 0 开始。
+
+```ts
+function reconnectDelay(attempt: number) {
+  const base = 500;
+  const max = 30_000;
+  const cap = Math.min(max, base * 2 ** attempt);
+  return Math.random() * cap;
+}
+```
+
+对单个客户端来说，这个随机等待甚至可能更慢。它解决的是大量客户端在同一时刻重连的问题。
+
+## 连接器
+
+服务端需要收到 `{"type":"ping"}` 后回复 `{"type":"pong"}`。浏览器 WebSocket API 不能主动发送协议层 ping，所以这里使用应用层消息检测“TCP 还在，但代理已经不再转发”的半开连接。
+
+```ts
+type SocketState =
+  | "idle"
+  | "connecting"
+  | "open"
+  | "waiting"
+  | "stopped";
+
+interface SocketOptions {
+  heartbeatMs?: number;
+  pongTimeoutMs?: number;
+  shouldReconnect?: (event: CloseEvent) => boolean;
+  onMessage: (event: MessageEvent) => void;
+  onStateChange?: (state: SocketState) => void;
+}
+
+export class ReliableSocket {
+  private socket: WebSocket | null = null;
+  private attempt = 0;
+  private stopped = true;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  private pongTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor(
+    private readonly url: string,
+    private readonly options: SocketOptions
+  ) {}
+
+  start() {
+    if (!this.stopped) return;
+    this.stopped = false;
+    window.addEventListener("online", this.handleOnline);
+    window.addEventListener("offline", this.handleOffline);
+    window.addEventListener("pagehide", this.handlePageHide);
+    window.addEventListener("pageshow", this.handlePageShow);
+    document.addEventListener("visibilitychange", this.handleVisibility);
+    this.connect();
+  }
+
+  stop() {
+    this.stopped = true;
+    this.clearTimers();
+    window.removeEventListener("online", this.handleOnline);
+    window.removeEventListener("offline", this.handleOffline);
+    window.removeEventListener("pagehide", this.handlePageHide);
+    window.removeEventListener("pageshow", this.handlePageShow);
+    document.removeEventListener("visibilitychange", this.handleVisibility);
+    this.socket?.close(1000, "client stopped");
+    this.socket = null;
+    this.setState("stopped");
+  }
+
+  send(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
+    if (this.socket?.readyState !== WebSocket.OPEN) return false;
+    this.socket.send(data);
+    return true;
+  }
+
+  private connect() {
+    if (this.stopped) return;
+    if (!navigator.onLine || document.visibilityState === "hidden") {
+      this.setState("waiting");
+      return;
+    }
+    if (
+      this.socket?.readyState === WebSocket.OPEN ||
+      this.socket?.readyState === WebSocket.CONNECTING
+    ) {
+      return;
+    }
+
+    this.setState("connecting");
+    const socket = new WebSocket(this.url);
+    this.socket = socket;
+
+    socket.addEventListener("open", () => {
+      if (socket !== this.socket) return;
+      this.attempt = 0;
+      this.setState("open");
+      this.startHeartbeat();
+    });
+
+    socket.addEventListener("message", (event) => {
+      if (socket !== this.socket) return;
+
+      if (this.isPong(event.data)) {
+        this.clearPongTimer();
+        return;
+      }
+
+      this.options.onMessage(event);
+    });
+
+    socket.addEventListener("close", (event) => {
+      if (socket !== this.socket) return;
+      this.socket = null;
+      this.clearHeartbeat();
+
+      if (this.stopped) return;
+
+      const shouldReconnect = this.options.shouldReconnect
+        ? this.options.shouldReconnect(event)
+        : event.code !== 1000 && event.code !== 4001;
+
+      if (shouldReconnect) this.scheduleReconnect();
+      else this.setState("idle");
+    });
+  }
+
+  private scheduleReconnect() {
+    this.clearReconnectTimer();
+
+    if (!navigator.onLine || document.visibilityState === "hidden") {
+      this.setState("waiting");
+      return;
+    }
+
+    const cap = Math.min(30_000, 500 * 2 ** this.attempt++);
+    const delay = Math.random() * cap;
+    this.setState("waiting");
+    this.reconnectTimer = setTimeout(() => this.connect(), delay);
+  }
+
+  private startHeartbeat() {
+    this.clearHeartbeat();
+    if (document.visibilityState === "hidden") return;
+
+    const heartbeatMs = this.options.heartbeatMs ?? 20_000;
+    const pongTimeoutMs = this.options.pongTimeoutMs ?? 8_000;
+
+    this.heartbeatTimer = setInterval(() => {
+      if (this.socket?.readyState !== WebSocket.OPEN) return;
+      this.socket.send('{"type":"ping"}');
+      this.clearPongTimer();
+      this.pongTimer = setTimeout(() => {
+        this.socket?.close(4000, "pong timeout");
+      }, pongTimeoutMs);
+    }, heartbeatMs);
+  }
+
+  private readonly handleOnline = () => this.connect();
+
+  private readonly handleOffline = () => {
+    this.clearTimers();
+    this.socket?.close(4000, "offline");
+    this.setState("waiting");
+  };
+
+  private readonly handleVisibility = () => {
+    if (document.visibilityState === "hidden") {
+      this.clearHeartbeat();
+    } else if (this.socket?.readyState === WebSocket.OPEN) {
+      this.startHeartbeat();
+    } else {
+      this.connect();
+    }
+  };
+
+  private readonly handlePageHide = () => {
+    this.clearTimers();
+    this.socket?.close(1000, "page hidden");
+    this.socket = null;
+  };
+
+  private readonly handlePageShow = () => this.connect();
+
+  private setState(state: SocketState) {
+    this.options.onStateChange?.(state);
+  }
+
+  private isPong(data: unknown) {
+    if (typeof data !== "string") return false;
+
+    try {
+      return (JSON.parse(data) as { type?: unknown }).type === "pong";
+    } catch {
+      return false;
+    }
+  }
+
+  private clearReconnectTimer() {
+    if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+    this.reconnectTimer = null;
+  }
+
+  private clearPongTimer() {
+    if (this.pongTimer) clearTimeout(this.pongTimer);
+    this.pongTimer = null;
+  }
+
+  private clearHeartbeat() {
+    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+    this.heartbeatTimer = null;
+    this.clearPongTimer();
+  }
+
+  private clearTimers() {
+    this.clearReconnectTimer();
+    this.clearHeartbeat();
+  }
+}
+```
+
+`navigator.onLine` 只能当作提示。它表示浏览器认为设备有网络，不代表目标服务可以访问；连接是否可用仍然看 WebSocket 的 `open`、`close` 和心跳结果。
+
+## React 接入
+
+Effect cleanup 里记得调用 `stop()`。不清理的话，Strict Mode、路由切换或组件重新挂载都可能留下重复连接。
+
+```tsx
+useEffect(() => {
+  const socket = new ReliableSocket("wss://example.com/events", {
+    onMessage: (event) => receive(JSON.parse(event.data)),
+    onStateChange: setConnectionState,
+  });
+
+  socket.start();
+  return () => socket.stop();
+}, []);
+```
+
+URL 或鉴权 token 会变化时，把它们放进依赖数组，让旧连接先 cleanup。`onclose` 里也不要直接读取可能已经过期的闭包 token。
+
+## 后台标签页
+
+浏览器会限制后台标签页的计时器。如果仍按前台的时间判断 pong 超时，页面隐藏后很容易误判连接已经断开。这里在 hidden 时停掉心跳，回到 visible 后再恢复或重连。
+
+`pagehide` 时主动关闭连接，页面更有机会进入 bfcache；`pageshow` 时再恢复。只监听 `beforeunload` 会漏掉一部分页面生命周期。
+
+## 故障测试
+
+1. DevTools 切 Offline，再恢复 Online。
+2. 连接成功后重启服务端，观察 delay 是否逐步增长。
+3. 同时打开十个标签页，确认重连时间没有完全一致。
+4. 让服务端不回复 pong，确认 8 秒后主动 close。
+5. 让服务端返回鉴权关闭码，确认客户端不会无限重试。
+6. 前进后退触发 bfcache，确认只有一条活动连接。
+
+线上最好记录 attempt、close code、等待时间和最近一次 pong。这样收到“偶尔断线”的反馈时，日志里至少能看出客户端当时是在退避、鉴权失败，还是没有收到心跳。
+
+相关文档：
+
+- [RFC 6455 异常关闭恢复](https://www.rfc-editor.org/rfc/rfc6455#section-7.2.3)
+- [MDN WebSocket 客户端](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications)
+- [MDN Page Visibility API](https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API)

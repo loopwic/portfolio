@@ -1,0 +1,148 @@
+# React 搜索结果被旧请求覆盖了，怎么处理
+
+连续输入两次搜索词，第二次结果已经出现，过一会儿页面却又换回第一次。Network 没报错，React 也没有警告；先发出的请求只是更晚返回，并把新结果覆盖了。
+
+## 复现
+
+下面的代码在 `query` 改变时请求数据。输入 `react` 后立刻改成 `router`，如果第一个请求更慢，它会最后执行 `setItems`，把新结果覆盖掉。
+
+```tsx
+useEffect(() => {
+  fetch(`/api/search?q=${encodeURIComponent(query)}`)
+    .then((response) => response.json())
+    .then((data) => setItems(data.items));
+}, [query]);
+```
+
+加防抖之后，请求会少一些，但顺序问题还在。两个请求就算相隔 500ms，前一个也可能碰上缓存未命中、慢查询或网络重传，最后反而更晚返回。
+
+## abort 和 requestId
+
+React 文档里的做法是在 cleanup 中设置 `ignore`，旧响应回来后不再更新状态。页面不会被覆盖了，不过那条请求仍会占用连接、服务器计算和用户流量。
+
+`AbortController` 可以把取消信号交给 `fetch`。查询变化或组件卸载时调用 `abort()`，浏览器会停止请求以及响应体读取。请求后面如果还有不支持 signal 的异步步骤，仍然可能继续执行，所以我还会留一个请求编号兜底。
+
+代码里保留两道防线：
+
+1. `AbortController` 停止仍在进行的网络工作。
+2. 递增的 `requestId` 阻止任何旧任务写入最新状态。
+
+## Hook
+
+这个版本处理空查询、HTTP 错误、8 秒超时、主动取消和过期响应。`AbortSignal.any()` 把“组件取消”和“超时取消”合成一个 signal。
+
+```tsx
+import { useEffect, useRef, useState } from "react";
+
+type SearchState<T> =
+  | { status: "idle"; items: T[] }
+  | { status: "loading"; items: T[] }
+  | { status: "success"; items: T[] }
+  | { status: "error"; items: T[]; message: string };
+
+export function useRemoteSearch<T>(query: string) {
+  const [state, setState] = useState<SearchState<T>>({
+    status: "idle",
+    items: [],
+  });
+  const latestRequest = useRef(0);
+
+  useEffect(() => {
+    const value = query.trim();
+    const requestId = ++latestRequest.current;
+
+    if (!value) {
+      setState({ status: "idle", items: [] });
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = AbortSignal.timeout(8_000);
+    const signal = AbortSignal.any([controller.signal, timeout]);
+
+    async function run() {
+      setState((previous) => ({
+        status: "loading",
+        items: previous.items,
+      }));
+
+      try {
+        const response = await fetch(
+          `/api/search?q=${encodeURIComponent(value)}`,
+          { signal }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.status}`);
+        }
+
+        const data = (await response.json()) as { items: T[] };
+
+        if (requestId === latestRequest.current && !signal.aborted) {
+          setState({ status: "success", items: data.items });
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        if (requestId !== latestRequest.current) return;
+
+        const timedOut =
+          error instanceof DOMException && error.name === "TimeoutError";
+
+        setState({
+          status: "error",
+          items: [],
+          message: timedOut ? "请求超时，请重试" : "搜索失败，请稍后重试",
+        });
+      }
+    }
+
+    void run();
+
+    return () => controller.abort();
+  }, [query]);
+
+  return state;
+}
+```
+
+catch 里不能只看 `signal.aborted`。超时也会把合成后的 signal 标成 aborted，直接 return 会吞掉超时提示。组件 cleanup 检查 `controller.signal.aborted`，超时则检查错误名 `TimeoutError`。
+
+## Strict Mode 的两次请求
+
+React Strict Mode 会在开发环境额外执行一次 Effect 的 setup 与 cleanup，用来暴露无法正确清理的副作用。上面的第一次请求会立刻被 abort，第二次才会继续。
+
+没必要用“只执行一次”的 ref 把第二次调用挡掉。生产环境虽然没有这次额外检查，但路由切换、参数变化和组件卸载依然需要 cleanup。
+
+## 防抖
+
+防抖可以放在输入值和请求 Hook 之间。它负责少发几次请求；取消和 `requestId` 处理返回顺序。两部分分开后，调整 250ms 这个延迟也不会影响正确性。
+
+```tsx
+function useDebouncedValue<T>(value: T, delay = 250) {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debounced;
+}
+
+const debouncedQuery = useDebouncedValue(query);
+const result = useRemoteSearch<Product>(debouncedQuery);
+```
+
+## 测试
+
+这个 bug 不适合靠手速复现。可以给测试接口加一个 `delay` 参数：短查询固定等 1500ms，长查询只等 100ms。依次输入两次，页面最后应当停在第二次查询的结果上。
+
+我还会顺手测清空输入、请求中切换页面、8 秒超时和 HTTP 500。打开 Network 面板后，被替换的请求应显示为 cancelled，不会一直下载到结束。
+
+项目里已经有路由 loader、TanStack Query 或 SWR 时，直接接它们提供的取消、缓存和去重机制就够了。这个 Effect 版本更适合没有数据层的局部搜索组件。
+
+相关文档：
+
+- [React useEffect](https://react.dev/reference/react/useEffect#fetching-data-with-effects)
+- [MDN AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)
+- [MDN AbortSignal.timeout](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/timeout_static)
