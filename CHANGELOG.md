@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/loopwic/portfolio/compare/v1.10.0...v1.11.0) (2026-07-16)
+
+
+### Features
+
+* redesign portfolio and rebuild blog ([27b3752](https://github.com/loopwic/portfolio/commit/27b3752b1565e5e1104a786773c1cad7154bf501))
+
 # [1.10.0](https://github.com/loopwic/portfolio/compare/v1.9.0...v1.10.0) (2026-05-29)
 
 
