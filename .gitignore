@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/.artifacts
 
 # tanstack/vite
 /.next

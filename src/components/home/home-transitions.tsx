@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { ReactNode } from "react";
 import { useRef } from "react";
 
-import { GSAP_EASE_POWER2, GSAP_EASE_POWER3 } from "@/lib/motion-tokens";
+import { GSAP_EASE_POWER3 } from "@/lib/motion-tokens";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -105,23 +105,25 @@ export const HomeTransitions = ({ children }: HomeTransitionsProps) => {
         }
 
         const experience = scope.current?.querySelector("#experience");
-        const timelineLine = scope.current?.querySelector(
-          "[data-timeline-line]"
+        const timelineProgress = scope.current?.querySelector(
+          "[data-timeline-progress]"
         );
 
-        if (experience && timelineLine) {
-          gsap.from(timelineLine, {
-            clearProps: "transform",
-            duration: 0.82,
-            ease: GSAP_EASE_POWER2,
-            scaleY: 0,
-            scrollTrigger: {
-              once: true,
-              start: "top 76%",
-              trigger: experience,
-            },
-            transformOrigin: "top",
-          });
+        if (experience && timelineProgress) {
+          gsap.fromTo(
+            timelineProgress,
+            { scaleY: 0 },
+            {
+              ease: "none",
+              scaleY: 1,
+              scrollTrigger: {
+                end: "bottom 54%",
+                scrub: 0.45,
+                start: "top 72%",
+                trigger: experience,
+              },
+            }
+          );
         }
 
         ScrollTrigger.refresh();

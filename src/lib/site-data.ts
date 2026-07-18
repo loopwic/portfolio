@@ -12,7 +12,12 @@ export const SITE = {
   url: "https://loopwic.com",
 } as const;
 
-export const HOME_SECTIONS = ["profile", "projects", "experience"] as const;
+export const HOME_SECTIONS = [
+  "profile",
+  "projects",
+  "experience",
+  "switch",
+] as const;
 
 export const PROFILE = {
   avatar: "https://avatars.githubusercontent.com/u/157279205",

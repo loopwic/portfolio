@@ -6,15 +6,17 @@ export const ProfileSection = () => (
     id={HOME_SECTIONS[0]}
   >
     <div className="mx-auto flex w-fit max-w-full items-center gap-4 md:gap-5">
-      <img
-        alt={`${SITE.name} 的头像`}
-        className="size-12 shrink-0 rounded-full object-cover saturate-[0.92] shadow-[0_8px_22px_rgba(0,0,0,0.09)] md:size-14 dark:shadow-[0_8px_22px_rgba(0,0,0,0.28)]"
-        data-profile-avatar=""
-        fetchPriority="high"
-        height={56}
-        src={PROFILE.avatar}
-        width={56}
-      />
+      <span className="profile-avatar-shell shrink-0">
+        <img
+          alt={`${SITE.name} 的头像`}
+          className="profile-avatar size-12 rounded-full object-cover saturate-[0.92] shadow-[0_8px_22px_rgba(0,0,0,0.09)] md:size-14 dark:shadow-[0_8px_22px_rgba(0,0,0,0.28)]"
+          data-profile-avatar=""
+          fetchPriority="high"
+          height={56}
+          src={PROFILE.avatar}
+          width={56}
+        />
+      </span>
 
       <div className="min-w-0 flex-1" data-profile-copy="">
         <h1 className="font-display text-xl font-light leading-none tracking-[-0.01em] md:text-2xl">

@@ -1,3 +1,5 @@
+import { ProjectField } from "@/components/home/project-field";
+import { ProjectPreview } from "@/components/home/project-preview";
 import { HOME_SECTIONS, PROJECTS } from "@/lib/site-data";
 
 export const ProjectsSection = () => (
@@ -12,7 +14,7 @@ export const ProjectsSection = () => (
         data-motion-heading=""
       >
         <span>02</span>
-        <span className="h-px w-8 bg-foreground/18" />
+        <span className="section-heading-rule h-px w-8 bg-foreground/18" />
         <h2 className="font-normal">项目</h2>
       </div>
 
@@ -25,7 +27,7 @@ export const ProjectsSection = () => (
 
           return (
             <article
-              className={`group relative flex min-h-[16rem] min-w-0 flex-col overflow-hidden bg-surface/90 backdrop-blur-sm lg:min-h-0 ${index === 0 ? "lg:row-span-2" : ""}`}
+              className={`project-card group relative flex min-h-[16rem] min-w-0 flex-col overflow-hidden bg-surface/90 backdrop-blur-sm lg:min-h-0 ${index === 0 ? "lg:row-span-2" : ""}`}
               data-motion-item=""
               key={project.name}
             >
@@ -34,7 +36,7 @@ export const ProjectsSection = () => (
                   <span>{String(index + 1).padStart(2, "0")}</span>
                   <span>{project.status}</span>
                 </div>
-                <h3 className="mt-5 font-display text-[clamp(1.75rem,2.7vw,2.35rem)] font-light leading-none tracking-[-0.015em]">
+                <h3 className="project-card-title mt-5 font-display text-[clamp(1.75rem,2.7vw,2.35rem)] font-light leading-none tracking-[-0.015em]">
                   {project.name}
                 </h3>
                 <p className="mt-3 text-xs leading-relaxed text-foreground/68">
@@ -44,20 +46,17 @@ export const ProjectsSection = () => (
 
               {hasPreview ? (
                 <div className="relative mt-auto aspect-[16/8] min-w-0 overflow-hidden border-foreground/10 border-t bg-surface lg:aspect-auto lg:flex-1">
-                  <img
+                  <ProjectPreview
                     alt={project.previewAlt}
-                    className="h-full w-full object-cover grayscale transition-transform duration-700 ease-out group-hover:scale-[1.015]"
                     height={project.previewHeight}
-                    loading="lazy"
                     src={project.preview}
                     width={project.previewWidth}
                   />
                 </div>
               ) : (
-                <div
-                  aria-hidden="true"
-                  className="absolute -right-24 -bottom-24 size-64 rounded-full bg-foreground/8 blur-3xl"
-                />
+                <div className="absolute inset-0 top-14 text-foreground/70">
+                  <ProjectField />
+                </div>
               )}
             </article>
           );
@@ -65,7 +64,7 @@ export const ProjectsSection = () => (
 
         <a
           aria-label="在 GitHub 查看更多项目"
-          className="relative flex min-h-[16rem] min-w-0 flex-col overflow-hidden bg-surface/90 p-5 backdrop-blur-sm transition-colors duration-300 hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-foreground focus-visible:outline-offset-[-3px] md:p-6 lg:min-h-0"
+          className="group relative flex min-h-[16rem] min-w-0 flex-col overflow-hidden bg-surface/90 p-5 backdrop-blur-sm transition-[background-color,transform] duration-300 hover:bg-surface active:scale-[0.992] focus-visible:outline focus-visible:outline-2 focus-visible:outline-foreground focus-visible:outline-offset-[-3px] motion-reduce:transition-none md:p-6 lg:min-h-0"
           data-motion-item=""
           href="https://github.com/loopwic"
           rel="noreferrer"
@@ -74,8 +73,14 @@ export const ProjectsSection = () => (
           <span className="relative z-10 font-mono text-2xs tracking-[0.16em] text-foreground/70">
             03
           </span>
-          <span className="relative z-10 mt-auto font-display text-2xl font-light leading-none tracking-[-0.015em]">
-            More
+          <span className="relative z-10 mt-auto flex items-end justify-between gap-6 font-display text-2xl font-light leading-none tracking-[-0.015em]">
+            <span>More</span>
+            <span
+              aria-hidden="true"
+              className="translate-y-0.5 text-base transition-transform duration-500 ease-[var(--ease-brutal)] group-hover:translate-x-1 group-hover:-translate-y-1 group-focus-visible:translate-x-1 group-focus-visible:-translate-y-1 motion-reduce:transition-none"
+            >
+              ↗
+            </span>
           </span>
           <div
             aria-hidden="true"

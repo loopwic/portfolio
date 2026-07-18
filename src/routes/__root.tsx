@@ -1,6 +1,7 @@
 import {
   createRootRoute,
   HeadContent,
+  Link,
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
@@ -46,6 +47,20 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
   </html>
 );
 
+const NotFoundPage = () => (
+  <section className="grid min-h-screen place-items-center px-6">
+    <div className="flex items-baseline gap-4">
+      <p className="font-serif text-5xl font-light">404</p>
+      <Link
+        className="font-mono text-xs uppercase tracking-[0.14em] text-foreground/50 transition-colors hover:text-foreground"
+        to="/"
+      >
+        返回首页
+      </Link>
+    </div>
+  </section>
+);
+
 export const Route = createRootRoute({
   component: RootLayout,
   head: () => {
@@ -84,5 +99,6 @@ export const Route = createRootRoute({
       ],
     };
   },
+  notFoundComponent: NotFoundPage,
   shellComponent: RootDocument,
 });

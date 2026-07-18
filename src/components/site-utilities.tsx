@@ -46,7 +46,7 @@ export const SiteUtilities = () => {
       <button
         aria-label={isDark ? "切换到日间模式" : "切换到夜间模式"}
         aria-pressed={isDark}
-        className="grid size-11 place-items-center rounded-full text-foreground/58 transition-colors duration-300 hover:bg-foreground/[0.055] hover:text-foreground focus-visible:outline focus-visible:outline-1 focus-visible:outline-foreground focus-visible:outline-offset-1"
+        className="group grid size-11 place-items-center rounded-full text-foreground/58 transition-[background-color,color,transform] duration-300 hover:bg-foreground/[0.055] hover:text-foreground active:scale-[0.94] focus-visible:outline focus-visible:outline-1 focus-visible:outline-foreground focus-visible:outline-offset-1 motion-reduce:transition-none"
         disabled={!mounted}
         onClick={() => setTheme(isDark ? "light" : "dark")}
         title={isDark ? "日间模式" : "夜间模式"}
@@ -55,7 +55,7 @@ export const SiteUtilities = () => {
         {mounted ? (
           <ThemeIcon
             aria-hidden="true"
-            className="size-3.5"
+            className="size-3.5 transition-transform duration-500 ease-[var(--ease-brutal)] group-hover:rotate-[18deg] group-active:scale-90 motion-reduce:transition-none"
             strokeWidth={1.5}
           />
         ) : (

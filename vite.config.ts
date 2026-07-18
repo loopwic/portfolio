@@ -10,6 +10,10 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+  build: {
+    // Three is isolated behind the lazy-loaded model viewer.
+    chunkSizeWarningLimit: 650,
+  },
   plugins: [
     tsconfigPaths({ loose: true, projects: ["./tsconfig.json"] }),
     tailwindcss(),
@@ -36,7 +40,7 @@ export default defineConfig({
     },
     tanstackStart(),
     viteReact({
-      include: /\.(mdx|js|jsx|ts|tsx)$/u,
+      include: /\.(js|jsx|ts|tsx)$/u,
     }),
     cloudflare({
       viteEnvironment: {
