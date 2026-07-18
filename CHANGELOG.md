@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/loopwic/portfolio/compare/v1.11.0...v1.12.0) (2026-07-18)
+
+
+### Features
+
+* refine portfolio and add Cherry MX study ([daf8210](https://github.com/loopwic/portfolio/commit/daf82108c48436bb99869a5d0a6790e52fe3923f))
+
 # [1.11.0](https://github.com/loopwic/portfolio/compare/v1.10.0...v1.11.0) (2026-07-16)
 
 
