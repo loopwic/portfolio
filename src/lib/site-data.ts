@@ -43,17 +43,10 @@ export const PROFILE = {
 
 export const PROJECTS = [
   {
-    name: "Lattice",
-    preview: "/images/lattice.webp",
-    previewAlt: "Lattice desktop window",
-    previewHeight: 1520,
-    previewWidth: 2400,
-    status: "SHIPPED" as const,
-    tags: ["Mod + Backend + Desktop", "Ops-ready", "Live iteration"],
-  },
-  {
-    name: "LicMusic",
-    status: "PLANNED" as const,
-    tags: ["Desktop-first", "AI taste profile", "Condition-based discovery"],
+    description:
+      "隐私优先、离线运行的中英双语 iOS 键盘，提供本地拼音候选与词序学习，并配有 iOS / macOS 原生伴随 App。",
+    name: "Lotli / 洛缇",
+    status: "PROTOTYPE" as const,
+    tags: ["iOS + macOS", "中英双语", "本地拼音与学习"],
   },
 ] as const;

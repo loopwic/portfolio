@@ -1,5 +1,4 @@
 import { ProjectField } from "@/components/home/project-field";
-import { ProjectPreview } from "@/components/home/project-preview";
 import { HOME_SECTIONS, PROJECTS } from "@/lib/site-data";
 
 export const ProjectsSection = () => (
@@ -19,48 +18,36 @@ export const ProjectsSection = () => (
       </div>
 
       <div
-        className="mt-7 grid gap-px overflow-hidden rounded-[1.35rem] border border-foreground/12 bg-foreground/12 shadow-[0_18px_50px_rgba(0,0,0,0.045)] lg:h-[28rem] lg:grid-cols-[5fr_4fr] lg:grid-rows-[3fr_2fr] dark:shadow-[0_18px_50px_rgba(0,0,0,0.18)]"
+        className="mt-7 grid gap-px overflow-hidden rounded-[1.35rem] border border-foreground/12 bg-foreground/12 shadow-[0_18px_50px_rgba(0,0,0,0.045)] lg:h-[28rem] lg:grid-cols-[5fr_4fr] dark:shadow-[0_18px_50px_rgba(0,0,0,0.18)]"
         data-bento-grid=""
       >
-        {PROJECTS.map((project, index) => {
-          const hasPreview = "preview" in project;
-
-          return (
-            <article
-              className={`project-card group relative flex min-h-[16rem] min-w-0 flex-col overflow-hidden bg-surface/90 backdrop-blur-sm lg:min-h-0 ${index === 0 ? "lg:row-span-2" : ""}`}
-              data-motion-item=""
-              key={project.name}
-            >
-              <div className="relative z-10 flex min-w-0 flex-col p-5 md:p-6">
-                <div className="flex items-center justify-between gap-4 font-mono text-2xs uppercase tracking-[0.16em] text-foreground/70">
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <span>{project.status}</span>
-                </div>
-                <h3 className="project-card-title mt-5 font-display text-[clamp(1.75rem,2.7vw,2.35rem)] font-light leading-none tracking-[-0.015em]">
-                  {project.name}
-                </h3>
-                <p className="mt-3 text-xs leading-relaxed text-foreground/68">
-                  {project.tags.join(" · ")}
-                </p>
+        {PROJECTS.map((project, index) => (
+          <article
+            className="project-card group relative flex min-h-[16rem] min-w-0 flex-col overflow-hidden bg-surface/90 backdrop-blur-sm lg:min-h-0"
+            data-motion-item=""
+            key={project.name}
+          >
+            <div className="relative z-10 flex min-w-0 flex-col p-5 md:p-6">
+              <div className="flex items-center justify-between gap-4 font-mono text-2xs uppercase tracking-[0.16em] text-foreground/70">
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <span>{project.status}</span>
               </div>
+              <h3 className="project-card-title mt-5 font-display text-[clamp(1.75rem,2.7vw,2.35rem)] font-light leading-none tracking-[-0.015em]">
+                {project.name}
+              </h3>
+              <p className="mt-3 text-xs leading-relaxed text-foreground/68">
+                {project.tags.join(" · ")}
+              </p>
+              <p className="mt-5 max-w-sm text-sm leading-relaxed text-foreground/80">
+                {project.description}
+              </p>
+            </div>
 
-              {hasPreview ? (
-                <div className="relative mt-auto aspect-[16/8] min-w-0 overflow-hidden border-foreground/10 border-t bg-surface lg:aspect-auto lg:flex-1">
-                  <ProjectPreview
-                    alt={project.previewAlt}
-                    height={project.previewHeight}
-                    src={project.preview}
-                    width={project.previewWidth}
-                  />
-                </div>
-              ) : (
-                <div className="absolute inset-0 top-14 text-foreground/70">
-                  <ProjectField />
-                </div>
-              )}
-            </article>
-          );
-        })}
+            <div className="absolute inset-0 top-32 text-foreground/70">
+              <ProjectField />
+            </div>
+          </article>
+        ))}
 
         <a
           aria-label="在 GitHub 查看更多项目"
@@ -71,7 +58,7 @@ export const ProjectsSection = () => (
           target="_blank"
         >
           <span className="relative z-10 font-mono text-2xs tracking-[0.16em] text-foreground/70">
-            03
+            {String(PROJECTS.length + 1).padStart(2, "0")}
           </span>
           <span className="relative z-10 mt-auto flex items-end justify-between gap-6 font-display text-2xl font-light leading-none tracking-[-0.015em]">
             <span>More</span>
