@@ -30,7 +30,7 @@ export const PROFILE = {
   works: [
     {
       company: "Huivo Tech Co., Ltd.",
-      period: "2026.03 - 至今",
+      period: "2026.03",
       role: "研发工程师",
     },
     {
