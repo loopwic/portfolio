@@ -21,7 +21,7 @@ export const HOME_SECTIONS = [
 
 export const PROFILE = {
   avatar: "https://avatars.githubusercontent.com/u/157279205",
-  location: "China · UTC+8",
+  location: "Japan · UTC+9",
   works: [
     {
       company: "Huivo Tech Co., Ltd.",
