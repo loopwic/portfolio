@@ -13,7 +13,7 @@ export const ExperienceSection = () => (
       >
         <span>03</span>
         <span className="section-heading-rule h-px w-8 bg-foreground/18" />
-        <h2 className="font-normal">履历</h2>
+        <h2 className="font-normal">经历</h2>
       </div>
 
       <div className="relative mt-9 max-w-3xl">
@@ -27,7 +27,7 @@ export const ExperienceSection = () => (
           data-timeline-progress=""
         />
         <ol>
-          {PROFILE.works.map((work, index) => (
+          {[PROFILE.independentProject, ...PROFILE.works].map((work) => (
             <li
               className="timeline-item group relative pb-10 pl-8 last:pb-0 md:grid md:grid-cols-[9rem_1fr] md:gap-8 md:pl-10"
               data-timeline-item=""
@@ -45,11 +45,6 @@ export const ExperienceSection = () => (
                   {work.company}
                 </h3>
                 <p className="mt-2 text-sm text-foreground/68">{work.role}</p>
-                {index === 0 ? (
-                  <span className="timeline-current mt-3 inline-block rounded-full border border-foreground/14 px-2.5 py-1 font-mono text-2xs uppercase tracking-[0.12em] text-foreground/68">
-                    Current
-                  </span>
-                ) : null}
               </div>
             </li>
           ))}

@@ -21,6 +21,11 @@ export const HOME_SECTIONS = [
 
 export const PROFILE = {
   avatar: "https://avatars.githubusercontent.com/u/157279205",
+  independentProject: {
+    company: "Lotli / 洛缇",
+    period: "个人项目",
+    role: "独立开发 · iOS / macOS",
+  },
   location: "Japan · UTC+9",
   works: [
     {
