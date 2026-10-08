@@ -1,3 +1,10 @@
+## [1.14.2](https://github.com/loopwic/portfolio/compare/v1.14.1...v1.14.2) (2026-10-08)
+
+
+### Bug Fixes
+
+* omit current marker from work history ([6a9fea1](https://github.com/loopwic/portfolio/commit/6a9fea18056561e2b6fdcfad21a662e75ad78c6e))
+
 ## [1.14.1](https://github.com/loopwic/portfolio/compare/v1.14.0...v1.14.1) (2026-10-08)
 
 
