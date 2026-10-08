@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/loopwic/portfolio/compare/v1.12.0...v1.13.0) (2026-10-08)
+
+
+### Features
+
+* present portfolio as independent developer ([06581ba](https://github.com/loopwic/portfolio/commit/06581ba981bc31c2201f01e54a87197a44ec9a12))
+
 # [1.12.0](https://github.com/loopwic/portfolio/compare/v1.11.0...v1.12.0) (2026-07-18)
 
 
