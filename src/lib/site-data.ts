@@ -1,13 +1,13 @@
 export const SITE = {
   description:
-    "我主要做前端和交互实现，习惯先把状态和结构拆清楚，再做动效。这样页面既有表现力，也能长期维护。",
+    "Kieran Ming is an independent developer building Lotli, a privacy-first offline Chinese and English iOS keyboard prototype. Keyboard processing and local learning stay on device.",
   email: "me@loopwic.com",
   locale: "zh_CN",
-  name: "Loopwic",
+  name: "Kieran Ming",
   ogImage: "/og-default.jpg",
-  subtitle: "Frontend / Interaction / Engineering",
-  subtitleCN: "前端开发 / 交互实现",
-  title: "LOOPWIC",
+  subtitle: "Independent Developer · Privacy-first iOS Software",
+  subtitleCN: "独立开发者 · 隐私优先的 iOS 软件",
+  title: "KIERAN MING",
   twitter: "@loopwic",
   url: "https://loopwic.com",
 } as const;
@@ -44,7 +44,7 @@ export const PROFILE = {
 export const PROJECTS = [
   {
     description:
-      "隐私优先、离线运行的中英双语 iOS 键盘，提供本地拼音候选与词序学习，并配有 iOS / macOS 原生伴随 App。",
+      "由 Kieran Ming 独立开发，目前处于原型阶段。Lotli 是一款离线中英双语 iOS 键盘，提供本地拼音候选与词序学习，并配有 iOS / macOS 原生伴随 App；输入处理与学习数据仅保留在设备本地。",
     name: "Lotli / 洛缇",
     status: "PROTOTYPE" as const,
     tags: ["iOS + macOS", "中英双语", "本地拼音与学习"],

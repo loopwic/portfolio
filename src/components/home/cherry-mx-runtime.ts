@@ -18,10 +18,11 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
-const MODEL_URL = "/models/cherry-mx-mid-web-v9.glb";
-const MODEL_SIZE_BYTES = 2_408_332;
-const MODEL_ROOT = "cherry_mx_mid_web_v9";
-const MODEL_REVISION = "assembled-mid-no-led-lower-through-contacts-v9";
+const MODEL_URL = "/models/cherry-mx-mid-web-v10.glb";
+const MODEL_SIZE_BYTES = 1_761_168;
+const MODEL_ROOT = "cherry_mx_mid_web_v10";
+const MODEL_REVISION =
+  "assembled-mid-no-led-full-groove-solid-clean-walls-flat-shell-matched-contacts-v10";
 const SOURCE_SHA256 =
   "580284368ea10f0e58de1efe92315782b6294fb1920320a87c8b5836c9c9dc3f";
 const REQUIRED_COMPONENTS = [

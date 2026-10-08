@@ -50,21 +50,30 @@ export const ProjectsSection = () => (
         ))}
 
         <a
-          aria-label="在 GitHub 查看更多项目"
+          aria-label="访问 Kieran Ming 的 GitHub 个人主页"
           className="group relative flex min-h-[16rem] min-w-0 flex-col overflow-hidden bg-surface/90 p-5 backdrop-blur-sm transition-[background-color,transform] duration-300 hover:bg-surface active:scale-[0.992] focus-visible:outline focus-visible:outline-2 focus-visible:outline-foreground focus-visible:outline-offset-[-3px] motion-reduce:transition-none md:p-6 lg:min-h-0"
           data-motion-item=""
           href="https://github.com/loopwic"
           rel="noreferrer"
           target="_blank"
         >
-          <span className="relative z-10 font-mono text-2xs tracking-[0.16em] text-foreground/70">
-            {String(PROJECTS.length + 1).padStart(2, "0")}
-          </span>
-          <span className="relative z-10 mt-auto flex items-end justify-between gap-6 font-display text-2xl font-light leading-none tracking-[-0.015em]">
-            <span>More</span>
+          <div className="relative z-10 flex items-center justify-between gap-4 font-mono text-2xs uppercase tracking-[0.16em] text-foreground/70">
+            <span>{String(PROJECTS.length + 1).padStart(2, "0")}</span>
+            <span>Independent development</span>
+          </div>
+          <div className="relative z-10 mt-auto">
+            <h3 className="project-card-title font-display text-2xl font-light leading-none tracking-[-0.015em]">
+              Kieran Ming
+            </h3>
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-foreground/68">
+              Loopwic 是我的个人开发主页。Lotli 目前仍是由我独立开发的原型项目。
+            </p>
+          </div>
+          <span className="relative z-10 mt-6 flex items-center justify-between gap-6 border-t border-foreground/12 pt-4 font-mono text-2xs uppercase tracking-[0.12em] text-foreground/70">
+            <span>GitHub profile</span>
             <span
               aria-hidden="true"
-              className="translate-y-0.5 text-base transition-transform duration-500 ease-[var(--ease-brutal)] group-hover:translate-x-1 group-hover:-translate-y-1 group-focus-visible:translate-x-1 group-focus-visible:-translate-y-1 motion-reduce:transition-none"
+              className="text-base transition-transform duration-500 ease-[var(--ease-brutal)] group-hover:translate-x-1 group-hover:-translate-y-1 group-focus-visible:translate-x-1 group-focus-visible:-translate-y-1 motion-reduce:transition-none"
             >
               ↗
             </span>
