@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/loopwic/portfolio/compare/v1.13.0...v1.14.0) (2026-10-08)
+
+
+### Features
+
+* show Lotli in independent experience timeline ([e4091a2](https://github.com/loopwic/portfolio/commit/e4091a29a8a7ed32ddd11a47dbbbee2423695fb2))
+
 # [1.13.0](https://github.com/loopwic/portfolio/compare/v1.12.0...v1.13.0) (2026-10-08)
 
 
