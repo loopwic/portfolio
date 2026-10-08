@@ -44,9 +44,7 @@ export const ProfileSection = () => (
           </div>
 
           <p className="mt-7 max-w-2xl text-sm leading-7 text-foreground/74 md:text-base md:leading-8">
-            我独立开发隐私优先的 Apple 平台软件。Lotli
-            是一款仍在原型阶段的离线中英双语 iOS
-            键盘；输入处理与本地学习都在设备上完成。
+            我主要做前端和交互实现，最近在做一款中英双语 iOS 输入法。
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">

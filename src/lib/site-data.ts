@@ -1,6 +1,6 @@
 export const SITE = {
   description:
-    "Kieran Ming is an independent developer building Lotli, a privacy-first offline Chinese and English iOS keyboard prototype. Keyboard processing and local learning stay on device.",
+    "Kieran Ming 的个人主页，主要做前端与交互，也在做一款中英双语 iOS 输入法。",
   email: "me@loopwic.com",
   locale: "zh_CN",
   name: "Kieran Ming",
