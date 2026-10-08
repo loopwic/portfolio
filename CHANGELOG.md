@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/loopwic/portfolio/compare/v1.14.0...v1.14.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* simplify profile introduction ([42362d0](https://github.com/loopwic/portfolio/commit/42362d0c0e4bccab156c970037e40e3a3bfa0f8d))
+
 # [1.14.0](https://github.com/loopwic/portfolio/compare/v1.13.0...v1.14.0) (2026-10-08)
 
 
